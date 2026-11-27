@@ -513,7 +513,7 @@ go();})();
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 64 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 65 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -543,7 +543,7 @@ go();})();
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 64 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 65 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -2993,7 +2993,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 64 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 64 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 65 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 65 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
@@ -3841,22 +3841,25 @@ function updateWild(dt,night){
     pack.t-=dt*(pack.mode==='away'&&night>0.5?1.6:1);pack.ang+=dt*0.055;
     const fireD=hyp(px-FIRE.x,pz-FIRE.z),inLight=fireLit&&fireD<7,hasFood=st.fish>0||st.berries>0;
     const charging=w=>keys.runActive&&hyp(w.x-px,w.z-pz)<4.5&&Math.abs(angD(Math.atan2(w.x-px,w.z-pz),player.rot))<0.6;
-    if(pack.mode==='away'){if(pack.t<=0&&!player.climb){pack.mode='stalk';pack.t=rr(75,105);pack.steals=0;pack.next=rr(10,14);
-        wild.forEach(w=>{if(hyp(w.x-px,w.z-pz)>16){const sp=wolfSpot(13,16);if(sp){w.x=sp[0];w.z=sp[1];}}w.state='stalk';w.stare=0;});
+    const provoked=w=>keys.runActive&&hyp(w.x-px,w.z-pz)<16&&Math.abs(angD(Math.atan2(w.x-px,w.z-pz),player.rot))<0.35;
+    if(pack.mode==='away'){if(pack.t<=0&&!player.climb){pack.mode='stalk';pack.t=rr(75,105);pack.steals=0;pack.next=rr(35,70);pack.thief=rng()<0.45;
+        wild.forEach(w=>{if(hyp(w.x-px,w.z-pz)>16||hyp(w.x-px,w.z-pz)<19){const sp=wolfSpot(20,25);if(sp){w.x=sp[0];w.z=sp[1];}}w.state='stalk';w.stare=0;});
         toast('Something is moving between the trees…',3);}}
     else if(pack.mode==='stalk'){
-      if(pack.t<=0||pack.steals>=3){pack.mode='leave';pack.t=11;wild.forEach(w=>{w.state='leave';});
+      if(pack.t<=0||pack.steals>=1){pack.mode='leave';pack.t=11;wild.forEach(w=>{w.state='leave';});
         toast(pack.steals?'Snacks in their jaws, the wolves melt back into the forest.':'The wolves lose interest and melt back into the forest.',3.5);}
       else{pack.next-=dt;
-        if(pack.next<=0&&!guarded&&!inLight&&!(car&&car.occupied)&&!wild.some(w=>w.state==='dart'||w.state==='flee')){const w=wild[pack.turn++%wild.length];w.state='dart';w.timer=7;pack.next=rr(13,19);}}}
+        if(pack.next<=0&&pack.thief&&st.berries>0&&!guarded&&!inLight&&!(car&&car.occupied)&&!wild.some(w=>w.state==='dart'||w.state==='flee'||w.state==='bluff')){const w=wild[pack.turn++%wild.length];w.state='dart';w.timer=14;pack.next=rr(40,70);}}}
     else if(pack.mode==='leave'&&pack.t<=0){pack.mode='away';pack.t=rr(80,140);wild.forEach(w=>{w.state='roam';});}
     wild.forEach((w,i)=>{const d=hyp(w.x-px,w.z-pz);w.watch=false;let cT=0;
       if(w.state==='stalk'){
-        const R=(inLight?11.5:guarded?12:(hasFood?7.5:9))+(i%3)*1.6;
-        const ang=pack.ang+i*(6.283/Math.max(1,wild.length))+Math.sin(T*0.23+i)*0.3,r=R+Math.sin(T*0.37+i*1.7)*1.8;
+        const R=(inLight||guarded?24:20)+(i%3)*2.2;
+        const ang=pack.ang+i*(6.283/Math.max(1,wild.length))+Math.sin(T*0.23+i)*0.35,r=R+Math.sin(T*0.31+i*1.7)*3.2+Math.sin(T*0.9+i*2.3)*1.2;
         const tx=px+Math.cos(ang)*r,tz=pz+Math.sin(ang)*r,dx=tx-w.x,dz=tz-w.z,dd=hyp(dx,dz);
         w.stare=(w.stare||0)-dt;
-        if(w.stare>0){face(w,px,pz,dt);w.watch=true;cT=1;}
+        if(provoked(w)){w.state='bluff';w.timer=2.2;if(T-(pack.bt||-99)>8){pack.bt=T;toast('A wolf snarls and lunges at you, then pulls up short. Back off.',3);}}
+        else if(d<17){amove(w,w.x-px,w.z-pz,2.2,dt);cT=0.6;if(d>12)face(w,px,pz,dt);}
+        else if(w.stare>0){face(w,px,pz,dt);w.watch=true;cT=1;}
         else if(dd>0.6){const fast=dd>5;amove(w,dx,dz,fast?1.5:0.5,dt);cT=fast?0.6:1;if(!fast&&rng()<dt*0.14)w.stare=rr(2.5,5);}
         else{face(w,px,pz,dt);cT=1;w.watch=true;}
         if(charging(w)){w.state='flee';w.timer=2.5;}}
@@ -3864,12 +3867,13 @@ function updateWild(dt,night){
         if(guarded||inLight||w.timer<=0){w.state='flee';w.timer=2;}
         else if(charging(w)){w.state='flee';w.timer=2.5;toast('You charge at the wolf and it bolts!',2);}
         else if(d<1.1){
-          if(st.fish>0){st.fish--;pack.steals++;toast('A wolf snatched one of your fish and bolted!',2.6);}
-          else if(st.berries>0){st.berries--;pack.steals++;toast('A wolf grabbed a handful of berries and bolted!',2.6);}
+          if(st.berries>0){const n=Math.ceil(st.berries/2);st.berries-=n;pack.steals++;st.shake=Math.max(st.shake,0.2);toast('A wolf darts in, nips your ankle and runs off with '+n+' berr'+(n===1?'y':'ies')+'! (Berries in crates and the van are safe.)',3.5);}
           else toast('A wolf sniffs at your empty pockets and slinks off.',2.4);
           w.state='flee';w.timer=2.6;}}
-      else if(w.state==='flee'){w.timer-=dt;amove(w,w.x-px,w.z-pz,3.0,dt);if(w.timer<=0)w.state=pack.mode==='stalk'?'stalk':'roam';}
-      else if(w.state==='leave'){amove(w,(w.x-px)+(DEN.x-w.x)*0.6,(w.z-pz)+(DEN.z-w.z)*0.6,2.2,dt);}
+      else if(w.state==='bluff'){w.timer-=dt;cT=0.9;if(d>6&&w.timer>1)amove(w,px-w.x,pz-w.z,2.6,dt);else face(w,px,pz,dt);if(w.timer<=0){w.state='flee';w.timer=3.5;}}
+      else if(w.state==='flee'){w.timer-=dt;amove(w,w.x-px,w.z-pz,3.0,dt);if(d>22)w.timer=Math.min(w.timer,0.2);if(w.timer<=0)w.state=pack.mode==='stalk'?'stalk':'roam';}
+      else if(w.state==='leave'){amove(w,w.x-px,w.z-pz,d<22?2.4:1.6,dt);}
+      else if(d<16){amove(w,w.x-px,w.z-pz,1.8,dt);cT=0.4;}
       else{wander(w,{x:DEN.x+(i-1)*1.4,z:DEN.z},3.5,1.2,dt);}
       w.crouch=(w.crouch||0)+(cT-(w.crouch||0))*Math.min(1,dt*4);
     });
