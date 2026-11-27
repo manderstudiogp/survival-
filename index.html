@@ -513,7 +513,7 @@ go();})();
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 62 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 63 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -543,7 +543,7 @@ go();})();
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 62 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 63 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -815,7 +815,7 @@ const camera=new THREE.PerspectiveCamera(38,innerWidth/innerHeight,1.5,120);
 const DEF={exposure:1,autoExp:0.65,contrast:1.15,saturation:0.86,split:0.7,vignette:0.5,grain:0.035,bloom:0.8,
   fogDensity:0.065,fogStart:0,mist:0.5,mistFalloff:0.8,mistNoise:0.8,fogBright:1.05,glow:1.4,
   sun:0.95,sunHeight:0.55,ambient:0.7,shadowSoft:4,fire:1.2,flash:1,head:1,reflect:0.45,
-  tilt:0.98,tiltWidth:0.10,tiltCenter:0.42,lens:1,fstop:2.0,focusRange:0.09,bokeh:1.59,catEye:1,camDist:17,camPitch:38,camYaw:0};
+  tilt:0.98,tiltWidth:0.10,tiltCenter:0.42,lens:1,fstop:2.0,focusRange:0.09,bokeh:1.59,catEye:1,camDist:37,camPitch:38,camYaw:0};
 const CAMK=['camDist','camPitch','camYaw'];
 const PRESETS={
   'Heavy mist':{},
@@ -827,7 +827,8 @@ const L=Object.assign({},DEF);
 try{const sv=JSON.parse(localStorage.getItem('plw-light-v3')||localStorage.getItem('plw-light-v2')||'null');const fresh=!localStorage.getItem('plw-light-v3');
   if(sv)for(const k in DEF)if(typeof sv[k]==='number'&&!(fresh&&CAMK.includes(k)))L[k]=sv[k];}catch(err){}
 try{if(!localStorage.getItem('plw-exp1')){L.exposure=1;localStorage.setItem('plw-exp1','1');}}catch(err){}
-try{if(!localStorage.getItem('plw-lens1')){Object.assign(L,{tilt:0.98,tiltWidth:0.10,tiltCenter:0.42,lens:1,fstop:2.0,focusRange:0.09,bokeh:1.59,catEye:1,camDist:17,camPitch:38});localStorage.setItem('plw-lens1','1');}}catch(err){}
+try{if(!localStorage.getItem('plw-lens1')){Object.assign(L,{tilt:0.98,tiltWidth:0.10,tiltCenter:0.42,lens:1,fstop:2.0,focusRange:0.09,bokeh:1.59,catEye:1,camDist:37,camPitch:38});localStorage.setItem('plw-lens1','1');}}catch(err){}
+try{if(!localStorage.getItem('plw-zoom80')){L.camDist=37;localStorage.setItem('plw-zoom80','1');}}catch(err){L.camDist=37;}
 const saveL=()=>{try{localStorage.setItem('plw-light-v3',JSON.stringify(L));}catch(err){}};
 
 /* ---------- cinematic post pass: depth fog, ground mist, light bleeding into fog, bloom, grade ---------- */
@@ -2992,7 +2993,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 62 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 62 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 63 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 63 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
