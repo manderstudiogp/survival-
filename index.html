@@ -134,7 +134,7 @@ body.touch #prompt{bottom:128px}
   <div class="bar" id="bWolf" hidden><span>Wolf</span><i><b></b></i></div>
   <div class="items"><span>Sticks <strong id="iSticks">0/500</strong></span><span>Berries <strong id="iBerries">0</strong></span><span>Fish <strong id="iFish">0</strong></span><span>Fire <strong id="iFire">50%</strong></span></div>
 </div>
-<div id="clock" class="tag"><span id="compass" title="North">N</span><span id="orb"></span><span id="clockTxt">Day 1 · Morning</span><button id="timeBtn" class="mini" aria-expanded="false">Time</button><button id="lightBtn" class="mini" aria-expanded="false">Light</button><button id="weatherBtn" class="mini" aria-expanded="false">Weather</button><button id="buildBtn" class="mini" aria-expanded="false">Build</button><button id="onlineBtn" class="mini" aria-expanded="false">Online</button><button id="helpBtn" aria-label="How to play">?</button></div>
+<div id="clock" class="tag"><span id="compass" title="North">N</span><span id="orb"></span><span id="clockTxt">Day 1 · Morning</span><button id="timeBtn" class="mini" aria-expanded="false">Time</button><button id="lightBtn" class="mini" aria-expanded="false">Light</button><button id="weatherBtn" class="mini" aria-expanded="false">Weather</button><button id="buildBtn" class="mini" aria-expanded="false">Build</button><button id="onlineBtn" class="mini" aria-expanded="false">Online</button><button id="soundBtn" class="mini" aria-pressed="true">Sound</button><button id="helpBtn" aria-label="How to play">?</button></div>
 <div id="tp" class="tag panel" hidden>
   <div class="lpHead">Time of day<span id="tpFps"></span><button id="tpClose" class="pClose" aria-label="Close time menu">×</button></div>
   <div class="tBig" id="tBig">Morning · 08:52</div>
@@ -198,7 +198,7 @@ body.touch #prompt{bottom:128px}
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 42 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 43 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -228,7 +228,7 @@ body.touch #prompt{bottom:128px}
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 42 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 43 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -2644,7 +2644,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 42 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 42 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 43 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 43 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
@@ -2703,6 +2703,54 @@ function owlTick(dt,night){if(!owl)return;const o=owl,R=o.R;o.t-=dt;
       if(opts.length){const nb=opts[(rng()*opts.length)|0],a=perchPos(o.perch),b=perchPos(nb);o.fly={a,b,u:0,dur:Math.max(2,hyp(b[0]-a[0],b[2]-a[2])/3.2)};o.perch=nb;o.mode='fly';
         if(night>0.5&&!o.hoot){o.hoot=true;toast('An owl hoots softly from the pines.',2.6);}}else o.t=rr(20,40);}}
   R.root.rotation.y=o.rot;R.update(dt);}
+/* ---------- sound: ambient beds (birds, crickets, rain), positional sounds in 3D (the nearest water, owls), footsteps.
+   Everything runs through one mix with a gentle compressor so layers sit together; rain ducks the birds and crickets,
+   the van muffles the outside world, and far-off owls are mostly echo. Sound starts on your first click or key press. ---------- */
+const SND={ctx:null,on:true,b:{},n:{},owlT:rr(6,14),waterT:0,wp:null,wd:99};
+try{SND.on=localStorage.getItem('plw-sound')!=='off';}catch(e){}
+function sndImpulse(c,sec,decay){const n=Math.floor(c.sampleRate*sec),b=c.createBuffer(2,n,c.sampleRate);for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,decay);}return b;}
+function sndInit(){if(SND.ctx){if(SND.ctx.state==='suspended')SND.ctx.resume();return;}const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+  const c=new AC();SND.ctx=c;const comp=c.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=12;comp.ratio.value=3;comp.attack.value=0.02;comp.release.value=0.35;comp.connect(c.destination);
+  const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=20000;lp.connect(comp);const master=c.createGain();master.gain.value=SND.on?0.9:0;master.connect(lp);SND.master=master;SND.lp=lp;
+  const rev=c.createConvolver();rev.buffer=sndImpulse(c,3.2,2.4);const wet=c.createGain();wet.gain.value=0.9;rev.connect(wet);wet.connect(master);SND.rev=rev;
+  const mk=(name,pos)=>{const g=c.createGain();g.gain.value=0;let out=g;if(pos){const p=c.createPanner();p.panningModel='HRTF';p.distanceModel='inverse';p.refDistance=2.5;p.rolloffFactor=1.2;p.maxDistance=60;g.connect(p);p.connect(master);SND.n[name+'P']=p;const s=c.createGain();s.gain.value=0.15;p.connect(s);s.connect(rev);}else g.connect(master);SND.n[name]=g;
+    fetch('audio/'+name+'.mp3').then(r=>r.arrayBuffer()).then(a=>new Promise((res,rej)=>c.decodeAudioData(a,res,rej))).then(buf=>{const s=c.createBufferSource();s.buffer=buf;s.loop=true;s.connect(g);s.start(0,Math.random()*buf.duration);SND.b[name]=s;}).catch(e=>console.warn('sound',name,e));};
+  mk('birds');mk('crickets');mk('rain');mk('stream',true);mk('steps_forest');mk('steps_snow');}
+['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>sndInit(),{passive:true}));
+const sndSet=(name,v,t=0.6)=>{const g=SND.n[name];if(g)g.gain.setTargetAtTime(v,SND.ctx.currentTime,t);};
+/* an owl call, made on the fly: hoo… hoo-hoo… hoo, hoo. Near owls are clear and placed in 3D; far ones are mostly echo */
+function hoot(x,y,z,near){const c=SND.ctx,t0=c.currentTime+0.05,out=c.createGain(),pan=c.createPanner();pan.panningModel='HRTF';pan.distanceModel='inverse';pan.refDistance=4;pan.rolloffFactor=1;
+  if(pan.positionX){pan.positionX.value=x;pan.positionY.value=y;pan.positionZ.value=z;}else pan.setPosition(x,y,z);
+  const dry=c.createGain(),wet=c.createGain();dry.gain.value=near?1:0.18;wet.gain.value=near?0.35:1.2;out.connect(pan);pan.connect(dry);dry.connect(SND.master);pan.connect(wet);wet.connect(SND.rev);
+  const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=near?1400:700;lp.connect(out);out.gain.value=near?0.55:0.35;
+  const f0=310+Math.random()*50;[[0,0.42,1],[0.62,0.18,0.9],[0.86,0.22,0.95],[1.45,0.4,1],[2.05,0.48,0.97]].forEach(([dt,len,k])=>{const o=c.createOscillator(),e=c.createGain(),v=c.createOscillator(),vg=c.createGain();
+    o.type='sine';o.frequency.setValueAtTime(f0*k*1.04,t0+dt);o.frequency.exponentialRampToValueAtTime(f0*k*0.93,t0+dt+len);v.frequency.value=5.5;vg.gain.value=4;v.connect(vg);vg.connect(o.frequency);
+    e.gain.setValueAtTime(0,t0+dt);e.gain.linearRampToValueAtTime(1,t0+dt+0.07);e.gain.setTargetAtTime(0,t0+dt+len*0.7,0.07);o.connect(e);e.connect(lp);o.start(t0+dt);v.start(t0+dt);o.stop(t0+dt+len+0.4);v.stop(t0+dt+len+0.4);});}
+function sndTick(dt,night){const c=SND.ctx;if(!c||c.state!=='running')return;
+  SND.master.gain.setTargetAtTime(SND.on?0.9:0,c.currentTime,0.2);
+  /* the listener is the hiker, facing the way the camera looks */
+  const L_=c.listener,lx=player.x,ly=player.y+1.5,lz=player.z,yw=camCur.y*Math.PI/180,fx=-Math.sin(yw),fz=-Math.cos(yw);
+  if(L_.positionX){L_.positionX.value=lx;L_.positionY.value=ly;L_.positionZ.value=lz;L_.forwardX.value=fx;L_.forwardY.value=0;L_.forwardZ.value=fz;L_.upX.value=0;L_.upY.value=1;L_.upZ.value=0;}
+  else{L_.setPosition(lx,ly,lz);L_.setOrientation(fx,0,fz,0,1,0);}
+  const dF=yearDay(),winter=dF>=7.1&&dF<13.5,rainI=W.kind==='rain'?W.I:0,snowI=W.kind==='snow'?W.I:0,clear=1-clamp(Math.max(rainI,snowI)*1.6,0,1),duck=1-0.85*rainI;
+  const inCar=car&&car.occupied;SND.lp.frequency.setTargetAtTime(inCar?700:20000,c.currentTime,0.25);
+  sndSet('birds',0.32*clamp(1-night*1.6,0,1)*clear*(winter?0.25:1)*duck);
+  sndSet('crickets',0.26*smooth(0.55,0.85,night)*clear*(winter?0:1)*duck);
+  sndSet('rain',0.6*smooth(0.02,0.5,rainI)+0.15*rainI*rainI,1.2);
+  /* the stream: find the nearest water a few times a second and place the sound there */
+  if((SND.waterT-=dt)<=0){SND.waterT=0.25;let best=null,bd=99;if(waterAt(lx,lz)!==null){best=[lx,lz];bd=0;}
+    else for(const r of[1.5,3,5,8,12,17,24]){for(let k=0;k<12;k++){const a=k/12*6.283+r,x=lx+Math.cos(a)*r,z=lz+Math.sin(a)*r;if(waterAt(x,z)!==null){best=[x,z];bd=r;break;}}if(best)break;}
+    SND.wp=best;SND.wd=bd;}
+  if(SND.wp){const p=SND.n.streamP;if(p.positionX){p.positionX.setTargetAtTime(SND.wp[0],c.currentTime,0.3);p.positionY.value=ly-1;p.positionZ.setTargetAtTime(SND.wp[1],c.currentTime,0.3);}else p.setPosition(SND.wp[0],ly-1,SND.wp[1]);}
+  sndSet('stream',SND.wp?0.75*(snowI>0.6?0.6:1):0,0.8);
+  /* footsteps: forest floor, or crunching snow when it lies deep; they follow your walking speed */
+  const walk=!inCar&&!player.climb&&player.moving&&player.spd>0.2&&depthAt(player.x,player.z,player.level)<0.05,sn=st.snow||0,sp=clamp(player.spd/2,0.5,1.4);
+  sndSet('steps_forest',walk?0.32*(1-smooth(0.3,0.6,sn)):0,0.08);sndSet('steps_snow',walk?0.4*smooth(0.3,0.6,sn):0,0.08);
+  if(SND.b.steps_forest)SND.b.steps_forest.playbackRate.value=sp;if(SND.b.steps_snow)SND.b.steps_snow.playbackRate.value=sp*0.95;
+  /* owls call at dusk and night: the one nearby, placed where it sits; otherwise a far-off call echoing across the valley */
+  if(night>0.35&&clear>0.4&&(SND.owlT-=dt)<=0){SND.owlT=rr(9,22);
+    if(owl&&owl.R.root.visible!==false){owl.R.root.getWorldPosition(_ov);const d=hyp(_ov.x-lx,_ov.z-lz);if(d<28){hoot(_ov.x,_ov.y,_ov.z,true);return;}}
+    const a=Math.random()*6.283,r=rr(35,60);hoot(lx+Math.cos(a)*r,ly+6,lz+Math.sin(a)*r,false);}}
 /* ---------- online play hookup: other hikers appear in your world; the host keeps time, weather and the fire ---------- */
 const IN_CLAUDE=!!(window.claude&&typeof window.claude.use==='function');
 const NETC=[P.rust,P.truck,P.birch,P.fern,P.pumpkin,P.river,P.sage,P.white];
@@ -3511,6 +3559,8 @@ function togglePanel(id,btn,force){const p=$(id),open=force!==undefined?force:p.
   if(open)setMenu(true);
   p.hidden=!open;$(btn).classList.toggle('on',open);$(btn).setAttribute('aria-expanded',open);if(open&&id==='lp')syncLP();if(open)panT=0;}
 function setMenu(on){document.body.classList.toggle('menuOpen',on);$('menuBtn').setAttribute('aria-expanded',on);if(!on)['lp','tp','wp','bp','op'].forEach(o=>{$(o).hidden=true;$({lp:'lightBtn',tp:'timeBtn',wp:'weatherBtn',bp:'buildBtn',op:'onlineBtn'}[o]).classList.remove('on');});}
+const paintSnd=()=>{$('soundBtn').textContent=SND.on?'Sound on':'Sound off';$('soundBtn').setAttribute('aria-pressed',SND.on);};paintSnd();
+$('soundBtn').addEventListener('click',()=>{SND.on=!SND.on;try{localStorage.setItem('plw-sound',SND.on?'on':'off');}catch(e){}sndInit();paintSnd();});
 $('menuBtn').addEventListener('click',()=>setMenu(!document.body.classList.contains('menuOpen')));
 const toggleOP=f=>togglePanel('op','onlineBtn',f);$('onlineBtn').addEventListener('click',()=>toggleOP());$('opClose').addEventListener('click',()=>toggleOP(false));
 const toggleLP=f=>togglePanel('lp','lightBtn',f),toggleTP=f=>togglePanel('tp','timeBtn',f),toggleWP=f=>togglePanel('wp','weatherBtn',f),toggleBP=f=>togglePanel('bp','buildBtn',f);
@@ -3729,7 +3779,7 @@ function visuals(dt){
   if(fish.state==='reel'){const fb=$('fbMark');fb.style.left=(fish.m*100).toFixed(1)+'%';$('fbProg').style.width=(fish.p*100).toFixed(1)+'%';
     const tt=fish.m>0.66?'Too tight! Ease off':fish.m<0.38?(isTouch?'Reel in! Hold Use':'Reel in! Hold E'):'Hold it in the green…';if($('fbTitle').textContent!==tt)$('fbTitle').textContent=tt;}
   player.g.rotation.x+=(lean-player.g.rotation.x)*Math.min(1,dt*12);{const nt=night>0.4,ax=nt?-0.6:Math.sin(ph)*sw*0.8,az=nt?0.38:0,k=Math.min(1,dt*8);player.arms[1].rotation.x+=(ax-player.arms[1].rotation.x)*k;player.arms[1].rotation.z+=(az-player.arms[1].rotation.z)*k;}
-  poseAnimals(dt);updBubbles(dt);upd3D(dt);owlTick(dt,night);updRipples(dt,night);updLine();updWeather(dt,night);CABINKIT.update(dt);updBuildPanel(dt);netTick(dt);updTrees(dt,st.playing&&!st.busy);updChips(dt);
+  poseAnimals(dt);updBubbles(dt);upd3D(dt);owlTick(dt,night);updRipples(dt,night);updLine();updWeather(dt,night);CABINKIT.update(dt);updBuildPanel(dt);netTick(dt);sndTick(dt,night);updTrees(dt,st.playing&&!st.busy);updChips(dt);
   // camera follows the hiker; zoom, tilt and turn are limited
   const tx=clamp(player.x,CX[0],CX[1]),tz=clamp(player.z,CZ[0],CZ[1]);camT.x+=(tx-camT.x)*(1-Math.exp(-4*dt));camT.z+=(tz-camT.z)*(1-Math.exp(-4*dt));camT.y+=(player.y-camT.y)*(1-Math.exp(-3*dt));
   {const g=camGoal(),k=1-Math.exp(-7*dt);camCur.d+=(g.d-camCur.d)*k;camCur.p+=(g.p-camCur.p)*k;camCur.y=wrapDeg(camCur.y+wrapDeg(g.y-camCur.y)*k);setCamOff();
