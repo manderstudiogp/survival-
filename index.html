@@ -82,9 +82,9 @@ body.menuOpen #hud{top:64px}body.menuOpen #hotbar{top:174px}
 #op input{width:100%;height:32px;border-radius:8px;border:2px solid var(--tent);background:#F4F6F6;color:#3a2717;font:600 14px Nunito,sans-serif;padding:0 8px}
 #onList{list-style:none;margin:6px 0;padding:0}#onList li{display:flex;align-items:center;gap:6px;padding:2px 0}#onList i{width:12px;height:12px;border-radius:50%;display:inline-block}
 .netName{position:fixed;transform:translate(-50%,-100%);font:700 12px Nunito,sans-serif;color:#F4F6F6;text-shadow:0 1px 3px rgba(0,0,0,.7);pointer-events:none;white-space:nowrap;z-index:4}
-#compass{position:fixed;right:12px;top:12px;z-index:7;width:48px;height:48px;padding:4px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
-body.menuOpen #compass{top:78px}
-#mapBox{position:fixed;right:12px;top:66px;z-index:8;padding:8px;cursor:pointer}body.menuOpen #mapBox{top:132px}
+#mapCompass{position:fixed;right:12px;top:12px;z-index:9;width:48px;height:48px;padding:4px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+body.menuOpen #mapCompass{top:78px}
+#mapBox{position:fixed;right:12px;top:66px;z-index:10;padding:8px;cursor:pointer}body.menuOpen #mapBox{top:132px}
 #mapCv{display:block;width:min(300px,70vw);height:auto;border-radius:8px;image-rendering:auto}
 #invBody table{width:100%;border-collapse:collapse;font:600 13px Nunito,sans-serif}#invBody td,#invBody th{padding:3px 4px;text-align:left}#invBody th{color:var(--birch);font-weight:800}
 #invBody button{padding:2px 7px;font-size:12px}
@@ -159,7 +159,7 @@ body.touch #prompt{bottom:128px}
   <div id="invBody"></div>
   <p class="pnote">Stand by a crate or the van to move things (I opens this). Logs are 5 sticks bundled; building uses sticks first, then logs.</p>
 </div>
-<div id="compass" class="tag" title="Map (click)"><svg viewBox="-20 -20 40 40" width="40" height="40" aria-hidden="true"><g id="cmpRose"><path d="M0,-15 L4,0 L-4,0Z" fill="#AB451C"/><path d="M0,15 L4,0 L-4,0Z" fill="#F4F6F6"/><text x="0" y="-9" text-anchor="middle" font-size="7" fill="#F4F6F6" font-family="sans-serif">N</text></g></svg></div>
+<div id="mapCompass" class="tag" title="Map (click)" role="button" tabindex="0" aria-label="Open map"><svg viewBox="-20 -20 40 40" width="40" height="40" aria-hidden="true"><g id="cmpRose"><path d="M0,-15 L4,0 L-4,0Z" fill="#AB451C"/><path d="M0,15 L4,0 L-4,0Z" fill="#F4F6F6"/><text x="0" y="-9" text-anchor="middle" font-size="7" fill="#F4F6F6" font-family="sans-serif">N</text></g></svg></div>
 <div id="mapBox" class="tag" hidden><div class="lpHead">Map<button id="mapClose" class="pClose" aria-label="Close map">×</button></div><canvas id="mapCv" width="300" height="300"></canvas><div class="pnote" style="margin-top:4px">● you · ✚ spawn · ▲ camp · ★ pinned camp spots · ■ van · ◆ cabins</div><div class="btns"><button id="mapPin">Pin a camp spot here</button><button id="mapClear">Clear pins</button></div></div>
 <div id="op" class="tag panel" hidden>
   <div class="lpHead">Play online<button id="opClose" class="pClose" aria-label="Close online menu">×</button></div>
@@ -211,7 +211,7 @@ body.touch #prompt{bottom:128px}
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 49 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 50 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -241,7 +241,7 @@ body.touch #prompt{bottom:128px}
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 49 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 50 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -2690,7 +2690,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 49 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 49 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 50 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 50 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
@@ -3698,7 +3698,7 @@ const mapImg=(()=>{const c=document.createElement('canvas'),N=150;c.width=c.heig
   for(let j=0;j<N;j++)for(let i=0;i<N;i++){const wx=-E+2*E*i/N,wz=-E+2*E*j/N,y=gh(wx,wz),o=(j*N+i)*4;
     if(waterAt(wx,wz)!==null)col.setHex(P.river);else col.setHex(groundCol(wx,y,wz,0.95,0));const sh=0.75+clamp(y/12,-0.2,0.35);im.data[o]=col.r*255*sh;im.data[o+1]=col.g*255*sh;im.data[o+2]=col.b*255*sh;im.data[o+3]=255;}
   x.putImageData(im,0,0);return {c,E};})();
-$('compass').addEventListener('click',()=>{$('mapBox').hidden=!$('mapBox').hidden;});$('mapClose').addEventListener('click',()=>{$('mapBox').hidden=true;});
+{const tog=e=>{if(e)e.stopPropagation();$('mapBox').hidden=!$('mapBox').hidden;};$('mapCompass').addEventListener('click',tog);$('mapCompass').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});}$('mapClose').addEventListener('click',()=>{$('mapBox').hidden=true;});
 /* pinned camp spots, remembered on this device */
 let PINS=[];try{PINS=JSON.parse(localStorage.getItem('plw-pins')||'[]');}catch(e){}
 const savePins=()=>{try{localStorage.setItem('plw-pins',JSON.stringify(PINS));}catch(e){}};
