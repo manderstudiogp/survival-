@@ -380,6 +380,13 @@ body.menuOpen #dockBtn,body.menuOpen #dock,body.menuOpen #dockPane,body.photoMod
 .gmTabs button img{width:20px;height:20px;border-radius:5px;vertical-align:-5px;margin-right:7px}
 .wmRes small img{width:14px;height:14px;border-radius:3px;vertical-align:-3px;margin-right:4px}
 @media(max-width:600px){#dockPane{right:72px;left:8px;width:auto;top:92px}#dock button{width:42px;height:42px}}
+
+/* Build 66 */
+#campBar{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:9;display:flex;gap:8px;padding:8px;background:rgba(9,15,14,.8);border:1px solid rgba(183,215,208,.25);border-radius:10px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#campBar[hidden]{display:none}#campBar button{min-height:40px;padding:6px 16px;border-radius:5px;border:1px solid rgba(183,215,208,.4);background:rgba(183,215,208,.08);color:#E8EEEC;font:700 13px Nunito,sans-serif;letter-spacing:.8px;text-transform:uppercase;cursor:pointer}
+#campBar #campOk{background:#B7D7D0;color:#0b1412}#campBar #campOk:disabled{background:#AB451C;color:#F4F6F6;cursor:not-allowed}
+body.touch #campBar{bottom:130px}
+#invBody table b{color:#E8EEEC}
 </style>
 <link rel="icon" href="data:image/webp;base64,UklGRiAIAABXRUJQVlA4IBQIAAAQIACdASpYAFgAPmEqkkckIiGhKBObQIAMCWgAtvtHSA/MeZ3Y/1g3zssVin1fbg/zeea9pwG5gW1vpHy9x/N+54s9rurI1YszL/4f6P0GfRPsI+Vz7IhGkDXYptZuG5LmsL5WPk75b1s47x/LedjLwq1dh5ccbcuuQKy0qPQjagdoqk01pg87kHwDuvQ2evDlxc8eqOY/lSKBJ8u5vm5Zjp/PRylAK7ui1TbDt1LJ/HoPUHR1EDlGGt4E0ASL/06VDu9pGtD3dZl7bY6y6t1WK563xoMAfYPJtiryz+QM7XymKx1tP/5f6Xi5BRCYfDZr+XyeTlprDw2/Hfrz4B0bKp5sS+GmTYQAAP7+jgLYF4jdM6rV7bpnTUgOdFp1tShcEgO1L+f/Kxu30NdOSy6D8vKBIXplo9QIA62ZcOuOTqTKm5udDg2j+sq3Z151/E6PseF/3sfX5XtBK2iuMGfiUmH1GTI+OZ1fgf1cnS8MzUA6zTc7vUOd35/L7UPZTUv01EKnGlDsjaadOUtvjXztNPmGQD1T6/jDHq1jr/oyMRpa2Kv6bIU1goOpQH5CGPlJ+pO50F8hsNr/MH6nnn5xXziSiRf4mVgLESSJT2Lo7lIu9x7etZOJ7S3VUuVNWOl0e50axxaL/yfLzX1TzlHWWFOBnHAXRgsaUe3TywIYmpUymWeHCD9FLK48SResPOiI34xVVNIzL6Nt0BzOc3yVYK33USWkUsDiDL9aZbcAHibzZAyz1WJPx0DB7JlKQYla1MUsGj3D/p9wVHcAd5fhTGnPkGc+Riag52GIWnMvB+sHwzSdzN0AG+l3plY0WzAWTVx7nfVx+yOBjhjF7kp39jajtvLhd5O2edWERWr9ajFMHyn9rJbHM40w8eGAmQy+rKerERTRAZmC4xZtsxdyv/nGDDo9HIbwUbcy5QtBUVvjc4m9EyVA9mDwdFAz+fGWYH6pIrRKc3hh0LngqnzkDvYYq5lVX6bCb//7PPm1BpiEhjDAyk9CulcmwhB0o22AnEI0PqHwVSh7YgCtusNlDnb7Vg7V1JIp/TdU1Vy97JcmNKi+AbmLFaSdmBOpXMuKjNjV+ke0/rJ8y2AFNpwVSShHe14gt4sBJNxhkXf0xIfVfVSEmPZZNDAU21W0TWqeX5HpXF2Npr9rU/iI9qyZXkXA004zXSb4x6UN0HwpTMEfYYP6eiDaaadXGrnKmhFnco9ivnvAQUG6Q02PMOMeNCpjE4r/UJa/HgwtJpbTyfzP9Hk5Wal0oCi9mXaS/y/FWXtdFqX/zjjy02gpUvtU6qkH4lZHD6rgb9R/Fxante2xCYIKc4e5e/5w+PmVnjBBBXZkUleQcFHoEP3VVUZtXPCjIp8j8Q54fOAXJlXtX1lKXEFqpzLFBL/v8XnWZjocIxYx35BD60fLBCoFXekE3VzAOMK2ptDORtoIGMtpYxipOGwh0d6zxOzRMUTpmjudFRXZpXEvt7U3yPQr0iEhuRxfK4A9r+yzJvjO/XhKe5QqUtwllvMIfEX+c3yaFlsO/wSA6FBIm5q/15854c6mJxmqT1qc5OrxHOpasmHbYAsW3N031LitHCpOV0YGhy9yulPb8UtCiNbgZ9/tS1m5DzYRp22bcHAuUz3ytmJg4SUC146V/ZSErwIRQpqGhH4Uny+CwkpDzvFy3NiwlQid0IUAQv3sN6IDYcJYZm4pM7pFvnLsNqaqrHxQhrFo3TkfkfAuptBbUBd8cjRRQJ/0krp2vKn4dlzb34LsWrmTqWVfeJ4h0neGCgj6uvzMyNt+I2gRRdS/R16rjUnULyUMFPIQyzLjd4PavhzpLfXec43ihjntT2tvcO2eRzBmchqsYx5e1E2l9xz7DnW9466wi8CVFKtq8si/tMwyGuid1t3s+SS3hm/lZ6d39/JHXjgPGNhZBF+rNHzPkCR3kyaIS4fforpb0LEbxYKne+XJo1iwRXQ9nOATIlE416prhbIHoGKsfVCESWtYyiBgQYvtCG2Mudoida/RWpMbXuTIZZTxwgyiEMwL90cS4KpFGvRiO/Bt9tuYST+rDXj8y+6MX+k5Dx76vu8cKFE0tuDlrxdq4ohO+DAoSFCI/lNXmlJpscTUtxUE+xnQooE6KVmFWkpPvx+iy9jT3OL/VY3F/mlI3vb9gd8/NhZJXjPBDHcEQZMX++MBvkB3jDfM0nuodlkbNW/4YPqzHz5rUAVtaYYArUjA5yDww16baypfT5OtuX/rgfFQ9mHf7+gv+CZLwZVHjDGk+AwdGI5b4wYPEQKM8ByUi8Ljr1VQZcwHRfoKDsbWUN2+kmlwiFoxExH0Jkgatb1X0nlU7FEhFY69yySjIxGenbMEVS393CFPcGbqvwNM9eXvfe9YTeiUxqArOy2fx5cx5LdIWHflucp8aS1ZFkwjgC6hrQIpPEwA3qutbphs9fNulCXueej5ekSPCaRhetL5aMKy7dGndr22W0J1U3++/nP0fEqdVa/glGdXTN4jKV0wti0qWq4sVEX2w3LogR8xhGK6pomj5g4HASuHNq9LufkYfRisE1qTKMffs2SupUUdTsgMcA4BBdYnCr9dA017x17o5QQzfH9WQaCIQ3VMzFvL85PVHUkFW/Ub8B92aD6WuVcFp7LiQ3ZWyZlgFF8wv4jAFANzJidHZ7sPR4QZKVxiAdBPnsONern/SKGBHqIEUVca8JySk4pQS8N4qw/mc+0nLU70PW29iKqziZ+lIlIYFArBEZ1ebnFWoQAA">
 </head>
@@ -454,6 +461,7 @@ go();})();
 <button id="dockBtn" aria-label="Field kit" aria-expanded="false" title="Field kit"></button>
 <nav id="dock" aria-label="Field kit"></nav>
 <section id="dockPane" hidden aria-live="polite"><div class="dkHead"><img id="dkIcon" alt=""><span id="dkTitle"></span><button id="dkX" aria-label="Close">×</button></div><div id="dkBody"></div></section>
+<div id="campBar" hidden><button id="campOk">Pitch camp here (E)</button><button id="campNo">Cancel</button></div>
 <div id="popTxt" aria-hidden="true"></div>
 <div id="netLabels"></div>
 <div id="ip" class="tag panel" hidden>
@@ -513,7 +521,7 @@ go();})();
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 65 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 66 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -543,7 +551,7 @@ go();})();
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 65 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 66 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -1054,7 +1062,7 @@ if(WORLD){const W_=WORLD_,WS=W_.WS;let ws=987654321;const wr=()=>{ws=(Math.imul(
     else if(r<0.96&&fm>-0.1){const L=wrr(1.4,3),a=wr()*6.28;m.add(G.cyl6,P.earth,M(x,y+0.16,z,a,0.17,L,0.17,0,Math.PI/2));if(L>2.2)addC(x,z,0.4,'rock');}
     else{m.add(G.cyl6,P.earth,M(x,y+0.18,z,wr()*6,0.24,0.36,0.24));m.add(G.cyl6,P.tent,M(x,y+0.37,z,0,0.22,0.02,0.22));}}
   const ugMeshes=[];for(const c of UG.values()){const me=new THREE.Mesh(c.m.build(),matV);me.receiveShadow=true;me.userData={cx:c.cx,cz:c.cz};scene.add(me);ugMeshes.push(me);}
-  WORLDM={wr,wrr,addC,solidAt,nearTree,mtnPaper:mp,ground:gm,ug:ugMeshes};
+  WORLDM={wr,wrr,addC,solidAt,nearTree,clearC:(x,z,Rr)=>{const i0=Math.floor((x-Rr)/4),i1=Math.floor((x+Rr)/4),j0=Math.floor((z-Rr)/4),j1=Math.floor((z+Rr)/4);for(let a=i0;a<=i1;a++)for(let b=j0;b<=j1;b++){const L=CG.get(key(a,b));if(!L)continue;for(const c of L)if((x-c[0])**2+(z-c[1])**2<Rr*Rr)c[2]=0;}},mtnPaper:mp,ground:gm,ug:ugMeshes};
 }
 
 /* ---------- water ---------- */
@@ -2716,7 +2724,7 @@ function spotProblem(item,axis,line,a,b,k){
   if(distToSeg(p.x,p.z,axis,line,a,b)>CFG.reach)return'Too far away. Walk closer.';
   for(const o of S.openings)if(o.axis===axis&&near(o.line,line)&&k>=o.k0&&k<=o.k1&&o.c+o.w/2>a+0.01&&o.c-o.w/2<b-0.01)return'That would cover a '+o.kind+' opening.';
   for(const q of S.logs)if(q.axis===ox&&q.k===k&&q.line>a+0.02&&q.line<b-0.02&&line>q.a+0.02&&line<q.b-0.02)return"Logs can't cross in the middle. End this log at the other wall (use a shorter log) to make a T-joint.";
-  if(k<LEVEL)for(let s=a;s<=b+1e-6;s+=0.3){const c=wp(axis,line,s,0);if(opts.blocked&&opts.blocked(c[0],c[2]))return'A tree or object is in the way. Chop it or move.';}
+  if(k<LEVEL)for(let s=a;s<=b+1e-6;s+=0.3){const c=wp(axis,line,s,0);if(opts.blocked&&opts.blocked(c[0],c[2]))return'Water, a cliff or your camp is in the way there.';}
   if(k*COURSE<1.5&&distToSeg(p.x,p.z,axis,line,a-T/2,b+T/2)<0.4)return"You're standing where it would go. Step back.";
   return'';
 }
@@ -2843,7 +2851,7 @@ function place(){
   if(!t)return{ok:false,reason:'Nothing to place.'};
   if(!t.valid){say(t.reason);return{ok:false,reason:t.reason};}
   if(t.kind==='cut'){applyCut(t.cut);mode='idle';}
-  else if(t.kind==='wall'){S.logs.push({id:nid(),type:t.item.type,axis:t.axis,line:t.line,a:t.a,b:t.b,k:t.k,ea:'node',eb:'node'});say('Placed a '+label(t.item)+' on course '+(t.k+1)+'.');carried=null;mode='idle';}
+  else if(t.kind==='wall'){if(opts.clear){const c=wp(t.axis,t.line,(t.a+t.b)/2,0);opts.clear(c[0],c[2],(t.b-t.a)/2+0.8);}S.logs.push({id:nid(),type:t.item.type,axis:t.axis,line:t.line,a:t.a,b:t.b,k:t.k,ea:'node',eb:'node'});say('Placed a '+label(t.item)+' on course '+(t.k+1)+'.');carried=null;mode='idle';}
   else if(t.kind==='fill'){t.opening.fill=t.item.type;t.opening.open=false;say('Fitted the '+t.item.type+'. Press E next to it to open or close it.');carried=null;mode='idle';}
   else if(t.kind==='roof'){const s=t.slot,c=t.cab;let left=0;
     if(s.part==='gable'){S.roof.push({id:nid(),key:s.key,sid:s.sid,part:'gable',len:s.need});left=t.item.len-s.need;}
@@ -2971,7 +2979,8 @@ return{
     const sn=v=>Math.round(v/GRID)*GRID,walls=[];
     if(wallOnly){const ax=Math.abs(fx)>Math.abs(fz)?'z':'x',line=sn(ax==='x'?cz:cx),a=sn((ax==='x'?cx:cz)-w/2);walls.push({axis:ax,line,a,b:a+w});}
     else{const x0=sn(cx-w/2),z0=sn(cz-d/2),x1=x0+w,z1=z0+d;walls.push({axis:'x',line:z0,a:x0,b:x1},{axis:'x',line:z1,a:x0,b:x1},{axis:'z',line:x0,a:z0,b:z1},{axis:'z',line:x1,a:z0,b:z1});}
-    for(const wl of walls)for(let t=wl.a;t<=wl.b+0.01;t+=0.6){const x=wl.axis==='x'?t:wl.line,z=wl.axis==='x'?wl.line:t;if(opts.blocked&&opts.blocked(x,z)){say('Something is in the way there (near '+x.toFixed(1)+', '+z.toFixed(1)+'). Find a clearer spot.');return false;}}
+    for(const wl of walls)for(let t=wl.a;t<=wl.b+0.01;t+=0.6){const x=wl.axis==='x'?t:wl.line,z=wl.axis==='x'?wl.line:t;if(opts.blocked&&opts.blocked(x,z)){say('Water, a cliff or your camp is in the way there. Try a little further along.');return false;}}
+    if(opts.clear){let a0=1e9,a1=-1e9,b0=1e9,b1=-1e9;for(const wl of walls){const xs=wl.axis==='x'?[wl.a,wl.b]:[wl.line,wl.line],zs=wl.axis==='x'?[wl.line,wl.line]:[wl.a,wl.b];a0=Math.min(a0,...xs);a1=Math.max(a1,...xs);b0=Math.min(b0,...zs);b1=Math.max(b1,...zs);}opts.clear((a0+a1)/2,(b0+b1)/2,Math.hypot(a1-a0,b1-b0)/2+1.3);}
     for(const wl of walls)for(let k=0;k<CFG.wallCourses;k++){let x=wl.a,r=wl.b-wl.a;while(r>0.01){const L=r>=3.6-1e-6?3.6:r>=2.4-1e-6?2.4:1.2;
       S.logs.push({id:nid(),type:typeForLen(L),axis:wl.axis,line:wl.line,a:x,b:x+L,k,ea:'node',eb:'node'});x+=L;r-=L;}}
     opts.spendSticks(cost);rebuild();say(wallOnly?'A wall goes up ('+cost+' sticks).':'Cabin walls up ('+cost+' sticks). Cut a door with C, then use Auto roof.');return true;},
@@ -2993,7 +3002,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 65 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 65 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 66 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 66 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
@@ -3163,7 +3172,8 @@ let kitMouse=null,kitTap=null;const kitRay=new THREE.Raycaster();
 CABINKIT.init(scene,{
   getSticks:()=>st.sticks+st.logs*5,spendSticks:n=>{if(st.sticks+st.logs*5<n)return false;const a=Math.min(st.sticks,n);st.sticks-=a;n-=a;if(n>0)st.logs-=Math.ceil(n/5),st.sticks+=Math.ceil(n/5)*5-n;return true;},refundSticks:n=>{st.sticks+=n;},
   heightAt:(x,z)=>heightAt(x,z,'rim'),
-  blocked:(x,z)=>!walkable(x,z,LIM,'rim')||inWater(x,z)||trees.some(t=>t.state==='up'&&(t.x-x)*(t.x-x)+(t.z-z)*(t.z-z)<0.3)||hyp(x-FIRE.x,z-FIRE.z)<1.4||(TENT&&hyp(x-TENT.x,z-TENT.z)<2)||(car&&hyp(x-car.x,z-car.z)<2.4)||(WORLDM&&WORLDM.solidAt(x,z,0.2,true)),
+  blocked:(x,z)=>!walkable(x,z,LIM,'rim')||inWater(x,z)||hyp(x-FIRE.x,z-FIRE.z)<1.4||(TENT&&hyp(x-TENT.x,z-TENT.z)<2)||(car&&hyp(x-car.x,z-car.z)<2.4),
+  clear:(x,z,r)=>clearArea(x,z,r),
   getPlayer:()=>({x:player.x,y:player.y,z:player.z,facing:player.rot}),
   getAim:()=>{if(!kitMouse)return null;kitRay.setFromCamera(kitMouse,camera);return{o:kitRay.ray.origin,d:kitRay.ray.direction};},
   onMessage:t=>toast(t,3)});
@@ -3981,20 +3991,24 @@ $('menuBtn').addEventListener('click',()=>setMenu(!document.body.classList.conta
 const toggleOP=f=>togglePanel('op','onlineBtn',f);
 const toggleIP=f=>{togglePanel('ip','invBtn',f);if(!$('ip').hidden)paintInv();};$('invBtn').addEventListener('click',()=>{INV.target=null;toggleIP();});$('ipClose').addEventListener('click',()=>toggleIP(false));
 function nearContainer(){for(const c of CRATES)if(hyp(player.x-c.x,player.z-c.z)<2.2)return c;if(car&&!car.occupied&&hyp(player.x-car.x,player.z-car.z)<3.6)return 'van';return null;}
-function paintInv(){const tg=nearContainer(),van=tg==='van',cr=tg&&!van?tg:null,cInv=van?car.inv:cr?cr.inv:null,cName=van?'Van':cr?cr.name:null,canHold=k=>van?VANCAP[k]>0:cr?cr.holds.includes(k):false,cCap=k=>van?VANCAP[k]:1000;
-  const crTot=k=>CRATES.reduce((a,c)=>a+(c.inv[k]||0),0);
-  let h='<table><tr><th>Item</th><th>You</th>'+(cName?'<th>'+cName+'</th><th></th>':'')+'</tr>';
-  for(const[k,lab]of ITEMS){h+='<tr><td>'+lab+'</td><td>'+(st[k]||0)+'/'+CAP[k]+'</td>';
-    if(cName){h+='<td>'+(canHold(k)?(cInv[k]||0)+'/'+cCap(k):'–')+'</td><td>'+(canHold(k)?'<button data-mv="take" data-k="'+k+'" data-n="10">Take 10</button> <button data-mv="take" data-k="'+k+'" data-n="all">All</button> <button data-mv="put" data-k="'+k+'" data-n="10">Put 10</button> <button data-mv="put" data-k="'+k+'" data-n="all">All</button>':'')+'</td>';}h+='</tr>';}
-  h+='</table><div class="btns" style="margin-top:6px"><button data-mk="1">Bundle 5 sticks → 1 log</button><button data-mk="10">×10</button></div>';
-  h+='<p class="pnote">At the camp crates: '+ITEMS.map(([k,l])=>crTot(k)?l.split(' ')[0]+' '+crTot(k):'').filter(Boolean).join(' · ')+'<br>In the van: '+(car?['logs','berries','fish'].map(k=>k+' '+car.inv[k]).join(' · '):'–')+
-    '<br>Camp box: '+(CAMP.state==='set'?'set up'+(TENT&&hyp(TENT.x-CAMP.home.tx,TENT.z-CAMP.home.tz)<0.1?' at the starting camp':' away from home'):CAMP.state==='van'?'in the van':'you are carrying it')+'</p>';
-  if(CAMP.state!=='set'&&(CAMP.state==='carried'||(car&&hyp(player.x-car.x,player.z-car.z)<6)))h+='<div class="btns"><button data-camp="1">Set up camp here</button></div>';
-  if(CAMP.state==='carried'&&car&&hyp(player.x-car.x,player.z-car.z)<6)h+='<div class="btns"><button data-campvan="1">Load the camp box into the van</button></div>';
+function paintInv(){const tg=nearContainer(),van=tg==='van',cr=tg&&!van?tg:null,cInv=van?car.inv:cr?cr.inv:null,cName=van?'the van':cr?'the '+cr.name.toLowerCase():null,canHold=k=>van?VANCAP[k]>0:cr?cr.holds.includes(k):false,cCap=k=>van?VANCAP[k]:1000;
+  const crate=k=>CRATES.find(c=>c.holds.includes(k)),ic=n=>typeof icon==='function'?'<img src="'+icon(n)+'" alt="" style="width:18px;height:18px;border-radius:4px;vertical-align:-4px;margin-right:6px">':'';
+  const II={sticks:'log',logs:'log',berries:'berry',fish:'fish'};
+  let h='<table><tr><th>Item</th><th>You carry</th><th>Van</th><th>Crates</th></tr>';
+  for(const[k,lab]of ITEMS){const c=crate(k);h+='<tr><td>'+ic(II[k]||'backpack')+lab+'</td><td><b>'+(st[k]||0)+'</b>/'+CAP[k]+'</td><td>'+(car&&VANCAP[k]>0?(car.inv[k]||0)+'/'+VANCAP[k]:'–')+'</td><td>'+(c?(c.inv[k]||0):'–')+'</td></tr>';}
+  h+='</table>';
+  if(cName){h+='<h4>At '+cName+'</h4><table>';for(const[k,lab]of ITEMS){if(!canHold(k))continue;h+='<tr><td>'+lab+' <span class="pnote">'+(cInv[k]||0)+'/'+cCap(k)+'</span></td><td style="text-align:right"><button data-mv="take" data-k="'+k+'" data-n="10">Take 10</button> <button data-mv="take" data-k="'+k+'" data-n="all">All</button> <button data-mv="put" data-k="'+k+'" data-n="10">Put 10</button> <button data-mv="put" data-k="'+k+'" data-n="all">All</button></td></tr>';}h+='</table>';}
+  else h+='<p class="pnote">Stand by a crate at camp or the van to move things in and out.</p>';
+  h+='<div class="btns" style="margin-top:6px"><button data-mk="1">Bundle 5 sticks → 1 log</button><button data-mk="10">×10</button></div>';
+  h+='<h4>'+ic('campfire')+'Camp</h4><p class="pnote">'+(CAMP.state==='set'?'Pitched'+(TENT&&hyp(TENT.x-CAMP.home.tx,TENT.z-CAMP.home.tz)<0.1?' at the starting camp.':' away from home.')+' Pack it up by the tent (P).':CAMP.state==='van'?'Packed in its box, in the van.':'Packed in its box. You are carrying it.')+'</p>';
+  const nv=car&&hyp(player.x-car.x,player.z-car.z)<8;
+  if(CAMP.state==='carried'||(CAMP.state==='van'&&nv))h+='<div class="btns"><button data-camp="1" class="on">Set up camp…</button></div>';
+  else if(CAMP.state==='van')h+='<p class="pnote">Walk back to the van to unpack the camp box.</p>';
+  if(CAMP.state==='carried'&&nv)h+='<div class="btns"><button data-campvan="1">Load the camp box into the van</button></div>';
   $('invBody').innerHTML=h;}
 $('invBody').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const tg=nearContainer();
   if(b.dataset.mk){const n=Math.min(+b.dataset.mk,Math.floor(st.sticks/5),CAP.logs-st.logs);if(n>0){st.sticks-=n*5;st.logs+=n;}}
-  else if(b.dataset.camp){setupCamp();}
+  else if(b.dataset.camp){startCampPlace();}
   else if(b.dataset.campvan){CAMP.state='van';toast('Camp box loaded in the van.',2);}
   else if(b.dataset.mv&&tg){const k=b.dataset.k,inv=tg==='van'?car.inv:tg.inv,cap=tg==='van'?VANCAP[k]:1000,want=b.dataset.n==='all'?1e9:+b.dataset.n;
     if(b.dataset.mv==='take'){const n=Math.min(want,inv[k]||0,CAP[k]-(st[k]||0));inv[k]-=n;st[k]=(st[k]||0)+n;}else{const n=Math.min(want,st[k]||0,cap-(inv[k]||0));inv[k]=(inv[k]||0)+n;st[k]-=n;}}
@@ -4646,6 +4660,54 @@ $('dockBtn').addEventListener('click',()=>dockToggle());$('dkX').addEventListene
 /* icons in the M menu tabs and the map's resource strip */
 {const TI={status:'firstaid',map:'map',ip:'backpack',bp:'hammer',wp:'storm',tp:'sunmoon',lp:'flashlight',op:'walkie',set:'compass2'};[...$('gmTabs').children].forEach(b=>{const n=TI[b.dataset.t];if(n)b.insertAdjacentHTML('afterbegin','<img alt="" src="'+icon(n)+'">');});}
 {const RI={Sticks:'log',Logs:'log',Berries:'berry',Fish:'fish',Fire:'campfire',Pins:'sign'};const _r=wmRes;wmRes=function(){_r();[...$('wmRes').querySelectorAll('small')].forEach(sm=>{const n=RI[sm.textContent];if(n)sm.insertAdjacentHTML('afterbegin','<img alt="" src="'+icon(n)+'">');});};}
+
+/* ===== Build 66: pitch camp anywhere (ghost preview), clear the ground ===== */
+const _cbx=new THREE.Box3(),_cs=new THREE.Sphere();
+function clearArea(cx,cz,Rr){let nT=0;
+  for(const tr of trees)if(tr.state==='up'&&hyp(tr.x-cx,tr.z-cz)<Rr){tr.state='cleared';tr.mesh.visible=false;nT++;}
+  if(typeof WTREES!=='undefined'&&WTREES){const Z=new THREE.Matrix4().makeScale(0,0,0);for(const im of WTREES.meshes){const L=im.userData.L;let ch=false;for(const it of L){if(it.gone)continue;if(hyp(it.x-cx,it.z-cz)<Rr){im.setMatrixAt(it.n,Z);it.gone=true;if(it.c)it.c[2]=0;ch=true;nT++;}}if(ch)im.instanceMatrix.needsUpdate=true;}}
+  if(WORLDM&&WORLDM.clearC)WORLDM.clearC(cx,cz,Rr);
+  for(const c of colliders){if(c===fireCol||c===tentCol)continue;if(car&&hyp(c.x-car.x,c.z-car.z)<3)continue;if(CRATES.some(k=>k.x!==undefined&&hyp(c.x-k.x,c.z-k.z)<1.6))continue;if(hyp(c.x-cx,c.z-cz)<Rr)c.r=0;}
+  /* rocks, logs and undergrowth are baked into big merged meshes: fold away every triangle above the ground inside the circle */
+  for(const o of scene.children.concat(WORLDM?WORLDM.ug:[])){if(!o.isMesh||o.isInstancedMesh||!o.geometry||o.geometry.index||o.material!==matV)continue;
+    if(WORLDM&&o===WORLDM.ground)continue;if(o.position.lengthSq()>1e-6||o.rotation.y!==0||o.scale.x!==1)continue;
+    const g=o.geometry;if(!g.boundingSphere)g.computeBoundingSphere();_cs.copy(g.boundingSphere);if(hyp(_cs.center.x-cx,_cs.center.z-cz)>_cs.radius+Rr)continue;
+    const A=g.attributes.position.array;let ch=false;
+    for(let i=0;i<A.length;i+=9){const x=(A[i]+A[i+3]+A[i+6])/3,z=(A[i+2]+A[i+5]+A[i+8])/3;if((x-cx)*(x-cx)+(z-cz)*(z-cz)>Rr*Rr)continue;const y=(A[i+1]+A[i+4]+A[i+7])/3;
+      {const g0=gh(x,z);if(y<g0+0.12||y>g0+3.5)continue;}if(WORLD_&&WORLD_.wBridge&&WORLD_.wBridge(x,z))continue;for(let j=0;j<9;j+=3){A[i+j]=x;A[i+j+1]=y;A[i+j+2]=z;}ch=true;}
+    if(ch)g.attributes.position.needsUpdate=true;}
+  return nT;}
+const CP={on:false,F:[0,0],ok:false};CAMP.seats=CAMP.seats||[];
+const ghostM=new THREE.MeshBasicMaterial({color:0xB7D7D0,transparent:true,opacity:0.38,depthWrite:false});
+const ghost=new THREE.Group();ghost.visible=false;scene.add(ghost);
+{const tent=new THREE.Mesh(new THREE.ConeGeometry(1.35,1.7,4),ghostM);tent.rotation.y=Math.PI/4;tent.position.y=0.85;tent.name='tent';ghost.add(tent);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(0.55,0.09,6,14),ghostM);ring.rotation.x=Math.PI/2;ring.position.y=0.1;ring.name='fire';ghost.add(ring);
+  for(let k=0;k<2;k++){const lg=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,1.5,8),ghostM);lg.rotation.z=Math.PI/2;const sg=new THREE.Group();sg.add(lg);lg.position.y=0.2;sg.name='seat'+k;ghost.add(sg);}
+  const foot=new THREE.Mesh(new THREE.RingGeometry(0.96,1,48),new THREE.MeshBasicMaterial({color:0xB7D7D0,transparent:true,opacity:0.5,depthWrite:false,side:THREE.DoubleSide}));foot.rotation.x=-Math.PI/2;foot.name='foot';ghost.add(foot);}
+function campLayout(fx,fz){const off=[CAMP.home.tx-CAMP.home.fx,CAMP.home.tz-CAMP.home.fz],ol=hyp(off[0],off[1])||1,u=[-off[0]/ol,-off[1]/ol],S=[];
+  for(const a of[0.75,-0.75]){const c=Math.cos(a),sn=Math.sin(a),rx=u[0]*c-u[1]*sn,rz=u[0]*sn+u[1]*c;S.push([fx+rx*2.1,fz+rz*2.1,Math.atan2(rx,rz)]);}
+  return{F:[fx,fz],T:[fx+off[0],fz+off[1]],S,R:Math.max(ol+1.6,3.6)};}
+function campSpotOk(L){for(const[x,z]of[L.F,L.T,...L.S]){if(waterAt(x,z)!==null||inWater(x,z))return false;if(!walkable(x,z,LIM,'rim'))return false;if(WORLD_&&WORLD_.wBridge&&WORLD_.wBridge(x,z))return false;if(cabinHit(x,z,0.8,player.y))return false;}return true;}
+function startCampPlace(){const nv=car&&hyp(player.x-car.x,player.z-car.z)<8;if(!(CAMP.state==='carried'||(CAMP.state==='van'&&nv))){toast(CAMP.state==='set'?'Your camp is already set up.':'The camp box is in the van. Walk back to it first.',2.4);return;}
+  if(car&&car.occupied){toast('Get out of the van first.',2);return;}
+  setMenu(false);if(typeof dockClose==='function')dockClose();CP.on=true;ghost.visible=true;$('campBar').hidden=false;toast('Walk to move the camp. E to pitch it here, Esc to cancel.',3.5);}
+function cancelCampPlace(){CP.on=false;ghost.visible=false;$('campBar').hidden=true;}
+function campPlaceTick(){if(!CP.on)return;const fx=player.x+Math.sin(player.rot)*3.4,fz=player.z+Math.cos(player.rot)*3.4,L=campLayout(fx,fz);CP.L=L;CP.ok=campSpotOk(L);
+  ghostM.color.setHex(CP.ok?0xB7D7D0:0xAB451C);ghost.position.set(0,0,0);
+  const put=(n,x,z,yaw)=>{const o=ghost.getObjectByName(n);o.position.x=x;o.position.z=z;o.position.y=(n==='fire'?0.1:n==='tent'?0.85:0)+gh(x,z);if(yaw!==undefined)o.rotation.y=yaw;};
+  put('tent',L.T[0],L.T[1]);put('fire',L.F[0],L.F[1]);put('seat0',L.S[0][0],L.S[0][1],L.S[0][2]);put('seat1',L.S[1][0],L.S[1][1],L.S[1][2]);
+  const cx=(L.F[0]+L.T[0])/2,cz=(L.F[1]+L.T[1])/2,f=ghost.getObjectByName('foot');f.position.set(cx,gh(cx,cz)+0.06,cz);const r=L.R+0.4;f.scale.set(r,r,1);f.material.color.setHex(CP.ok?0xB7D7D0:0xAB451C);
+  $('campOk').disabled=!CP.ok;$('campOk').textContent=CP.ok?'Pitch camp here (E)':'Too wet or steep here';}
+function confirmCampPlace(){if(!CP.on||!CP.ok)return;const L=CP.L;cancelCampPlace();const cx=(L.F[0]+L.T[0])/2,cz=(L.F[1]+L.T[1])/2,n=clearArea(cx,cz,L.R+0.4);
+  CAMP.state='set';flame.visible=true;fireLight.visible=true;moveCamp(L.F[0],L.F[1]);st.fuel=Math.max(st.fuel,0.3);
+  CAMP.seats=L.S.map(([x,z,y])=>makeSeat(x,z,y));toast('Camp pitched: tent, campfire and two log seats.'+(n?' You cleared '+n+' tree'+(n>1?'s':'')+' to make room.':''),3.5);}
+{const _pk=packCamp;packCamp=function(){const was=CAMP.state==='set';_pk();if(was&&CAMP.seats)for(const s_ of CAMP.seats){if(s_.carried)continue;s_.carried=true;s_.gone=true;s_.me.visible=false;scene.remove(s_.me);const i=SEATS.indexOf(s_);if(i>=0)SEATS.splice(i,1);}CAMP.seats=[];};}
+setupCamp=startCampPlace;
+$('campOk').addEventListener('click',confirmCampPlace);$('campNo').addEventListener('click',cancelCampPlace);
+addEventListener('keydown',e=>{if(!CP.on)return;const tg=e.target&&e.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA')return;
+  if(e.code==='KeyE'||e.code==='Enter'){e.preventDefault();e.stopImmediatePropagation();confirmCampPlace();}else if(e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();cancelCampPlace();}},true);
+{const ub=$('useBtn');if(ub)ub.addEventListener('pointerdown',e=>{if(CP.on){e.stopImmediatePropagation();e.preventDefault();confirmCampPlace();}},true);}
+{const _u=updMapCompass;updMapCompass=function(){_u();campPlaceTick();};}
 hud();requestAnimationFrame(frame);
 })();
 </script>
