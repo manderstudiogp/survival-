@@ -6,7 +6,7 @@
 <title>Paperland Trails: Oregon Wilds</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Iceland&family=Lilita+One&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 /* VOICE: cozy, tactile; a folded-paper toy on a tabletop
    IDEA: a papercraft diorama of the Oregon woods you can walk through
@@ -127,6 +127,178 @@ body.touch #prompt{bottom:128px}
 .tBig{font:26px/1.1 'Lilita One',sans-serif;color:var(--river);margin:8px 0 2px;font-variant-numeric:tabular-nums}
 .tScale{display:flex;justify-content:space-between;font-size:11px;color:var(--tent)}
 .pnote{margin:8px 0 0;color:var(--tent);font-size:12px}
+
+/* ===== Build 51: glass UI ===== */
+:root{--g-bg:rgba(9,15,14,.58);--g-bg2:rgba(9,15,14,.78);--g-line:rgba(183,215,208,.16);--g-line2:rgba(183,215,208,.34);--g-acc:#B7D7D0;--g-txt:#E8EEEC;--g-dim:rgba(232,238,236,.56);--g-d:'Iceland','Nunito',sans-serif}
+.tag{background:var(--g-bg);border:1px solid var(--g-line);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.25);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:var(--g-txt)}
+kbd{background:transparent;color:var(--g-acc);border:1px solid var(--g-line2);box-shadow:none;font:16px/1 var(--g-d);border-radius:5px;min-width:24px;height:24px}
+#prompt{font:700 14px Nunito,sans-serif;letter-spacing:.2px}
+#toast{font:700 14px Nunito,sans-serif}
+#menuBtn{border-radius:10px;color:var(--g-acc);font:22px/1 var(--g-d);width:42px;height:42px}
+#menuBtn::after{content:'M';position:absolute;right:3px;bottom:2px;font:10px/1 var(--g-d);color:var(--g-dim)}
+body.touch #menuBtn::after{display:none}
+body.menuOpen #menuBtn,body.menuOpen #mapCompass,body.menuOpen #clock{display:none!important}
+#clock{display:none!important}
+/* compass */
+#mapCompass{width:58px;height:58px;padding:0;border-radius:50%;background:radial-gradient(circle,rgba(9,15,14,.25) 0 52%,rgba(9,15,14,.6) 53%);border:1px solid var(--g-line2)}
+#mapCompass:hover{border-color:var(--g-acc)}
+#mapCompass svg{width:56px;height:56px;overflow:visible}
+#cmpDeg{position:absolute;left:50%;top:62px;transform:translateX(-50%);font:13px/1 var(--g-d);color:var(--g-acc);letter-spacing:1px;text-shadow:0 1px 3px rgba(0,0,0,.7);white-space:nowrap}
+/* map */
+#mapBox{padding:12px;background:var(--g-bg2);top:92px}
+#mapBox .lpHead{font:20px/1 var(--g-d);letter-spacing:2px;text-transform:uppercase;color:var(--g-txt)}
+.mapWrap{position:relative;margin-top:8px;border:1px solid var(--g-line);border-radius:6px;overflow:hidden}
+.mapWrap::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(rgba(183,215,208,.09) 1px,transparent 1px) 0 0/10% 10%,linear-gradient(90deg,rgba(183,215,208,.09) 1px,transparent 1px) 0 0/10% 10%;box-shadow:inset 0 0 40px rgba(0,0,0,.55)}
+#mapCv{border-radius:0;filter:saturate(.75) brightness(.92)}
+.mapLeg{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font:700 11px Nunito,sans-serif;color:var(--g-dim);text-transform:uppercase;letter-spacing:.6px}
+.mapLeg b{font-weight:800;margin-right:4px}
+#mapBox .pnote{display:none}
+.pClose{width:28px;height:28px;border:1px solid var(--g-line2);background:transparent;color:var(--g-txt);font:16px/1 Nunito,sans-serif}
+/* buttons, rows everywhere */
+.btns button,.maps button{background:rgba(183,215,208,.05);border:1px solid var(--g-line2);color:var(--g-txt);border-radius:4px;font:700 12px Nunito,sans-serif;letter-spacing:.5px;text-transform:uppercase;min-height:32px;padding:5px 12px;transition:background .15s,border-color .15s}
+.btns button:hover,.maps button:hover{background:rgba(183,215,208,.14);border-color:var(--g-acc)}
+.btns button.on,.maps button.on{background:var(--g-acc);color:#0b1412;border-color:var(--g-acc)}
+input[type=range]{accent-color:var(--g-acc)}
+button:focus-visible,#helpBtn:focus-visible{outline:2px solid var(--g-acc);outline-offset:2px}
+/* intro / main menu */
+#intro{background:linear-gradient(90deg,rgba(6,11,10,.86),rgba(6,11,10,.45) 70%,rgba(6,11,10,.25))}
+#intro .card{background:var(--g-bg);border:1px solid var(--g-line);border-radius:12px}
+.logo h1{font:clamp(34px,7vw,54px)/1 var(--g-d);color:var(--g-txt);letter-spacing:3px;text-shadow:none;text-transform:uppercase}
+.logo span{background:transparent;border:0;border-top:1px solid var(--g-acc);border-radius:0;color:var(--g-acc);font:16px/1.6 var(--g-d);letter-spacing:6px;text-transform:uppercase;padding:4px 10px 0}
+.card li em{color:var(--g-acc)}.card p.tip{color:var(--g-dim)}
+#startBtn{background:var(--g-acc);color:#0b1412;font:24px/1 var(--g-d);letter-spacing:4px;text-transform:uppercase;border-radius:4px;box-shadow:none}
+#startBtn:hover{filter:brightness(1.08)}
+.tbtn{background:var(--g-bg);border:1px solid var(--g-line2);box-shadow:none;color:var(--g-txt);font:16px/1 var(--g-d);letter-spacing:1px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#useBtn{background:rgba(183,215,208,.85);color:#0b1412;border-color:var(--g-acc)}
+#stickBase{background:rgba(9,15,14,.35);border:1px solid var(--g-line2)}#stickKnob{background:rgba(183,215,208,.8);border:0;box-shadow:none}
+/* ===== the M menu ===== */
+#gm{position:fixed;inset:0;z-index:8;display:none;grid-template-rows:auto 1fr auto;color:var(--g-txt);font:600 14px Nunito,sans-serif;background:linear-gradient(90deg,rgba(6,11,10,.82) 0,rgba(6,11,10,.62) 55%,rgba(6,11,10,.35) 100%)}
+body.menuOpen #gm{display:grid;animation:gmIn .18s ease-out}
+@keyframes gmIn{from{opacity:0}to{opacity:1}}
+.gmTop{display:flex;align-items:stretch;gap:0;border-bottom:1px solid var(--g-line);background:rgba(6,11,10,.5)}
+.gmBrand{display:flex;align-items:center;padding:0 22px;background:var(--g-acc);color:#0b1412;font:22px/1 var(--g-d);letter-spacing:3px;text-transform:uppercase;white-space:nowrap}
+.gmTabs{display:flex;flex:1;overflow-x:auto;scrollbar-width:none}.gmTabs::-webkit-scrollbar{display:none}
+.gmTabs button{flex:none;background:none;border:0;color:var(--g-dim);font:800 12.5px Nunito,sans-serif;letter-spacing:1.6px;text-transform:uppercase;padding:18px 16px 15px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.gmTabs button:hover{color:var(--g-txt)}
+.gmTabs button.on{color:var(--g-acc);border-bottom-color:var(--g-acc)}
+.gmClock{display:flex;align-items:center;gap:10px;padding:0 18px;font:18px/1 var(--g-d);letter-spacing:1px;white-space:nowrap;color:var(--g-txt)}
+.gmClock #orb{width:12px;height:12px}
+.gmX{background:none;border:0;border-left:1px solid var(--g-line);color:var(--g-txt);font:22px/1 Nunito,sans-serif;padding:0 20px;cursor:pointer}.gmX:hover{color:var(--g-acc)}
+.gmMain{display:grid;grid-template-columns:minmax(0,640px) minmax(240px,380px);gap:28px;padding:26px clamp(14px,4vw,60px);min-height:0;overflow:hidden}
+.gmBody{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:10px;scrollbar-width:thin;scrollbar-color:var(--g-line2) transparent}
+.gmSec{display:flex;align-items:center;gap:12px;margin:4px 0 12px;font:20px/1 var(--g-d);letter-spacing:3px;text-transform:uppercase;color:var(--g-txt)}
+.gmSec::before{content:'';width:44px;height:2px;background:var(--g-acc)}
+.gmDetail{align-self:start;padding:22px 24px;border:1px solid var(--g-line);border-radius:8px;background:rgba(6,11,10,.45)}
+.gmDetail h2{margin:0 0 6px;font:28px/1 var(--g-d);letter-spacing:2px;text-transform:uppercase}
+.gmDetail h2::after{content:'';display:block;width:70px;height:2px;background:var(--g-acc);margin-top:10px}
+.gmDetail p{color:var(--g-dim);line-height:1.5;margin:12px 0 0}
+.gmKeys{display:grid;grid-template-columns:auto 1fr;gap:7px 12px;margin-top:16px;align-items:center;color:var(--g-dim);font-size:13px}
+.gmFoot{display:flex;align-items:center;gap:18px;padding:10px clamp(14px,4vw,60px);border-top:1px solid var(--g-line);font:700 12px Nunito,sans-serif;color:var(--g-dim);letter-spacing:1px;text-transform:uppercase}
+.gmFoot span{display:flex;align-items:center;gap:7px}.gmFoot .sp{flex:1}
+#gm #buildBadge{position:static!important;opacity:.6!important}
+/* panels living inside the menu */
+#gm .panel,#gm #hud,#gm #hotbar,#gm #mapBox{position:static!important;display:block;width:auto;max-height:none;overflow:visible;padding:0;background:none;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;top:auto;left:auto;right:auto}
+#gm .panel[hidden],#gm #mapBox[hidden],#gm .gmPane[hidden]{display:none!important}
+#gm .lpHead{display:none}
+#gm .panel h4{display:flex;align-items:center;gap:12px;margin:22px 0 8px;font:17px/1 var(--g-d);letter-spacing:2.5px;text-transform:uppercase;color:var(--g-txt)}
+#gm .panel h4::before{content:'';width:28px;height:2px;background:var(--g-acc)}
+#gm .tBig{font:34px/1 var(--g-d);letter-spacing:1px;color:var(--g-txt);margin:0 0 10px}
+#gm .row{display:grid;grid-template-columns:minmax(0,1fr) minmax(140px,46%);align-items:center;gap:14px;margin:0;padding:10px 14px;border-bottom:1px solid var(--g-line);border-radius:3px;transition:background .12s}
+#gm .row:hover{background:rgba(183,215,208,.08)}
+#gm .row label{color:var(--g-txt);font:600 14px Nunito,sans-serif}
+#gm .row output{color:var(--g-acc);font:17px/1 var(--g-d);letter-spacing:.5px}
+#gm .row input[type=range]{height:22px}
+#gm .pnote{color:var(--g-dim);font-size:12.5px;line-height:1.5}
+#gm .chk{color:var(--g-txt)}
+#gm #sTime{margin:10px 0 4px}
+#gm .tScale{color:var(--g-dim)}
+#gm #op input{background:rgba(255,255,255,.06);border:1px solid var(--g-line2);color:var(--g-txt);border-radius:4px}
+#gm #invBody table{font:600 13.5px Nunito,sans-serif}#gm #invBody tr{border-bottom:1px solid var(--g-line)}#gm #invBody td,#gm #invBody th{padding:9px 8px}#gm #invBody th{color:var(--g-acc);font:15px/1 var(--g-d);letter-spacing:1.5px;text-transform:uppercase}
+#gm #lpOut{background:rgba(0,0,0,.35);border-color:var(--g-line2);color:var(--g-txt)}
+/* status tab */
+#gm #hud .bar{grid-template-columns:90px minmax(0,1fr);font:700 13px Nunito,sans-serif;letter-spacing:1px;text-transform:uppercase;padding:9px 0;margin:0;border-bottom:1px solid var(--g-line)}
+#gm #hud .bar i{height:6px;background:rgba(183,215,208,.1);border-radius:0}
+#gm #hud .bar b{border-radius:0}
+#gm #bHunger b{background:#D08118}#gm #bWarmth b{background:#DB9F44}#gm #bEnergy b{background:#B7D7D0}#gm #bWolf b{background:#A2A673}
+#gm #hud .items{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin:16px 0 0;background:var(--g-line);border:1px solid var(--g-line)}
+#gm #hud .items span{display:flex;flex-direction:column;gap:4px;padding:12px 14px;background:rgba(6,11,10,.55);color:var(--g-dim);font:700 11px Nunito,sans-serif;letter-spacing:1.4px;text-transform:uppercase}
+#gm #hud .items strong{color:var(--g-txt);font:28px/1 var(--g-d);letter-spacing:.5px}
+#gm #hotbar{display:flex!important;gap:8px;margin-top:12px}
+#gm .slot{background:rgba(183,215,208,.05);border:1px solid var(--g-line2);color:var(--g-txt);border-radius:4px;font:700 12px Nunito,sans-serif;letter-spacing:.8px;text-transform:uppercase;min-height:44px;padding:6px 14px 6px 8px}
+#gm .slot.on{background:var(--g-acc);color:#0b1412;border-color:var(--g-acc)}#gm .slot.on kbd{color:#0b1412;border-color:rgba(11,20,18,.4)}
+.ekg{display:flex;align-items:center;gap:18px;margin:0 0 10px}
+.ekg svg{width:min(320px,60%);height:54px;overflow:visible}
+.ekg path{fill:none;stroke:var(--ekg,#B7D7D0);stroke-width:2;stroke-linejoin:round;filter:drop-shadow(0 0 6px var(--ekg,#B7D7D0));stroke-dasharray:420;animation:ekg 2.2s linear infinite}
+.ekg b{font:30px/1 var(--g-d);letter-spacing:2px;text-transform:uppercase;color:var(--ekg,#B7D7D0)}
+.ekg.warn{--ekg:#DB9F44}.ekg.crit{--ekg:#AB451C}.ekg.crit path{animation-duration:1.1s}
+@keyframes ekg{from{stroke-dashoffset:840}to{stroke-dashoffset:0}}
+#gm #mapCv{width:min(560px,100%)!important}
+#gm .mapLeg{font-size:12px}
+@media(max-width:820px){.gmMain{grid-template-columns:1fr;padding:14px}.gmDetail{display:none}.gmBrand{padding:0 12px;font-size:17px}.gmBrand small{display:none}.gmClock{display:none}.gmTabs button{padding:15px 11px 12px;font-size:11.5px}.gmFoot{display:none}#gm .row{grid-template-columns:1fr;gap:4px}#gm #hud .items{grid-template-columns:repeat(2,1fr)}}
+
+/* ===== Build 52: world map ===== */
+#gm.wide .gmMain{grid-template-columns:1fr;padding:14px clamp(10px,2vw,28px)}
+#gm.wide .gmDetail{display:none}
+#gm.wide .gmBody{overflow:hidden;padding:0;display:flex}
+#gm.wide #gmMap:not([hidden]){flex:1;display:flex}
+#wmap{position:relative;flex:1;min-height:320px;border:1px solid var(--g-line);border-radius:10px;overflow:hidden;background:#060d0e}
+#wmCv{position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:none}#wmCv:active{cursor:grabbing}
+#wmap::after{content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 140px rgba(20,12,6,.8)}#wmap{background:#1c1612}
+.wmHead{position:absolute;left:48px;top:38px;pointer-events:none;z-index:1}
+.wmT{font:36px/1 var(--g-d);letter-spacing:6px;text-transform:uppercase;color:var(--g-txt);text-shadow:0 2px 10px rgba(0,0,0,.8)}
+.wmT::after{content:'';display:block;width:90px;height:2px;background:var(--g-acc);margin-top:10px;box-shadow:0 0 10px var(--g-acc)}
+.wmS{font:700 11px Nunito,sans-serif;letter-spacing:1.6px;text-transform:uppercase;color:var(--g-dim);margin-top:10px;text-shadow:0 1px 4px #000}
+.wmP{position:absolute;z-index:1;background:rgba(6,13,14,.74);border:1px solid var(--g-line);border-radius:8px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.wmP h5{margin:0 0 6px;font:17px/1 var(--g-d);letter-spacing:3px;text-transform:uppercase;color:var(--g-txt);display:flex;align-items:center;gap:8px}
+.wmP h5::before{content:'◆';color:var(--g-acc);font-size:9px}
+.wmLay{left:48px;bottom:62px;width:206px;padding:14px 16px 8px}
+.wmLay label{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--g-line);font:700 11.5px Nunito,sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--g-txt);cursor:pointer}
+.wmLay label i{font-style:normal;width:18px;text-align:center;margin-right:8px}
+.wmLay input{-webkit-appearance:none;appearance:none;width:15px;height:15px;margin:0;border-radius:50%;border:1px solid var(--g-line2);cursor:pointer}
+.wmLay input:checked{background:var(--g-acc);border-color:var(--g-acc);box-shadow:0 0 8px var(--g-acc)}
+.wmCard{right:22px;top:38px;width:min(270px,70%);padding:16px 18px 14px}
+.wmCard[hidden]{display:none}
+.wmCT{font:26px/1 var(--g-d);letter-spacing:2px;text-transform:uppercase;color:var(--g-txt);padding-right:24px}
+.wmCT small{display:block;font:800 10.5px Nunito,sans-serif;letter-spacing:1.8px;color:var(--g-acc);margin-bottom:6px}
+.wmRows{margin-top:10px}.wmRows div{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-top:1px solid var(--g-line);font:700 11.5px Nunito,sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--g-dim)}
+.wmRows b{color:var(--g-txt);font:18px/1 var(--g-d);letter-spacing:.5px;text-transform:none}
+.wmCard .btns button{flex:1}
+.wmCX{position:absolute;right:10px;top:10px;background:none;border:0;color:var(--g-dim);font:18px/1 Nunito,sans-serif;cursor:pointer}
+.wmZoom{position:absolute;z-index:1;right:22px;bottom:62px;display:flex;flex-direction:column;gap:6px}
+.wmZoom button{width:40px;height:40px;border-radius:6px;border:1px solid var(--g-line2);background:rgba(6,13,14,.74);color:var(--g-txt);font:20px/1 var(--g-d);cursor:pointer}.wmZoom button:hover{border-color:var(--g-acc);color:var(--g-acc)}
+.wmBot{position:absolute;z-index:1;left:50%;bottom:16px;transform:translateX(-50%);margin:0!important;flex-wrap:nowrap!important}
+.wmBot button{background:rgba(6,13,14,.8)!important;white-space:nowrap}
+#wmLayBtn{display:none}
+@media(max-width:820px){.wmHead{left:40px;top:30px}.wmT{font-size:24px;letter-spacing:4px}.wmLay{display:none;left:10px;bottom:60px}.wmLay.show{display:block}#wmLayBtn{display:block}.wmCard{left:10px;right:10px;top:auto;bottom:60px;width:auto}.wmZoom{right:10px;bottom:auto;top:30px}}
+
+/* Build 54 */
+.wmSty{margin:8px 0 6px!important;flex-wrap:nowrap!important}.wmSty button{flex:1;padding:4px 6px!important;font-size:10.5px!important}
+.wmRes{position:absolute;z-index:1;top:22px;left:50%;transform:translateX(-50%);display:flex;background:rgba(6,13,14,.82);border:1px solid var(--g-line);border-top:0;border-radius:0 0 8px 8px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.wmRes span{display:flex;flex-direction:column;align-items:center;padding:6px 14px 7px;border-left:1px solid var(--g-line)}.wmRes span:first-child{border-left:0}
+.wmRes small{font:800 9.5px Nunito,sans-serif;letter-spacing:1.4px;text-transform:uppercase;color:var(--g-acc)}.wmRes b{font:20px/1.05 var(--g-d);color:var(--g-txt);letter-spacing:.5px}
+.wmLog{right:22px;bottom:62px;width:250px;padding:12px 14px 6px}
+#wmLogL div{padding:6px 0;border-top:1px solid var(--g-line);font:600 12px/1.35 Nunito,sans-serif;color:var(--g-txt)}#wmLogL small{display:block;font:800 9.5px Nunito,sans-serif;letter-spacing:1.3px;text-transform:uppercase;color:var(--g-acc)}
+.wmZoom{bottom:auto!important;top:50%;transform:translateY(-50%)}
+.wmHead{top:70px!important}.wmCard{top:70px!important}
+#wmap[data-sty=par]{background:#1c1612}#wmap[data-sty=par]::after{box-shadow:inset 0 0 140px rgba(20,12,6,.8)}
+#wmap[data-sty=tac]::after{box-shadow:inset 0 0 120px rgba(0,0,0,.75)}
+@media(max-width:820px){.wmLog{display:none}.wmRes{left:30px;right:0;transform:none;overflow-x:auto}.wmRes span{padding:5px 9px}.wmHead{top:74px!important}.wmZoom{top:auto;transform:none;bottom:120px!important}}
+
+/* Build 55 */
+.wmZoom{top:auto!important;transform:none!important;bottom:16px!important;right:22px!important;flex-direction:row!important}
+.wmZoom button{width:36px!important;height:36px!important}
+.wmLog{bottom:66px!important}
+.wmHead{padding:14px 40px 14px 18px;margin-left:-18px;background:linear-gradient(90deg,rgba(4,9,10,.78),rgba(4,9,10,.5) 70%,transparent);border-radius:6px}
+.wmBot{left:44%!important}
+.mapWrap{width:fit-content}
+@media(max-width:820px){.wmBot{left:50%!important;bottom:60px!important}.wmZoom{bottom:12px!important}}
+
+/* Build 57 */
+#wm3d{position:absolute;inset:0;width:100%;height:100%;display:none;pointer-events:none}
+#wmap.d3 #wm3d{display:block}
+#wmap.d3{background:radial-gradient(ellipse at 50% 35%,#12302f 0,#071214 55%,#030809 100%)}
+#wmap.d3[data-sty=par]{background:radial-gradient(ellipse at 50% 35%,#3a2c1e 0,#1c1612 60%,#0d0a08 100%)}
+.wmZoom button.on{background:var(--g-acc)!important;color:#0b1412!important;border-color:var(--g-acc)!important}
 </style>
 </head>
 <body>
@@ -152,6 +324,19 @@ body.touch #prompt{bottom:128px}
   <div class="btns" id="speedBtns"></div>
   <p class="pnote">Jumping or scrubbing pauses the clock so the light holds still. Keys: <kbd>[</kbd> <kbd>]</kbd> step an hour, <kbd>P</kbd> pause.</p>
 </div>
+<div id="gm" role="dialog" aria-label="Game menu">
+ <div class="gmTop"><div class="gmBrand">Paperland<small style="font-size:.7em;opacity:.6;margin-left:8px">Trails</small></div>
+  <nav class="gmTabs" id="gmTabs"></nav>
+  <div class="gmClock" id="gmClock"></div>
+  <button class="gmX" id="gmX" aria-label="Close menu">×</button></div>
+ <div class="gmMain"><div class="gmBody" id="gmBody">
+  <div class="gmPane" id="gmStatus"><div class="gmSec">Vitals</div><div class="ekg" id="ekg"><svg viewBox="0 0 320 54"><path d="M0,30 H40 L48,30 L54,12 L60,46 L66,24 L72,30 H120 L128,30 L134,12 L140,46 L146,24 L152,30 H200 L208,30 L214,12 L220,46 L226,24 L232,30 H280 L288,30 L294,12 L300,46 L306,24 L312,30 H320"/></svg><b id="ekgTx">Fine</b></div><div id="gmHudSlot"></div><div class="gmSec" style="margin-top:26px">Tools</div><div id="gmBarSlot"></div></div>
+  <div class="gmPane" id="gmMap" hidden></div>
+  <div class="gmPane" id="gmSet" hidden><div class="gmSec">Audio</div><div class="row"><label>Sound</label><div class="btns" id="gmSnd" style="margin:0"></div></div><div class="gmSec" style="margin-top:22px">Game</div><div class="row"><label>How to play</label><div class="btns" style="margin:0"><button id="gmHelp">Open guide</button></div></div><div class="row"><label>Full screen</label><div class="btns" style="margin:0"><button id="gmFull">Toggle</button></div></div>
+  <div class="gmSec" style="margin-top:22px">Controls</div><div class="gmKeys" style="margin:0 0 0 4px"><kbd>WASD</kbd><span>Walk · Shift runs</span><kbd>E</kbd><span>Use, chop, pick up, enter van</span><kbd>1 2</kbd><span>Hands · fishing pole</span><kbd>X</kbd><span>Sit</span><kbd>Z</kbd><span>Lie down and rest</span><kbd>C</kbd><span>Carry a log seat</span><kbd>I</kbd><span>Inventory</span><kbd>G</kbd><span>Build</span><kbd>B</kbd><span>Weather</span><kbd>P</kbd><span>Pack up camp (by the tent)</span><kbd>M</kbd><span>This menu</span></div></div>
+ </div><aside class="gmDetail" id="gmDetail"><h2 id="gmDT"></h2><p id="gmDP"></p><div class="gmKeys" id="gmDK"></div></aside></div>
+ <div class="gmFoot"><span><kbd>M</kbd>Back to the trail</span><span><kbd>Esc</kbd>Close</span><span class="sp"></span><span id="gmBadge"></span></div>
+</div>
 <div id="popTxt" aria-hidden="true"></div>
 <div id="netLabels"></div>
 <div id="ip" class="tag panel" hidden>
@@ -159,8 +344,8 @@ body.touch #prompt{bottom:128px}
   <div id="invBody"></div>
   <p class="pnote">Stand by a crate or the van to move things (I opens this). Logs are 5 sticks bundled; building uses sticks first, then logs.</p>
 </div>
-<div id="mapCompass" class="tag" title="Map (click)" role="button" tabindex="0" aria-label="Open map"><svg viewBox="-20 -20 40 40" width="40" height="40" aria-hidden="true"><g id="cmpRose"><path d="M0,-15 L4,0 L-4,0Z" fill="#AB451C"/><path d="M0,15 L4,0 L-4,0Z" fill="#F4F6F6"/><text x="0" y="-9" text-anchor="middle" font-size="7" fill="#F4F6F6" font-family="sans-serif">N</text></g></svg></div>
-<div id="mapBox" class="tag" hidden><div class="lpHead">Map<button id="mapClose" class="pClose" aria-label="Close map">×</button></div><canvas id="mapCv" width="300" height="300"></canvas><div class="pnote" style="margin-top:4px">● you · ✚ spawn · ▲ camp · ★ pinned camp spots · ■ van · ◆ cabins</div><div class="btns"><button id="mapPin">Pin a camp spot here</button><button id="mapClear">Clear pins</button></div></div>
+<div id="mapCompass" class="tag" title="Map (click)" role="button" tabindex="0" aria-label="Open map"><svg viewBox="-28 -28 56 56" aria-hidden="true"><path d="M0,-27.5 L-3,-31.5 L3,-31.5Z" fill="#B7D7D0"/><g id="cmpRose"><line x1="0" y1="-25" x2="0" y2="-19" stroke="#B7D7D0" stroke-width="1.4" transform="rotate(0)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(15)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(30)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(45)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(60)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(75)"/><line x1="0" y1="-25" x2="0" y2="-19" stroke="#B7D7D0" stroke-width="1.4" transform="rotate(90)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(105)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(120)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(135)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(150)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(165)"/><line x1="0" y1="-25" x2="0" y2="-19" stroke="#B7D7D0" stroke-width="1.4" transform="rotate(180)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(195)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(210)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(225)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(240)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(255)"/><line x1="0" y1="-25" x2="0" y2="-19" stroke="#B7D7D0" stroke-width="1.4" transform="rotate(270)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(285)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(300)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(315)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(330)"/><line x1="0" y1="-25" x2="0" y2="-22" stroke="rgba(183,215,208,.45)" stroke-width="1" transform="rotate(345)"/><text x="0" y="-11" text-anchor="middle" font-size="7.5" font-family="Iceland,sans-serif" fill="#DB9F44" transform="rotate(0)">N</text><text x="0" y="-11" text-anchor="middle" font-size="7.5" font-family="Iceland,sans-serif" fill="#E8EEEC" transform="rotate(90)">E</text><text x="0" y="-11" text-anchor="middle" font-size="7.5" font-family="Iceland,sans-serif" fill="#E8EEEC" transform="rotate(180)">S</text><text x="0" y="-11" text-anchor="middle" font-size="7.5" font-family="Iceland,sans-serif" fill="#E8EEEC" transform="rotate(270)">W</text></g><path d="M0,-6 L3.2,4 L0,2.4 L-3.2,4Z" fill="#E8EEEC"/><g id="cmpWp" style="display:none"><path d="M0,-30 L3.2,-26.5 L0,-23 L-3.2,-26.5Z" fill="#AB451C" stroke="#F4F6F6" stroke-width=".8"/></g></svg><span id="cmpDeg">N 0°</span></div>
+<div id="mapBox" class="tag" hidden><div class="lpHead">Map<button id="mapClose" class="pClose" aria-label="Close map">×</button></div><div class="mapWrap"><canvas id="mapCv" width="300" height="300"></canvas></div><div class="mapLeg"><span><b style="color:#AB451C">●</b>You</span><span><b style="color:#F4F6F6">✚</b>Spawn</span><span><b style="color:#D08118">▲</b>Camp</span><span><b style="color:#DB9F44">★</b>Pinned</span><span><b style="color:#5B8093">■</b>Van</span><span><b style="color:#69452A">◆</b>Cabins</span></div><div class="pnote" style="margin-top:4px">● you · ✚ spawn · ▲ camp · ★ pinned camp spots · ■ van · ◆ cabins</div><div class="btns"><button id="mapPin">Pin a camp spot here</button><button id="mapClear">Clear pins</button></div></div>
 <div id="op" class="tag panel" hidden>
   <div class="lpHead">Play online<button id="opClose" class="pClose" aria-label="Close online menu">×</button></div>
   <div class="tBig" id="onState">Solo</div>
@@ -211,7 +396,7 @@ body.touch #prompt{bottom:128px}
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 50 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 57 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -241,7 +426,7 @@ body.touch #prompt{bottom:128px}
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 50 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 57 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -2690,7 +2875,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 50 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 50 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 57 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 57 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
@@ -3706,7 +3891,7 @@ $('mapPin').addEventListener('click',()=>{PINS.push([+player.x.toFixed(1),+playe
 $('mapClear').addEventListener('click',()=>{PINS=[];savePins();});
 const SPAWN={x:START.x,z:START.z};
 function updMapCompass(){$('cmpRose').setAttribute('transform','rotate('+(-camCur.y).toFixed(1)+')');if($('mapBox').hidden)return;
-  const cv=$('mapCv'),x=cv.getContext('2d'),W_=cv.width,E=mapImg.E,m=(a,b)=>[(a+E)/(2*E)*W_,(b+E)/(2*E)*W_];x.imageSmoothingEnabled=true;x.drawImage(mapImg.c,0,0,W_,W_);
+  const cv=$('mapCv'),x=cv.getContext('2d'),W_=cv.width,E=mapImg.E,m=(a,b)=>[(a+E)/(2*E)*W_,(b+E)/(2*E)*W_];x.imageSmoothingEnabled=true;x.drawImage(wmRelief(),0,0,W_,W_);
   x.lineWidth=2;x.strokeStyle='#30543B';if(WORLD_){x.beginPath();WORLD_.RING.forEach((p,i)=>{const[a,b]=m(p[0],p[1]);i?x.lineTo(a,b):x.moveTo(a,b);});x.stroke();}
   CABINKIT.regrowZones().forEach(z_=>{const[a,b]=m((z_.x0+z_.x1)/2,(z_.z0+z_.z1)/2);x.fillStyle='#69452A';x.beginPath();x.moveTo(a,b-5);x.lineTo(a+5,b);x.lineTo(a,b+5);x.lineTo(a-5,b);x.fill();});
   if(CAMP.state==='set'&&TENT){const[a,b]=m(FIRE.x,FIRE.z);x.fillStyle='#D08118';x.beginPath();x.moveTo(a,b-6);x.lineTo(a+5,b+4);x.lineTo(a-5,b+4);x.fill();}
@@ -4003,6 +4188,216 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(0.05,(now-las
   if(L.reflect>0.01&&(!isTouch||(frameN++&1)===0))renderReflection();
   renderer.setRenderTarget(rt);renderer.render(scene,camera);renderer.setRenderTarget(rtB);renderer.render(postScene,postCam);if(FLK.on||RAIN.on||LEAF.on){renderer.autoClear=false;for(const F of[LEAF,RAIN,FLK])if(F.on)renderer.render(F.sc,camera);renderer.autoClear=true;}if(L.lens>0.5){renderer.setRenderTarget(rtH1);renderer.render(bokScene,postCam);renderer.setRenderTarget(rtH2);renderer.render(softScene,postCam);}renderer.setRenderTarget(null);renderer.render(tiltScene,postCam);
   lpTick(dt);}
+
+/* ===== Build 51: unified glass menu ===== */
+const GMT=[['status','Status','gmStatus'],['map','Map','gmMap'],['ip','Inventory','ip'],['bp','Build','bp'],['wp','Weather','wp'],['tp','Time','tp'],['lp','Camera & Light','lp'],['op','Online','op'],['set','Settings','gmSet']];
+const GMD={status:['Status','How your hiker is doing. Keep hunger, warmth and energy up: eat berries and fish, stay by the fire, and rest when you are tired.',[['X','Sit'],['Z','Lie down'],['1 2','Switch tool']]],
+ map:['Map','The Oregon Wilds. Your spot, the spawn point, your camp, the van and any cabins. Pin a spot to remember a good place for camp.',[['Click','Compass opens a quick map']]],
+ ip:['Inventory','What you carry. Stand by a crate or the van to move things in and out. Five sticks bundle into one log.',[['I','Open inventory']]],
+ bp:['Build','Craft logs from sticks and stack a cabin. Quick build places a whole wall, cabin or log seat for testing.',[['G','Open build'],['Q R','Turn'],['Esc','Cancel']]],
+ wp:['Weather','Seasons run on their own: a 14-day year with rain in the first week and a harsh winter in the second. Start or scrub a storm here.',[['B','Open weather']]],
+ tp:['Time','Scrub the time of day, step hours or change clock speed. Scrubbing pauses the clock.',[['[ ]','Step an hour'],['P','Pause']]],
+ lp:['Camera & Light','Lighting presets, exposure and the cinematic lens blur. Copy settings to keep a look you like.',[]],
+ op:['Online','Play with up to four hikers. Host a game and share the code, or join with a friend\'s code.',[]],
+ set:['Settings','Sound, guide, screen and controls.',[]]};
+let gmCur='status';
+$('gmTabs').innerHTML=GMT.map(t=>'<button data-t="'+t[0]+'">'+t[1]+'</button>').join('');
+['ip','bp','wp','tp','lp','op'].forEach(id=>$('gmBody').appendChild($(id)));
+$('gmHudSlot').appendChild($('hud'));$('gmBarSlot').appendChild($('hotbar'));
+$('gmClock').appendChild($('orb'));$('gmClock').appendChild($('clockTxt'));
+$('gmSnd').appendChild($('soundBtn'));$('gmBadge').appendChild($('buildBadge'));
+const mapHome=$('mapBox').parentNode;
+function gmTab(t){gmCur=t;for(const[k,,el]of GMT){$(el).hidden=k!==t;}
+  [...$('gmTabs').children].forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  $('gm').classList.toggle('wide',t==='map');if(t==='map'){$('mapBox').hidden=true;WM.dirty=1;wmRes();}
+  if(t==='lp')syncLP();if(t==='ip')paintInv();panT=0;
+  const d=GMD[t];$('gmDT').textContent=d[0];$('gmDP').textContent=d[1];$('gmDK').innerHTML=d[2].map(k=>'<kbd>'+k[0]+'</kbd><span>'+k[1]+'</span>').join('');
+  $('gmBody').scrollTop=0;}
+$('gmTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)gmTab(b.dataset.t);});
+setMenu=function(on){document.body.classList.toggle('menuOpen',on);$('menuBtn').setAttribute('aria-expanded',on);if(on){if(!$('mapBox').hidden&&$('mapBox').parentNode===mapHome)$('mapBox').hidden=true;gmTab(gmCur);}else if($('mapBox').parentNode!==mapHome){mapHome.appendChild($('mapBox'));$('mapCv').width=$('mapCv').height=300;$('mapBox').hidden=true;}};
+togglePanel=function(id,btn,force){const open=force!==undefined?force:!(document.body.classList.contains('menuOpen')&&gmCur===id);if(open){gmCur=id;setMenu(true);}else setMenu(false);};
+$('gmX').addEventListener('click',()=>setMenu(false));
+$('gmHelp').addEventListener('click',()=>{setMenu(false);openHelp();});
+$('gmFull').addEventListener('click',()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}catch(e){}});
+addEventListener('keydown',e=>{if(e.code==='Escape'&&document.body.classList.contains('menuOpen')){e.stopImmediatePropagation();e.preventDefault();setMenu(false);}},true);
+{const _h=hud;let lastC='';hud=function(){_h();const m=Math.min(st.hunger,st.warmth,st.energy),c=m<25?'crit':m<50?'warn':'';if(c!==lastC){lastC=c;$('ekg').className='ekg '+c;$('ekgTx').textContent=c==='crit'?'Critical':c==='warn'?'Tired':'Fine';}};}
+{const _u=updMapCompass;const D=['N','NE','E','SE','S','SW','W','NW'];let lastD='';updMapCompass=function(){_u();let h=((camCur.y%360)+360)%360;const t=D[Math.round(h/45)%8]+' '+Math.round(h)+'°';if(t!==lastD){lastD=t;$('cmpDeg').textContent=t;}};}
+
+/* ===== Build 52: world map ===== */
+const WM={s:0,log:[],fit:0,vx:0,vz:0,w:1,h:1,dpr:1,sel:null,hits:[],acc:0,dirty:1,lay:{grid:1,roads:1,rivers:1,labels:1,camp:1,van:1,hikers:1,style:'tac',d3:1}};
+try{Object.assign(WM.lay,JSON.parse(localStorage.getItem('plw-maplay')||'{}'));}catch(e){}
+let WP=null;try{WP=JSON.parse(localStorage.getItem('plw-wp')||'null');}catch(e){}
+const saveWP=()=>{try{localStorage.setItem('plw-wp',JSON.stringify(WP));}catch(e){}};
+const DIR8=['N','NE','E','SE','S','SW','W','NW'],brg=(dx,dz)=>((Math.atan2(dx,-dz)*57.2958)+360)%360,brgTx=b=>DIR8[Math.round(b/45)%8]+' '+Math.round(b)+'°';
+const REG=[{n:'Ember Hollow',x:0,z:0,r:30,big:1}];
+if(WORLD_){const NM={NE:'Thunder Gorge',NW:'Cedar Gorge',SE:'Fern Gorge',SW:'Rust Canyon'};WORLD_.GG.forEach(g=>REG.push({n:NM[(g.cz<0?'N':'S')+(g.cx>0?'E':'W')],x:g.cx,z:g.cz,r:30}));}
+if(WORLD_){[['Basalt Rim',0,-1],['Sunrise Ridge',1,0],['Elk Meadows',0,1],['Salmon Bend',-1,0]].forEach(([n,dx,dz])=>REG.push({n,x:dx*76,z:dz*76,r:40}));WORLD_.GG.forEach((g,i)=>{let a_=Math.atan2(g.az,g.ax);if(a_>1.571)a_-=3.1416;if(a_<-1.571)a_+=3.1416;REG[i+1].rot=a_;REG[i+1].lx=g.cx-g.az*11+g.ax*6;REG[i+1].lz=g.cz+g.ax*11+g.az*6;});REG[0].lz=-16;}
+const regionAt=(x,z)=>{let b=null,bd=1e9;for(const r of REG){const d=hyp(x-r.x,z-r.z);if(d<r.r&&d<bd){bd=d;b=r;}}return b?b.n:'Backcountry';};
+let _rel=null;
+const MAPSTY={tac:{bg:'#060d0e',water:[13,27,30],ink:[5,11,12],fr:[96,150,143],sw:'rgba(120,196,190,.22)',B:[[34,52,49],[45,67,62],[60,86,79],[80,108,99],[110,137,127],[160,184,176]],tree:'rgba(5,11,12,.55)',lab:'rgba(226,236,232,.86)',labG:'rgba(0,0,0,.9)',road:'rgba(232,238,236,.6)',grid:'183,215,208',riv:['rgba(5,11,12,.9)','rgba(13,27,30,1)']},
+ par:{bg:'#1c1612',water:[36,34,32],ink:[22,18,14],fr:[246,228,190],sw:'rgba(150,140,125,.33)',B:[[236,212,164],[224,192,138],[202,162,108],[168,124,80],[130,92,58],[104,74,48]],tree:'rgba(60,38,20,.55)',lab:'rgba(66,42,24,.82)',labG:'rgba(240,222,180,.9)',road:'rgba(58,38,22,.75)',grid:'60,40,24',riv:['rgba(22,18,14,.9)','rgba(36,34,32,1)']}};
+const MS=()=>MAPSTY[WM.lay.style]||MAPSTY.tac;
+function wmRelief(){const key=WM.lay.style||'tac';if(_rel&&_rel.key===key)return _rel;const tac=key==='tac',E=mapImg.E,N=WORLD?512:256,M=N*2,KM=M*M;
+  let F=wmRelief.F;
+  if(!F){const K=N*N,H=new Float32Array(K),Wt=new Float32Array(K);for(let j=0;j<N;j++)for(let i=0;i<N;i++){const wx=-E+2*E*(i+.5)/N,wz=-E+2*E*(j+.5)/N,k=j*N+i;H[k]=gh(wx,wz);Wt[k]=waterAt(wx,wz)!==null?1:0;}
+    const bl=(src,n,r)=>{const t1=new Float32Array(n*n),t2=new Float32Array(n*n);for(let j=0;j<n;j++){let sm=0;for(let i=-r;i<=r;i++)sm+=src[j*n+clamp(i,0,n-1)];for(let i=0;i<n;i++){t1[j*n+i]=sm/(2*r+1);sm+=src[j*n+Math.min(i+r+1,n-1)]-src[j*n+Math.max(i-r,0)];}}
+      for(let i=0;i<n;i++){let sm=0;for(let j=-r;j<=r;j++)sm+=t1[clamp(j,0,n-1)*n+i];for(let j=0;j<n;j++){t2[j*n+i]=sm/(2*r+1);sm+=t1[Math.min(j+r+1,n-1)*n+i]-t1[Math.max(j-r,0)*n+i];}}return t2;};
+    const up=src=>{const o=new Float32Array(KM);for(let j=0;j<M;j++){const v=clamp(j/2-0.25,0,N-1.001),j0=v|0,fv=v-j0;for(let i=0;i<M;i++){const u=clamp(i/2-0.25,0,N-1.001),i0=u|0,fu=u-i0,k=j0*N+i0;o[j*M+i]=(src[k]*(1-fu)+src[k+1]*fu)*(1-fv)+(src[k+N]*(1-fu)+src[k+N+1]*fu)*fv;}}return o;};
+    /* smooth everything first: big clean shapes, not noise */
+    const Hs=bl(bl(H,N,3),N,3),smp=[];for(let k=0;k<K;k+=5)if(Wt[k]<0.5)smp.push(Hs[k]);smp.sort((p,q)=>p-q);
+    const rank=y=>{let lo_=0,hi_=smp.length-1;while(lo_<hi_){const m=(lo_+hi_)>>1;if(smp[m]<y)lo_=m+1;else hi_=m;}return lo_/smp.length;};
+    const Tn=new Float32Array(K);for(let k=0;k<K;k++)Tn[k]=rank(Hs[k]);
+    const T=up(bl(Tn,N,2)),Wf=up(bl(Wt,N,1)),Wb=bl(up(Wt),M,7),Hb=up(bl(H,N,6));
+    const RID=new Uint8Array(KM);for(let j=0;j<M;j++)for(let i=0;i<M;i++){const wx=-E+2*E*(i+.5)/M,wz=-E+2*E*(j+.5)/M;let br=0,bd=1e9;REG.forEach((r,q)=>{const d=hyp(wx-r.x,wz-r.z)/r.r;if(d<bd){bd=d;br=q;}});RID[j*M+i]=br;}
+    F={T,Wf,Wb,Hb,RID};wmRelief.F=F;}
+  const{T,Wf,Wb,Hb,RID}=F,c=document.createElement('canvas');c.width=c.height=M;c.key=key;const x=c.getContext('2d'),im=x.createImageData(M,M);
+  const P=tac?{L:[[22,41,41],[34,59,57],[50,82,77],[76,112,104],[122,160,150]],W:[8,18,22],coast:[160,236,224],edge:[14,28,30],shore:[70,112,106],bord:[150,226,214]}
+             :{L:[[236,214,168],[226,196,144],[205,168,116],[170,130,86],[136,100,66]],W:[34,32,30],coast:[24,20,16],edge:[96,66,40],shore:[246,232,198],bord:[90,60,36]};
+  const TH=[0.3,0.56,0.8,0.94],ss=(a_,b_,v)=>{const t=clamp((v-a_)/(b_-a_),0,1);return t*t*(3-2*t);},mix=(c0,c1,f)=>[c0[0]+(c1[0]-c0[0])*f,c0[1]+(c1[1]-c0[1])*f,c0[2]+(c1[2]-c0[2])*f];
+  for(let j=0;j<M;j++)for(let i=0;i<M;i++){const k=j*M+i,r_=i<M-1?k+1:k,l_=i>0?k-1:k,d_=j<M-1?k+M:k,u_=j>0?k-M:k;
+    const t=T[k],gt=Math.hypot(T[r_]-T[l_],T[d_]-T[u_])/2+1e-5,w=Wf[k],gw=Math.hypot(Wf[r_]-Wf[l_],Wf[d_]-Wf[u_])/2+1e-5;
+    /* flat land tones with anti-aliased steps */
+    let col=P.L[0].slice(),line=0;for(let q=0;q<TH.length;q++){const dd=(t-TH[q])/gt;col=mix(col,P.L[q+1],clamp(dd+0.5,0,1));line=Math.max(line,1-clamp(Math.abs(dd)/0.9,0,1));}
+    /* very soft light from the north-west so elevation still reads */
+    const hx=Hb[r_]-Hb[l_],hz=Hb[d_]-Hb[u_],sh=clamp(1-(hx+hz)*(tac?0.18:0.12),0.86,1.1);col=[col[0]*sh,col[1]*sh,col[2]*sh];
+    col=mix(col,P.edge,line*0.55);
+    /* region borders: fine dotted line */
+    if((RID[k]!==RID[r_]||RID[k]!==RID[d_])&&((i+j)>>1)%3===0)col=mix(col,P.bord,0.5);
+    /* pale shore band just inside the land */
+    const sb=ss(0.02,0.25,Wb[k]);col=mix(col,P.shore,sb*(tac?0.45:0.6));
+    /* water: flat, with a crisp coastline */
+    const dw=(w-0.5)/gw,cov=clamp(dw+0.5,0,1);col=mix(col,P.W,cov);const cl=1-clamp(Math.abs(dw)/1.1,0,1);col=mix(col,P.coast,cl*(tac?0.9:1));
+    const o=k*4;im.data[o]=col[0];im.data[o+1]=col[1];im.data[o+2]=col[2];im.data[o+3]=255;}
+  x.putImageData(im,0,0);
+  /* sparse sea swirls, like an old map */
+  const sw=document.createElement('canvas');sw.width=sw.height=M;const y2=sw.getContext('2d'),mi=y2.createImageData(M,M);for(let k=0;k<KM;k++)if(Wf[k]>0.5&&Wb[k]>0.55)mi.data[k*4+3]=255;y2.putImageData(mi,0,0);
+  y2.globalCompositeOperation='source-in';y2.strokeStyle=tac?'rgba(150,226,214,.16)':'rgba(150,140,125,.3)';y2.lineWidth=1.2;const g=M/34;
+  for(let j=0;j<40;j++)for(let i=0;i<36;i++){const cx=(i+(j%2)*0.5)*g,cy=j*g*0.9,r0=g*0.26;y2.beginPath();for(let a_=0;a_<9;a_+=0.25){const rr=r0*(1-a_/11);y2.lineTo(cx+Math.cos(a_)*rr,cy+Math.sin(a_)*rr);}y2.stroke();}
+  x.drawImage(sw,0,0);
+  _rel=c;return c;}
+$('gmMap').innerHTML='<div id="wmap"><canvas id="wmCv"></canvas><div class="wmHead"><div class="wmT">'+(WORLD?'Oregon Wilds':'Ember Hollow')+'</div><div class="wmS" id="wmSub"></div></div>'
+ +'<div class="wmP wmLay" id="wmLay"><h5>Layers</h5>'+[['grid','▦','Grid'],['roads','┄','Trails'],['rivers','≈','Rivers'],['labels','A','Place names'],['camp','▲','Camp & pins'],['van','■','Van & cabins'],['hikers','●','Hikers']].map(l=>'<label><span><i>'+l[1]+'</i>'+l[2]+'</span><input type="checkbox" data-l="'+l[0]+'"'+(WM.lay[l[0]]?' checked':'')+'></label>').join('')+'<div class="btns wmSty" id="wmStyle"><button data-st="tac">Tactical</button><button data-st="par">Parchment</button></div></div><div class="wmRes" id="wmRes"></div><div class="wmP wmLog" id="wmLog"><h5>Field log</h5><div id="wmLogL"></div></div>'
+ +'<div class="wmP wmCard" id="wmCard" hidden><button class="wmCX" id="wmCX" aria-label="Close">×</button><div class="wmCT" id="wmCT"></div><div class="wmRows" id="wmRows"></div><div class="btns" id="wmAct"></div></div>'
+ +'<div class="wmZoom" id="wmZoom"><button data-z="1" aria-label="Zoom in">+</button><button data-z="-1" aria-label="Zoom out">−</button><button data-z="0" aria-label="Centre on me">◎</button><button id="wmLayBtn" aria-label="Layers">▦</button><button id="wm3dBtn" aria-label="3D view" style="font-size:15px">3D</button></div>'
+ +'<div class="btns wmBot"><button id="wmPinMe">Pin camp spot here</button><button id="wmWpClr">Clear waypoint</button><button id="wmClr">Clear pins</button></div></div>';
+$('wmLay').addEventListener('change',e=>{const k=e.target.dataset.l;if(k){WM.lay[k]=e.target.checked?1:0;try{localStorage.setItem('plw-maplay',JSON.stringify(WM.lay));}catch(_){}WM.dirty=1;}});
+$('wmLayBtn').addEventListener('click',()=>$('wmLay').classList.toggle('show'));
+function wmSize(){const cv=$('wmCv'),b=$('wmap').getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1),w=Math.max(50,b.width|0),h=Math.max(50,b.height|0);
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}WM.w=w;WM.h=h;WM.dpr=dpr;WM.fit=Math.min(w-40,h-40)/(2*mapImg.E);WM.cover=Math.max(w,h)/(2*mapImg.E);if(!WM.s)WM.s=WM.cover;}
+const w2s=(x,z)=>WM.d3&&W3.cam?p3(x,z):[WM.w/2+(x-WM.vx)*WM.s,WM.h/2+(z-WM.vz)*WM.s],s2w=(a,b)=>WM.d3&&W3.cam?u3(a,b):[WM.vx+(a-WM.w/2)/WM.s,WM.vz+(b-WM.h/2)/WM.s];
+const clampView=()=>{const E=mapImg.E;WM.vx=clamp(WM.vx,-E,E);WM.vz=clamp(WM.vz,-E,E);};
+function zoomAt(f,a,b){if(WM.d3){WM.s=clamp(WM.s*f,WM.fit*0.85,WM.fit*10);WM.dirty=1;return;}const[wx,wz]=s2w(a,b);WM.s=clamp(WM.s*f,WM.fit*0.85,WM.fit*10);WM.vx=wx-(a-WM.w/2)/WM.s;WM.vz=wz-(b-WM.h/2)/WM.s;clampView();WM.dirty=1;}
+function wmMarkers(){const M=[{k:'spawn',x:SPAWN.x,z:SPAWN.z,n:'Spawn point',sub:'Where you started'}];
+  if(WM.lay.camp){if(CAMP.state==='set'&&TENT)M.push({k:'camp',x:FIRE.x,z:FIRE.z,n:'Camp',sub:'Tent & campfire'});PINS.forEach((p,i)=>M.push({k:'pin',i,x:p[0],z:p[1],n:'Camp spot '+(i+1),sub:'Pinned'}));}
+  if(WM.lay.van){if(car)M.push({k:'van',x:car.x,z:car.z,n:'The van',sub:'Vehicle · storage'});CABINKIT.regrowZones().forEach((z_,i)=>M.push({k:'cabin',x:(z_.x0+z_.x1)/2,z:(z_.z0+z_.z1)/2,n:'Cabin '+(i+1),sub:'Built by you'}));}
+  if(WM.lay.hikers)for(const o of NET.others.values())M.push({k:'hiker',x:o.x,z:o.z,n:o.name||'Hiker',sub:'Online'});
+  if(WP)M.push({k:'wp',x:WP.x,z:WP.z,n:WP.n||'Waypoint',sub:'Waypoint'});return M;}
+function drawWM(){wmSize();const cv=$('wmCv'),x=cv.getContext('2d'),E=mapImg.E,w=WM.w,h=WM.h,s=WM.s,T=performance.now()/1000;
+  x.setTransform(WM.dpr,0,0,WM.dpr,0,0);if(WM.d3){r3d();x.clearRect(0,0,w,h);}else{x.fillStyle=MS().bg;x.fillRect(0,0,w,h);}
+  const[a0,b0]=w2s(-E,-E),S=2*E*s;x.imageSmoothingEnabled=true;if(!WM.d3)x.drawImage(wmRelief(),a0,b0,S,S);
+  x.strokeStyle='rgba('+MS().ink.join(',')+',.95)';x.lineWidth=3;if(!WM.d3)x.strokeRect(a0,b0,S,S);
+  const step=s>9?5:s>4?10:s>1.6?20:50;
+  if(WM.lay.grid&&!WM.d3){for(let v=Math.ceil(-E/step)*step;v<=E;v+=step){x.strokeStyle='rgba('+MS().grid+','+(v%50===0?.14:.045)+')';const[p]=w2s(v,0),[,q]=w2s(0,v);x.beginPath();x.moveTo(Math.round(p)+.5,b0);x.lineTo(Math.round(p)+.5,b0+S);x.moveTo(a0,Math.round(q)+.5);x.lineTo(a0+S,Math.round(q)+.5);x.stroke();}}
+  const poly=L=>{x.beginPath();L.forEach((p,i)=>{const[a,b]=w2s(p[0],p[1]);i?x.lineTo(a,b):x.moveTo(a,b);});x.stroke();};
+  x.lineCap='round';x.lineJoin='round';
+  if(WORLD_&&WM.lay.rivers&&!WM.d3){const tc=(WM.lay.style||'tac')==='tac';x.strokeStyle=tc?'rgba(150,226,214,.35)':'rgba(24,20,16,.35)';for(const R of WORLD_.RIVS){x.lineWidth=1;poly(R.pts);}}
+  if(WORLD_&&WM.lay.roads){x.setLineDash([7,6]);x.lineWidth=1.4;x.strokeStyle=MS().road;poly(WORLD_.RING.concat([WORLD_.RING[0]]));poly(WORLD_.SPOKE);x.setLineDash([]);}
+  if(WM.lay.labels){const Y=MS();x.textAlign='center';x.textBaseline='middle';x.shadowColor=Y.labG;x.shadowBlur=7;x.fillStyle=Y.lab;
+    for(const r of REG){const[a,b]=w2s(r.lx!==undefined?r.lx:r.x,r.lz!==undefined?r.lz:r.z),fs=Math.round((r.big?22:13)*clamp(s/WM.cover,1,1.5)),txt=r.n.toUpperCase(),sp=fs*0.5,R=fs*40;x.font=fs+'px Iceland,sans-serif';
+      const ws=[...txt].map(ch=>x.measureText(ch).width+sp),tot=ws.reduce((p,q)=>p+q,0)-sp;let ang=-tot/2/R;x.save();x.translate(a,b);x.rotate(r.rot||0);
+      for(let q=0;q<txt.length;q++){const aa=ang+ws[q]/2/R;x.save();x.translate(0,R);x.rotate(aa);x.translate(0,-R);x.fillText(txt[q],0,0);x.restore();ang+=ws[q]/R;}x.restore();}x.shadowBlur=0;}
+  /* route line to the waypoint */
+  if(WP){const[a,b]=w2s(player.x,player.z),[c,d]=w2s(WP.x,WP.z);x.setLineDash([3,5]);x.lineWidth=1.5;x.strokeStyle='rgba(171,69,28,.85)';x.beginPath();x.moveTo(a,b);x.lineTo(c,d);x.stroke();x.setLineDash([]);}
+  const dia=(a,b,r,f,st,tx,tc)=>{x.save();x.translate(a,b);x.rotate(.7854);x.shadowColor='rgba(0,0,0,.7)';x.shadowBlur=6;x.fillStyle=f;x.fillRect(-r,-r,2*r,2*r);x.shadowBlur=0;x.lineWidth=1.5;x.strokeStyle=st;x.strokeRect(-r,-r,2*r,2*r);x.restore();if(tx){x.fillStyle=tc||'#0b1412';x.font='800 '+(r>7?11:9)+'px Nunito,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(tx,a,b+.5);}};
+  WM.hits=[];
+  for(const m of wmMarkers()){const[a,b]=w2s(m.x,m.z);WM.hits.push([a,b,m]);const sel=WM.sel&&WM.sel.k===m.k&&WM.sel.i===m.i&&(m.k!=='cabin'||WM.sel.n===m.n);
+    if(sel){x.strokeStyle='rgba(244,246,246,.85)';x.lineWidth=1.5;x.beginPath();x.arc(a,b,15+Math.sin(T*4)*1.5,0,6.283);x.stroke();}
+    if(m.k==='wp'){for(let q=0;q<3;q++){const ph=(T*0.7+q/3)%1;x.strokeStyle='rgba(171,69,28,'+(0.9*(1-ph)).toFixed(2)+')';x.lineWidth=2;x.beginPath();x.arc(a,b,5+ph*24,0.3,5.9);x.stroke();}x.fillStyle='#AB451C';x.beginPath();x.arc(a,b,4,0,6.283);x.fill();}
+    else if(m.k==='spawn')dia(a,b,7,'rgba(6,13,14,.85)','#B7D7D0','+','#B7D7D0');
+    else if(m.k==='camp')dia(a,b,9,'#DB9F44','#F4F6F6','▲');
+    else if(m.k==='pin'){const C_='229,57,47';x.save();if(WM.d3){const gr=x.createLinearGradient(a,b,a,b-46);gr.addColorStop(0,'rgba('+C_+',.8)');gr.addColorStop(1,'rgba('+C_+',0)');x.strokeStyle=gr;x.lineWidth=2;x.beginPath();x.moveTo(a,b);x.lineTo(a,b-46);x.stroke();}
+      x.shadowColor='rgba('+C_+',.95)';x.shadowBlur=16;x.fillStyle='rgba('+C_+',.16)';x.beginPath();x.arc(a,b,18,0,6.283);x.fill();x.lineWidth=1.7;
+      for(let q=0;q<3;q++){const rr=5.5+q*5,sp=(q%2?-1:1)*T*(0.5+q*0.35);x.strokeStyle='rgba('+C_+','+(1-q*0.22)+')';for(let z_=0;z_<3;z_++){const a1=sp+z_*2.094;x.beginPath();x.arc(a,b,rr,a1,a1+1.45);x.stroke();}}
+      x.shadowBlur=0;x.strokeStyle='rgba('+C_+',.5)';x.lineWidth=1;x.beginPath();x.moveTo(a-24,b);x.lineTo(a-19,b);x.moveTo(a+19,b);x.lineTo(a+24,b);x.moveTo(a,b-24);x.lineTo(a,b-19);x.moveTo(a,b+19);x.lineTo(a,b+24);x.stroke();
+      x.fillStyle='rgb('+C_+')';x.beginPath();x.arc(a,b,2.6,0,6.283);x.fill();x.font='18px Iceland,sans-serif';x.fillStyle='#F4F6F6';x.textAlign='left';x.textBaseline='middle';x.shadowColor='#000';x.shadowBlur=4;x.fillText(String(m.i+1).padStart(2,'0'),a+21,b-14);x.restore();}
+    else if(m.k==='van')dia(a,b,7,'#5B8093','#F4F6F6','■','#F4F6F6');
+    else if(m.k==='cabin')dia(a,b,7,'#69452A','#DB9F44','⌂','#F4F6F6');
+    else{x.fillStyle='#DB9F44';x.strokeStyle='#0b1412';x.beginPath();x.arc(a,b,5,0,6.283);x.fill();x.stroke();x.fillStyle='#E8EEEC';x.font='700 11px Nunito,sans-serif';x.textAlign='left';x.fillText(m.n,a+8,b);}}
+  /* you */
+  {const[a,b]=w2s(player.x,player.z),ph=(T*0.8)%1;x.strokeStyle='rgba(183,215,208,'+(0.8*(1-ph)).toFixed(2)+')';x.lineWidth=1.5;x.beginPath();x.arc(a,b,6+ph*18,0,6.283);x.stroke();
+    x.save();x.translate(a,b);x.rotate(Math.atan2(Math.cos(player.rot),Math.sin(player.rot))-Math.PI/2+Math.PI);x.restore();
+    const fx=Math.sin(player.rot),fz=Math.cos(player.rot),an=Math.atan2(fz,fx);x.save();x.translate(a,b);x.rotate(an+Math.PI/2);x.shadowColor='#B7D7D0';x.shadowBlur=10;x.fillStyle='#E8EEEC';x.beginPath();x.moveTo(0,-9);x.lineTo(6,6);x.lineTo(0,3);x.lineTo(-6,6);x.closePath();x.fill();x.restore();x.shadowBlur=0;}
+  if(!WM.d3){/* rulers */
+  x.fillStyle='rgba(4,9,10,.82)';x.fillRect(0,0,w,22);x.fillRect(0,0,30,h);x.strokeStyle='rgba(183,215,208,.4)';x.lineWidth=1;x.beginPath();x.moveTo(0,22.5);x.lineTo(w,22.5);x.moveTo(30.5,0);x.lineTo(30.5,h);x.stroke();
+  x.fillStyle='rgba(183,215,208,.85)';x.font='12px Iceland,sans-serif';x.textBaseline='middle';
+  const sub=step/5;for(let v=Math.ceil(-E/sub)*sub;v<=E;v+=sub){const major=Math.abs(v%step)<1e-6,[p]=w2s(v,0),[,q]=w2s(0,v);x.strokeStyle='rgba(183,215,208,'+(major?.8:.35)+')';x.beginPath();if(p>30&&p<w){x.moveTo(p+.5,22);x.lineTo(p+.5,major?14:18);}if(q>22&&q<h){x.moveTo(30,q+.5);x.lineTo(major?22:26,q+.5);}x.stroke();
+    if(major){x.textAlign='center';if(p>44&&p<w-10)x.fillText(String(v),p,9);x.textAlign='right';if(q>34&&q<h-6)x.fillText(String(v),20,q);}}
+  x.fillStyle='rgba(4,9,10,.9)';x.fillRect(0,0,30,22);x.fillStyle='#B7D7D0';x.textAlign='center';x.fillText('m',15,11);
+  /* scale bar */
+  {const L=[5,10,20,50,100].find(v=>v*s>70)||100,px_=L*s,X=44,Y=h-22;x.fillStyle='rgba(4,9,10,.6)';x.fillRect(X-6,Y-14,px_+60,22);x.strokeStyle='#E8EEEC';x.lineWidth=1.5;x.beginPath();x.moveTo(X,Y-4);x.lineTo(X,Y+2);x.lineTo(X+px_,Y+2);x.lineTo(X+px_,Y-4);x.stroke();x.fillStyle='#E8EEEC';x.textAlign='left';x.font='13px Iceland,sans-serif';x.fillText(L+' m',X+px_+8,Y-1);}}
+}
+function wmCard(){const m=WM.sel,c=$('wmCard');if(!m){c.hidden=true;return;}c.hidden=false;
+  const dx=m.x-player.x,dz=m.z-player.z,d=hyp(dx,dz),wet=waterAt(m.x,m.z)!==null;
+  $('wmCT').innerHTML='<small>'+(m.sub||'Location')+'</small>'+m.n;
+  $('wmRows').innerHTML='<div>Distance<b>'+(d<2?'Here':Math.round(d)+' m')+'</b></div><div>Bearing<b>'+(d<2?'–':brgTx(brg(dx,dz)))+'</b></div><div>Elevation<b>'+gh(m.x,m.z).toFixed(1)+' m</b></div><div>Region<b>'+regionAt(m.x,m.z)+'</b></div><div>Ground<b>'+(wet?'Water':'Dry land')+'</b></div>';
+  const isWp=WP&&Math.abs(WP.x-m.x)<.01&&Math.abs(WP.z-m.z)<.01;let h='<button data-a="wp">'+(isWp?'Clear waypoint':'Set waypoint')+'</button>';
+  if(m.k==='ground')h+='<button data-a="pin">Pin camp spot</button>';if(m.k==='pin')h+='<button data-a="unpin">Remove pin</button>';$('wmAct').innerHTML=h;}
+$('wmAct').addEventListener('click',e=>{const a=e.target.dataset.a,m=WM.sel;if(!a||!m)return;
+  if(a==='wp'){const isWp=WP&&Math.abs(WP.x-m.x)<.01&&Math.abs(WP.z-m.z)<.01;WP=isWp?null:{x:m.x,z:m.z,n:m.k==='ground'?'Waypoint':m.n};saveWP();toast(WP?'Waypoint set. Follow the red marker on your compass.':'Waypoint cleared.',2);}
+  if(a==='pin'){PINS.push([+m.x.toFixed(1),+m.z.toFixed(1)]);if(PINS.length>12)PINS.shift();savePins();WM.sel={k:'pin',i:PINS.length-1,x:m.x,z:m.z,n:'Camp spot '+PINS.length,sub:'Pinned'};}
+  if(a==='unpin'){PINS.splice(m.i,1);savePins();WM.sel=null;}
+  wmCard();WM.dirty=1;});
+$('wmCX').addEventListener('click',()=>{WM.sel=null;wmCard();});
+$('wmPinMe').addEventListener('click',()=>{PINS.push([+player.x.toFixed(1),+player.z.toFixed(1)]);if(PINS.length>12)PINS.shift();savePins();toast('Camp spot pinned on your map.',2);});
+$('wmClr').addEventListener('click',()=>{PINS=[];savePins();if(WM.sel&&WM.sel.k==='pin'){WM.sel=null;wmCard();}});
+$('wmWpClr').addEventListener('click',()=>{WP=null;saveWP();wmCard();});
+$("wmZoom").addEventListener('click',e=>{const z=e.target.dataset.z;if(z===undefined)return;if(z==='0'){WM.vx=player.x;WM.vz=player.z;WM.s=Math.max(WM.s,WM.fit*3);clampView();}else zoomAt(z==='1'?1.4:1/1.4,WM.w/2,WM.h/2);WM.dirty=1;});
+{const cv=$('wmCv'),P=new Map();let pinch=null,moved=0;
+  const pos=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top];};
+  cv.addEventListener('pointerdown',e=>{try{cv.setPointerCapture(e.pointerId);}catch(_){}P.set(e.pointerId,pos(e));moved=0;if(P.size===2){const[p,q]=[...P.values()];pinch={d:hyp(p[0]-q[0],p[1]-q[1])||1,s:WM.s};}});
+  cv.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;const o=P.get(e.pointerId),n=pos(e),dx=n[0]-o[0],dy=n[1]-o[1];P.set(e.pointerId,n);moved+=Math.abs(dx)+Math.abs(dy);
+    if(P.size===2&&pinch){const[p,q]=[...P.values()];zoomAt(pinch.s*hyp(p[0]-q[0],p[1]-q[1])/pinch.d/WM.s,(p[0]+q[0])/2,(p[1]+q[1])/2);moved=99;}
+    else if(P.size===1){WM.vx-=dx/WM.s;WM.vz-=dy/WM.s;clampView();WM.dirty=1;}});
+  const up=e=>{if(P.size===1&&moved<6){const[a,b]=pos(e);let best=null,bd=18;for(const[hx,hy,m]of WM.hits){const d=hyp(hx-a,hy-b);if(d<bd){bd=d;best=m;}}
+      if(!best){const[wx,wz]=s2w(a,b),E=mapImg.E;if(Math.abs(wx)<=E&&Math.abs(wz)<=E)best={k:'ground',x:wx,z:wz,n:regionAt(wx,wz),sub:'Open ground'};}WM.sel=best;wmCard();WM.dirty=1;}
+    P.delete(e.pointerId);if(P.size<2)pinch=null;};
+  cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',e=>{P.delete(e.pointerId);pinch=null;});
+  cv.addEventListener('wheel',e=>{e.preventDefault();const[a,b]=pos(e);zoomAt(Math.exp(-e.deltaY*0.0015),a,b);},{passive:false});}
+{const _u=updMapCompass;let lastT=0;updMapCompass=function(){_u();
+  const cw=$('cmpWp');if(WP){const dx=WP.x-player.x,dz=WP.z-player.z,d=hyp(dx,dz);if(d<3){WP=null;saveWP();toast('Waypoint reached.',2);cw.style.display='none';}else{cw.style.display='';cw.setAttribute('transform','rotate('+(brg(dx,dz)-camCur.y).toFixed(1)+')');$('cmpDeg').textContent=$('cmpDeg').textContent.replace(/ ·.*/,'')+' · '+Math.round(d)+' m';}}else cw.style.display='none';
+  if(document.body.classList.contains('menuOpen')&&gmCur==='map'){const t=performance.now();if(t-lastT>45){lastT=t;drawWM();if(WM.sel&&t%500<50)wmCard();$('wmSub').textContent=$('clockTxt').textContent+' · You are in '+regionAt(player.x,player.z);if(t%1000<50)wmRes();}}};}
+
+/* Build 54: map style switch, resource bar, field log */
+const paintSty=()=>[...$('wmStyle').children].forEach(b=>b.classList.toggle('on',b.dataset.st===(WM.lay.style||'tac')));paintSty();
+$('wmStyle').addEventListener('click',e=>{const v=e.target.dataset.st;if(!v)return;WM.lay.style=v;try{localStorage.setItem('plw-maplay',JSON.stringify(WM.lay));}catch(_){}paintSty();$('wmap').dataset.sty=v;WM.dirty=1;});$('wmap').dataset.sty=WM.lay.style||'tac';
+{const _t=toast;toast=function(m,d){_t(m,d);if(!m)return;const tx=$('clockTxt').textContent.split('·').slice(-1)[0].trim();if(WM.log[0]&&WM.log[0][1]===m)return;WM.log.unshift([tx,m]);if(WM.log.length>6)WM.log.pop();$('wmLogL').innerHTML=WM.log.map(l=>'<div><small>'+l[0]+'</small>'+l[1].replace(/</g,'&lt;')+'</div>').join('');};}
+$('wmLogL').innerHTML='<div><small>Today</small>Nothing to report yet.</div>';
+function wmRes(){const it=[['Sticks',$('iSticks').textContent],['Logs',st.logs|0],['Berries',$('iBerries').textContent],['Fish',$('iFish').textContent],['Fire',$('iFire').textContent],['Pins',PINS.length]];
+  $('wmRes').innerHTML=it.map(q=>'<span><small>'+q[0]+'</small><b>'+q[1]+'</b></span>').join('');}
+
+/* ===== Build 57: 3D terrain view ===== */
+const W3={},EX3=1.7;
+const hb3=(x,z)=>{const F=wmRelief.F,E=mapImg.E,M=Math.round(Math.sqrt(F.Hb.length)),i=clamp(Math.round((x+E)/(2*E)*M-0.5),0,M-1),j=clamp(Math.round((z+E)/(2*E)*M-0.5),0,M-1);return F.Hb[j*M+i]*EX3;};
+function r3dInit(){if(W3.r)return true;if(W3.fail)return false;try{wmRelief();const cv=document.createElement('canvas');cv.id='wm3d';$('wmap').insertBefore(cv,$('wmCv'));
+  const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});r.setPixelRatio(Math.min(2,devicePixelRatio||1));
+  const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(34,1,1,3000),E=mapImg.E,G=WORLD?255:127,geo=new THREE.PlaneGeometry(2*E,2*E,G,G);geo.rotateX(-Math.PI/2);
+  const pos=geo.attributes.position;let lo=1e9;for(let v=0;v<pos.count;v++){const y=hb3(pos.getX(v),pos.getZ(v));pos.setY(v,y);if(y<lo)lo=y;}geo.computeVertexNormals();
+  const tex=new THREE.CanvasTexture(wmRelief());tex.anisotropy=r.capabilities.getMaxAnisotropy?Math.min(8,r.capabilities.getMaxAnisotropy()):4;
+  const mesh=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({map:tex}));sc.add(mesh);
+  const base=new THREE.Mesh(new THREE.BoxGeometry(2*E,5,2*E),new THREE.MeshLambertMaterial({color:0x0b1a1c}));base.position.y=lo-2.4;sc.add(base);
+  const grid=new THREE.GridHelper(E*10,80,0x3a8a84,0x1a4644);grid.position.y=lo-5;grid.material.transparent=true;grid.material.opacity=0.32;sc.add(grid);
+  sc.add(new THREE.AmbientLight(0xbfdcd6,0.5));const dl=new THREE.DirectionalLight(0xffffff,1.0);dl.position.set(-70,80,-40);sc.add(dl);
+  Object.assign(W3,{r,sc,cam,mesh,tex,base,grid,lo,ray:new THREE.Raycaster(),v:new THREE.Vector3(),n:new THREE.Vector2(),w:0,h:0});return true;}catch(e){console.warn('map 3D',e);W3.fail=1;WM.d3=0;return false;}}
+function r3d(){if(!r3dInit())return;const{r,cam,sc}=W3,w=WM.w,h=WM.h;if(W3.w!==w||W3.h!==h){W3.w=w;W3.h=h;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
+  const par=(WM.lay.style||'tac')==='par';W3.base.material.color.setHex(par?0x2a2018:0x0b1a1c);W3.grid.material.opacity=par?0.12:0.32;
+  if(W3.tex.image!==wmRelief()){W3.tex.image=wmRelief();W3.tex.needsUpdate=true;}
+  const span=h/WM.s,dist=span*1.15,pitch=0.98,ty=hb3(WM.vx,WM.vz);cam.position.set(WM.vx,ty+Math.sin(pitch)*dist,WM.vz+Math.cos(pitch)*dist);cam.lookAt(WM.vx,ty,WM.vz);cam.updateMatrixWorld();
+  r.render(sc,cam);}
+function p3(x,z){const v=W3.v.set(x,hb3(x,z)+0.3,z).project(W3.cam);if(v.z>1)return[-9999,-9999];return[(v.x+1)/2*WM.w,(1-v.y)/2*WM.h];}
+function u3(a,b){W3.n.set(a/WM.w*2-1,-(b/WM.h)*2+1);W3.ray.setFromCamera(W3.n,W3.cam);const hit=W3.ray.intersectObject(W3.mesh)[0];return hit?[hit.point.x,hit.point.z]:[1e9,1e9];}
+WM.d3=WM.lay.d3?1:0;
+const paint3d=()=>{$('wm3dBtn').classList.toggle('on',!!WM.d3);$('wmap').classList.toggle('d3',!!WM.d3);};paint3d();
+$('wm3dBtn').addEventListener('click',()=>{WM.d3=WM.d3?0:1;WM.lay.d3=WM.d3;try{localStorage.setItem('plw-maplay',JSON.stringify(WM.lay));}catch(_){}paint3d();WM.dirty=1;});
 hud();requestAnimationFrame(frame);
 })();
 </script>
