@@ -160,7 +160,7 @@ body.touch #prompt{bottom:128px}
   <p class="pnote">Stand by a crate or the van to move things (I opens this). Logs are 5 sticks bundled; building uses sticks first, then logs.</p>
 </div>
 <div id="compass" class="tag" title="Map (click)"><svg viewBox="-20 -20 40 40" width="40" height="40" aria-hidden="true"><g id="cmpRose"><path d="M0,-15 L4,0 L-4,0Z" fill="#AB451C"/><path d="M0,15 L4,0 L-4,0Z" fill="#F4F6F6"/><text x="0" y="-9" text-anchor="middle" font-size="7" fill="#F4F6F6" font-family="sans-serif">N</text></g></svg></div>
-<div id="mapBox" class="tag" hidden><canvas id="mapCv" width="300" height="300"></canvas><div class="pnote" style="margin-top:4px">● you · ■ van · ▲ camp · ◆ cabins · click to close</div></div>
+<div id="mapBox" class="tag" hidden><div class="lpHead">Map<button id="mapClose" class="pClose" aria-label="Close map">×</button></div><canvas id="mapCv" width="300" height="300"></canvas><div class="pnote" style="margin-top:4px">● you · ✚ spawn · ▲ camp · ★ pinned camp spots · ■ van · ◆ cabins</div><div class="btns"><button id="mapPin">Pin a camp spot here</button><button id="mapClear">Clear pins</button></div></div>
 <div id="op" class="tag panel" hidden>
   <div class="lpHead">Play online<button id="opClose" class="pClose" aria-label="Close online menu">×</button></div>
   <div class="tBig" id="onState">Solo</div>
@@ -211,7 +211,7 @@ body.touch #prompt{bottom:128px}
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 48 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 49 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -241,7 +241,7 @@ body.touch #prompt{bottom:128px}
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 48 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 49 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -2690,7 +2690,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 48 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 48 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 49 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 49 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
@@ -3698,7 +3698,13 @@ const mapImg=(()=>{const c=document.createElement('canvas'),N=150;c.width=c.heig
   for(let j=0;j<N;j++)for(let i=0;i<N;i++){const wx=-E+2*E*i/N,wz=-E+2*E*j/N,y=gh(wx,wz),o=(j*N+i)*4;
     if(waterAt(wx,wz)!==null)col.setHex(P.river);else col.setHex(groundCol(wx,y,wz,0.95,0));const sh=0.75+clamp(y/12,-0.2,0.35);im.data[o]=col.r*255*sh;im.data[o+1]=col.g*255*sh;im.data[o+2]=col.b*255*sh;im.data[o+3]=255;}
   x.putImageData(im,0,0);return {c,E};})();
-$('compass').addEventListener('click',()=>{$('mapBox').hidden=!$('mapBox').hidden;});$('mapBox').addEventListener('click',()=>{$('mapBox').hidden=true;});
+$('compass').addEventListener('click',()=>{$('mapBox').hidden=!$('mapBox').hidden;});$('mapClose').addEventListener('click',()=>{$('mapBox').hidden=true;});
+/* pinned camp spots, remembered on this device */
+let PINS=[];try{PINS=JSON.parse(localStorage.getItem('plw-pins')||'[]');}catch(e){}
+const savePins=()=>{try{localStorage.setItem('plw-pins',JSON.stringify(PINS));}catch(e){}};
+$('mapPin').addEventListener('click',()=>{PINS.push([+player.x.toFixed(1),+player.z.toFixed(1)]);if(PINS.length>12)PINS.shift();savePins();toast('Camp spot pinned on your map.',2);});
+$('mapClear').addEventListener('click',()=>{PINS=[];savePins();});
+const SPAWN={x:START.x,z:START.z};
 function updMapCompass(){$('cmpRose').setAttribute('transform','rotate('+(-camCur.y).toFixed(1)+')');if($('mapBox').hidden)return;
   const cv=$('mapCv'),x=cv.getContext('2d'),W_=cv.width,E=mapImg.E,m=(a,b)=>[(a+E)/(2*E)*W_,(b+E)/(2*E)*W_];x.imageSmoothingEnabled=true;x.drawImage(mapImg.c,0,0,W_,W_);
   x.lineWidth=2;x.strokeStyle='#30543B';if(WORLD_){x.beginPath();WORLD_.RING.forEach((p,i)=>{const[a,b]=m(p[0],p[1]);i?x.lineTo(a,b):x.moveTo(a,b);});x.stroke();}
@@ -3706,6 +3712,8 @@ function updMapCompass(){$('cmpRose').setAttribute('transform','rotate('+(-camCu
   if(CAMP.state==='set'&&TENT){const[a,b]=m(FIRE.x,FIRE.z);x.fillStyle='#D08118';x.beginPath();x.moveTo(a,b-6);x.lineTo(a+5,b+4);x.lineTo(a-5,b+4);x.fill();}
   if(car){const[a,b]=m(car.x,car.z);x.fillStyle='#5B8093';x.fillRect(a-4,b-4,8,8);}
   for(const o of NET.others.values()){const[a,b]=m(o.x,o.z);x.fillStyle='#DB9F44';x.beginPath();x.arc(a,b,4,0,6.283);x.fill();}
+  {const[a,b]=m(SPAWN.x,SPAWN.z);x.strokeStyle='#F4F6F6';x.lineWidth=3;x.beginPath();x.moveTo(a-5,b);x.lineTo(a+5,b);x.moveTo(a,b-5);x.lineTo(a,b+5);x.stroke();x.lineWidth=2;}
+  for(const[px_,pz_]of PINS){const[a,b]=m(px_,pz_);x.fillStyle='#DB9F44';x.strokeStyle='#69452A';x.beginPath();for(let k=0;k<10;k++){const r=k%2?2.6:6.5,an=k/10*6.283-1.571;x.lineTo(a+Math.cos(an)*r,b+Math.sin(an)*r);}x.closePath();x.fill();x.stroke();}
   const[a,b]=m(player.x,player.z);x.fillStyle='#AB451C';x.strokeStyle='#F4F6F6';x.beginPath();x.arc(a,b,5,0,6.283);x.fill();x.stroke();
   x.beginPath();x.moveTo(a,b);x.lineTo(a+Math.sin(player.rot)*11,b+Math.cos(player.rot)*11);x.stroke();}
 /* ---------- quick build buttons ---------- */
