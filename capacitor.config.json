@@ -1,0 +1,6 @@
+{
+  "appId": "com.paperland.trails",
+  "appName": "Paperland Trails",
+  "webDir": "www",
+  "android": { "allowMixedContent": false }
+}
