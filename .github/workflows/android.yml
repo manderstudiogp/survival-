@@ -30,6 +30,10 @@ jobs:
         run: |
           npx cap add android
           npx cap sync android
+      - name: Use the Paperland Trails Survival app icon
+        run: |
+          rm -rf android/app/src/main/res/mipmap-anydpi-v26
+          for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do cp icons/android/mipmap-$d/*.png android/app/src/main/res/mipmap-$d/; done
       - name: Build the APK
         working-directory: android
         run: ./gradlew assembleDebug
