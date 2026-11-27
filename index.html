@@ -513,7 +513,7 @@ go();})();
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 63 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 64 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -543,7 +543,7 @@ go();})();
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 63 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 64 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -2993,7 +2993,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 63 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 63 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 64 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 64 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
@@ -3065,7 +3065,7 @@ function sndInit(){if(SND.ctx){if(SND.ctx.state==='suspended')SND.ctx.resume();r
   const mk=(name,pos)=>{const g=c.createGain();g.gain.value=0;let out=g;if(pos){const p=c.createPanner();p.panningModel='HRTF';p.distanceModel='inverse';p.refDistance=2.5;p.rolloffFactor=1.2;p.maxDistance=60;g.connect(p);p.connect(master);SND.n[name+'P']=p;const s=c.createGain();s.gain.value=0.15;p.connect(s);s.connect(rev);}else g.connect(master);SND.n[name]=g;
     fetch('audio/'+name+'.mp3').then(r=>r.arrayBuffer()).then(a=>new Promise((res,rej)=>c.decodeAudioData(a,res,rej))).then(buf=>{const s=c.createBufferSource();s.buffer=buf;s.loop=true;s.connect(g);s.start(0,Math.random()*buf.duration);SND.b[name]=s;}).catch(e=>console.warn('sound',name,e));};
   mk('birds');mk('crickets');mk('rain');mk('stream',true);mk('steps_forest');mk('steps_snow');mk('wade');mk('car_idle',true);mk('car_drive',true);
-  SND.one={};['car_start','car_brake'].forEach(n=>fetch('audio/'+n+'.mp3').then(r=>r.arrayBuffer()).then(a=>new Promise((res,rej)=>c.decodeAudioData(a,res,rej))).then(b=>{SND.one[n]=b;}).catch(()=>{}));}
+  SND.one={};['car_start','car_brake','chop1','chop2','chop3','tree_fall'].forEach(n=>fetch('audio/'+n+'.mp3').then(r=>r.arrayBuffer()).then(a=>new Promise((res,rej)=>c.decodeAudioData(a,res,rej))).then(b=>{SND.one[n]=b;}).catch(()=>{}));}
 function sndOne(name,x,y,z,vol){const c=SND.ctx;if(!c||!SND.one||!SND.one[name])return;const s=c.createBufferSource(),g=c.createGain(),p=c.createPanner();s.buffer=SND.one[name];p.panningModel='HRTF';p.refDistance=3;p.rolloffFactor=1;
   if(p.positionX){p.positionX.value=x;p.positionY.value=y;p.positionZ.value=z;}else p.setPosition(x,y,z);g.gain.value=vol;s.connect(g);g.connect(p);p.connect(SND.master);s.start();}
 ['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>sndInit(),{passive:true}));
@@ -3431,7 +3431,7 @@ function chopTick(dt){const tr=player.chopTree;if(!tr)return;
   const prev=player.cp;player.cp+=dt;
   if(prev<0.93&&player.cp>=0.93&&tr.state==='up')hitTree(tr);
   if(player.cp>=1.6){player.cp=0;if(tr.state!=='up'){player.chopTree=null;}else if(st.energy<6){player.chopTree=null;toast('Too tired to keep chopping.');}}}
-function hitTree(tr){tr.hp--;tr.wt=0;st.energy=Math.max(0,st.energy-3);st.hunger=Math.max(0,st.hunger-1);st.shake=Math.max(st.shake,0.08);
+function hitTree(tr){SND.chopN=((SND.chopN||0)+1+Math.floor(Math.random()*2))%3;sndOne('chop'+(1+SND.chopN),tr.x,player.y+1.1,tr.z,0.95);tr.hp--;tr.wt=0;st.energy=Math.max(0,st.energy-3);st.hunger=Math.max(0,st.hunger-1);st.shake=Math.max(st.shake,0.08);
   tr.cutH=clamp(player.y+CHOP.h-tr.base,0.3,1.4);
   chips(tr.x-tr.dir[0]*0.16*tr.s,tr.base+tr.cutH,tr.z-tr.dir[1]*0.16*tr.s,6,tr.base);
   if(tr.hp>0)return;
@@ -3465,7 +3465,7 @@ function updTrees(dt,simOn){
     {const g_=target-tr.occ;tr.occ+=g_*Math.min(1,dt*(g_<0?0.75:0.6));}
     if(tr.state==='up'){if(tr.axis){tr.wt+=dt;const goal=(HITS-tr.hp)*0.03;tr.lean+=(goal-tr.lean)*Math.min(1,dt*6);
         setTilt(tr,tr.lean+0.07*Math.exp(-3.5*tr.wt)*Math.sin(tr.wt*13));}}
-    else if(tr.state==='falling'){tr.ft+=dt;const f=tr.ft;let ang;
+    else if(tr.state==='falling'){tr.ft+=dt;const f=tr.ft;let ang;if(!tr.sndF&&f>=1.25){tr.sndF=1;sndOne('tree_fall',tr.x+tr.dir[0]*tr.H*0.3,tr.base+2,tr.z+tr.dir[1]*tr.H*0.3,1);}
       if(f<2.2){const k=f/2.2;ang=tr.ang0+(1.55-tr.ang0)*Math.pow(k,2.6);}
       else if(f<2.9){const k=(f-2.2)/0.7;ang=1.55-0.1*Math.sin(k*Math.PI)*(1-k*0.6);}else ang=1.55;
       setTilt(tr,ang);
