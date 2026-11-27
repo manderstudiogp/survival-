@@ -521,7 +521,7 @@ go();})();
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 66 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 72 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -534,7 +534,7 @@ go();})();
 <div id="intro">
   <div class="card tag">
     <div class="logo"><h1>PAPERLAND TRAILS:</h1><span>OREGON WILDS</span></div>
-    <div class="maps"><span>Map</span><button data-map="meadow">Meadow Camp</button><button data-map="gorge">Canyon Gorge · test</button></div>
+    <div class="maps"><span>Map</span><button data-map="meadow">Oregon Wilds</button><button data-map="hollow">Ember Hollow</button><button data-map="gorge">Canyon Gorge · test</button></div>
     <ul>
       <li><em>Move</em><span><span class="keyOnly">WASD or arrow keys. Hold <kbd>Shift</kbd> to run.</span><span class="touchOnly">Drag the joystick. Hold Run to run.</span></span></li>
       <li><em>Camera</em><span><span class="keyOnly">Drag the scene to tilt and turn, scroll to zoom, double-click to reset. <kbd>Q</kbd> <kbd>R</kbd> turn, <kbd>−</kbd> <kbd>=</kbd> zoom, <kbd>V</kbd> resets.</span><span class="touchOnly">Drag the scene to tilt and turn, pinch to zoom, double-tap to reset.</span></span></li>
@@ -551,7 +551,7 @@ go();})();
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 66 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 72 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -837,13 +837,14 @@ try{const sv=JSON.parse(localStorage.getItem('plw-light-v3')||localStorage.getIt
 try{if(!localStorage.getItem('plw-exp1')){L.exposure=1;localStorage.setItem('plw-exp1','1');}}catch(err){}
 try{if(!localStorage.getItem('plw-lens1')){Object.assign(L,{tilt:0.98,tiltWidth:0.10,tiltCenter:0.42,lens:1,fstop:2.0,focusRange:0.09,bokeh:1.59,catEye:1,camDist:37,camPitch:38});localStorage.setItem('plw-lens1','1');}}catch(err){}
 try{if(!localStorage.getItem('plw-zoom80')){L.camDist=37;localStorage.setItem('plw-zoom80','1');}}catch(err){L.camDist=37;}
+L.camDist=Math.min(L.camDist,54);
 const saveL=()=>{try{localStorage.setItem('plw-light-v3',JSON.stringify(L));}catch(err){}};
 
 /* ---------- cinematic post pass: depth fog, ground mist, light bleeding into fog, bloom, grade ---------- */
 const SS=isTouch?1:((window.devicePixelRatio||1)<1.5?1.5:1);
 const rt=new THREE.WebGLRenderTarget(2,2,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,format:THREE.RGBAFormat});
 rt.depthTexture=new THREE.DepthTexture();rt.depthTexture.type=renderer.capabilities.isWebGL2?THREE.FloatType:THREE.UnsignedIntType;
-const U={tColor:{value:rt.texture},tDepth:{value:rt.depthTexture},projInv:{value:camera.projectionMatrixInverse},camWorld:{value:camera.matrixWorld},
+const U={skyOn:{value:0},tColor:{value:rt.texture},tDepth:{value:rt.depthTexture},projInv:{value:camera.projectionMatrixInverse},camWorld:{value:camera.matrixWorld},
   res:{value:new THREE.Vector2(2,2)},time:{value:0},fogColor:{value:new THREE.Color(P.river)},fogDensity:{value:0},fogStart:{value:0},
   mist:{value:0},mistBase:{value:MIST_BASE},mistFalloff:{value:1},mistNoise:{value:0},exposure:{value:1},contrast:{value:1},saturation:{value:1},split:{value:0},
   vignette:{value:0},grain:{value:0},bloom:{value:0},fogExpo:{value:1},
@@ -854,7 +855,7 @@ const postMat=new THREE.ShaderMaterial({uniforms:U,depthTest:false,depthWrite:fa
 uniform sampler2D tColor;uniform sampler2D tDepth;uniform mat4 projInv;uniform mat4 camWorld;uniform vec2 res;uniform float time;
 uniform vec3 fogColor;uniform float fogDensity;uniform float fogStart;uniform float mist;uniform float mistFalloff;uniform float mistNoise;uniform float mistBase;
 uniform float exposure;uniform float fogExpo;uniform float contrast;uniform float saturation;uniform float split;uniform float vignette;uniform float grain;uniform float bloom;
-uniform vec3 lp[3];uniform vec3 lc[3];uniform float lr[3];
+uniform vec3 lp[3];uniform vec3 lc[3];uniform float lr[3];uniform float skyOn;
 varying vec2 vUv;
 float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
 float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1.,0.)),f.x),mix(h21(i+vec2(0.,1.)),h21(i+vec2(1.,1.)),f.x),f.y);}
@@ -871,7 +872,7 @@ void main(){
   float fD=1.-exp(-max(dist-fogStart,0.)*fogDensity);
   float n=vn(wp.xz*0.12+vec2(time*0.05,time*0.02))*0.65+vn(wp.xz*0.31-vec2(time*0.03,0.))*0.35;
   float fH=clamp(mist*exp(-max(wp.y-mistBase,0.)*mistFalloff)*mix(1.,n*1.6,mistNoise),0.,0.95);
-  float fog=d>0.99999?1.:clamp(1.-(1.-fD)*(1.-fH),0.,1.);
+  float fog=d>0.99999?1.-skyOn:clamp(1.-(1.-fD)*(1.-fH),0.,1.);
   vec3 glow=vec3(0.);
   for(int i=0;i<3;i++){vec3 dv=wp-lp[i];glow+=lc[i]*exp(-dot(dv,dv)/(lr[i]*lr[i]));}
   col*=exposure;
@@ -3002,7 +3003,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 66 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 66 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 72 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 72 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
@@ -3953,7 +3954,7 @@ const SPEC=[['Grade'],['exposure','Exposure',0.5,1.8,0.01],['autoExp','Day/night
   ['fire','Campfire',0,2.5,0.01],['flash','Flashlight',0,2.5,0.01],['head','Headlights',0,2.5,0.01],['reflect','Water reflection',0,1,0.01],
   ['Lens (50 mm, full frame)'],['lens','Lens blur on (0 = old tilt-shift)',0,1,1],['fstop','Aperture f/',1.4,4,0.1],['focusRange','Focus depth',0.02,0.5,0.01],['bokeh','Bokeh highlights',0,2,0.01],['catEye','Cat\'s-eye at edges',0,1,0.01],
   ['Tilt-shift (when lens is off)'],['tilt','Blur amount',0,1.5,0.01],['tiltWidth','Sharp band',0,0.4,0.01],['tiltCenter','Band position',0.25,0.75,0.01],
-  ['Camera'],['camDist','Zoom (distance)',17,42,0.1],['camPitch','Tilt angle',38,70,0.5],['camYaw','Turn',-180,180,1]];
+  ['Camera'],['camDist','Zoom (distance)',17,54,0.1],['camPitch','Tilt angle',38,70,0.5],['camYaw','Turn',-180,180,1]];
 $('sliders').innerHTML=SPEC.map(sp=>sp.length===1?`<h4>${sp[0]}</h4>`:
   `<div class="row"><label for="s_${sp[0]}">${sp[1]} <output id="o_${sp[0]}"></output></label><input type="range" id="s_${sp[0]}" min="${sp[2]}" max="${sp[3]}" step="${sp[4]}"></div>`).join('');
 const fmt=(v,st_)=>v.toFixed(st_<0.01?3:2);
@@ -4078,8 +4079,8 @@ function lpTick(dt){fpsAcc+=dt;fpsN++;if(fpsAcc>0.5){fpsTxt=Math.round(fpsN/fpsA
     const hrs=(6+st.t*24)%24,hh=Math.floor(hrs),mm=Math.floor((hrs-hh)*60);
     $('tBig').textContent=phaseName(st.t)+' · '+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');}}
 syncLP();markPreset(Object.keys(DEF).every(k=>CAMK.includes(k)||L[k]===DEF[k])?'Heavy mist':null);
-document.querySelectorAll('.maps button').forEach(b=>{b.classList.toggle('on',b.dataset.map===MAP);
-  b.addEventListener('click',()=>{if(b.dataset.map===MAP)return;location.hash=b.dataset.map;location.reload();});});
+const MAPKEY=location.hash==='#hollow'?'hollow':MAP;document.querySelectorAll('.maps button').forEach(b=>{b.classList.toggle('on',b.dataset.map===MAPKEY);
+  b.addEventListener('click',()=>{if(b.dataset.map===MAPKEY)return;location.hash=b.dataset.map;location.reload();});});
 addEventListener('hashchange',()=>location.reload());
 function start(){$('intro').classList.add('hide');st.playing=true;if(!st.started){st.started=true;
   toast(GZ?'Canyon Gorge (test map). Take a ladder down to the plunge pool, or try fishing from the rope bridge.':'Gather sticks and berries before dark. Your camp is right here.',4.5);}}
@@ -4089,9 +4090,9 @@ $('helpBtn').addEventListener('click',openHelp);
 
 /* ---------- camera ---------- */
 const camT=new THREE.Vector3(),camOff=new THREE.Vector3(),camCur={d:24,p:55,y:0};
-const CAMLIM={camDist:[17,42],camPitch:[38,70]};
+const CAMLIM={camDist:[17,54],camPitch:[38,70]};
 const wrapDeg=a=>((a+180)%360+360)%360-180;
-function camGoal(){return {d:L.camDist*(innerWidth<innerHeight?1.25:1),p:L.camPitch,y:L.camYaw};}
+function camGoal(){const fl=smooth(37,54,L.camDist);return {d:L.camDist*(innerWidth<innerHeight?1.25:1)*(1-0.12*fl),p:L.camPitch-(L.camPitch-11)*fl,y:L.camYaw};}
 function setCamOff(){const p=camCur.p*Math.PI/180,y=camCur.y*Math.PI/180;camOff.set(Math.sin(y)*Math.cos(p)*camCur.d,Math.sin(p)*camCur.d,Math.cos(y)*Math.cos(p)*camCur.d);}
 /* the camera follows the hiker; in Ember Hollow alone it stops short of the map edge, in Oregon Wilds it follows everywhere */
 const CX=WORLD?[-92,92]:[-12,12],CZ=WORLD?[-92,92]:[-13,12];
@@ -4322,7 +4323,7 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(0.05,(now-las
   if(st.playing&&!st.busy)sim(dt,night);
   night=visuals(dt);
   if((hudT-=dt)<=0){hudT=0.1;hud();}
-  if(L.reflect>0.01&&(!isTouch||(frameN++&1)===0))renderReflection();
+  skyTick(dt);if(L.reflect>0.01&&(!isTouch||(frameN++&1)===0)){const sv=SKY.mesh.visible;SKY.mesh.visible=false;renderReflection();SKY.mesh.visible=sv;}
   renderer.setRenderTarget(rt);renderer.render(scene,camera);renderer.setRenderTarget(rtB);renderer.render(postScene,postCam);if(FLK.on||RAIN.on||LEAF.on){renderer.autoClear=false;for(const F of[LEAF,RAIN,FLK])if(F.on)renderer.render(F.sc,camera);renderer.autoClear=true;}if(L.lens>0.5||PH.on){renderer.setRenderTarget(rtH1);renderer.render(bokScene,postCam);renderer.setRenderTarget(rtH2);renderer.render(softScene,postCam);}renderer.setRenderTarget(null);renderer.render(tiltScene,postCam);if(PH.snap){PH.snap=false;phCap();}
   lpTick(dt);}
 
@@ -4708,6 +4709,55 @@ addEventListener('keydown',e=>{if(!CP.on)return;const tg=e.target&&e.target.tagN
   if(e.code==='KeyE'||e.code==='Enter'){e.preventDefault();e.stopImmediatePropagation();confirmCampPlace();}else if(e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();cancelCampPlace();}},true);
 {const ub=$('useBtn');if(ub)ub.addEventListener('pointerdown',e=>{if(CP.on){e.stopImmediatePropagation();e.preventDefault();confirmCampPlace();}},true);}
 {const _u=updMapCompass;updMapCompass=function(){_u();campPlaceTick();};}
+
+/* ===== Build 67: living sky (Photographer test): sunrise, puffy clouds, sunset, stars and moon, driven by time and weather ===== */
+const SKY={off:0,U:{uSun:{value:new THREE.Vector3()},uMoon:{value:new THREE.Vector3()},uFog:{value:new THREE.Color()},uSunCol:{value:new THREE.Color()},uT:{value:0},uTw:{value:0},uDay:{value:1},uDusk:{value:0},uNight:{value:0},uCover:{value:0.4},uStorm:{value:0},uMoonA:{value:0}}};
+SKY.mesh=new THREE.Mesh(new THREE.SphereGeometry(100,40,24),new THREE.ShaderMaterial({uniforms:SKY.U,side:THREE.BackSide,depthWrite:false,fog:false,
+ vertexShader:`varying vec3 vDir;void main(){vec4 wp=modelMatrix*vec4(position,1.);vDir=wp.xyz-cameraPosition;gl_Position=projectionMatrix*viewMatrix*wp;gl_Position.z=gl_Position.w*0.99999;}`,
+ fragmentShader:`uniform vec3 uSun,uMoon,uFog,uSunCol;uniform float uT,uTw,uDay,uDusk,uNight,uCover,uStorm,uMoonA;varying vec3 vDir;
+float h3(vec3 p){p=fract(p*0.3183099+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h2(i),h2(i+vec2(1.,0.)),f.x),mix(h2(i+vec2(0.,1.)),h2(i+vec2(1.,1.)),f.x),f.y);}
+float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*n2(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return s;}
+void main(){vec3 v=normalize(vDir);float h=v.y,hh=clamp(h,0.,1.);
+  vec3 dayC=mix(vec3(.718,.843,.816),vec3(.328,.462,.530),pow(hh,.55));
+  vec3 nightC=mix(vec3(.107,.151,.173),vec3(.025,.035,.040),pow(hh,.6));
+  vec3 col=mix(nightC,dayC,uDay);
+  vec2 sa=normalize(uSun.xz+1e-4);float az=max(0.,dot(normalize(v.xz+1e-4),sa));
+  float band=pow(1.-hh,2.2);vec3 warm=mix(vec3(.839,.339,.138),vec3(.945,.686,.294),az);
+  col=mix(col,vec3(.268,.377,.432),uDusk*.55);col=mix(col,warm,clamp(uDusk*band*(.45+.55*az*az),0.,1.));
+  col=mix(col,vec3(.938,.582,.108),uDusk*exp(-((hh-.22)/.14)*((hh-.22)/.14))*.35*(.5+.5*az));
+  float sd=max(dot(v,uSun),0.);col+=uSunCol*(pow(sd,2600.)*8.+pow(sd,60.)*.35+pow(sd,10.)*.12+pow(sd,4.)*.06*uDusk)*(1.-uStorm*.85)*smoothstep(-.06,.02,uSun.y);
+  float star=0.;if(uNight>.01){vec3 sp=v*240.;float r_=h3(floor(sp));star=step(.9968,r_)*pow(max(0.,1.-length(fract(sp)-.5)*2.3),2.)*(.55+.45*sin(uTw*2.5+r_*90.));}
+  float md=dot(v,uMoon),disc=smoothstep(.99935,.9996,md),cut=smoothstep(.99935,.9996,dot(v,normalize(uMoon+vec3(.016,.009,-.004))));
+  float cl=0.;vec3 cc=vec3(0.);
+  if(h>0.){vec2 uv=v.xz/(h+.18)*1.15+vec2(uT*.010,uT*.0035);vec2 q=uv*.85+vec2(n2(uv*.6+vec2(3.1,7.7))-.5,n2(uv*.6+vec2(1.3,2.9))-.5)*.9;float c=fbm(q)*1.06;
+    cl=smoothstep(1.-uCover-.02,1.-uCover+.16,c)*smoothstep(0.,.14,h);
+    float th=smoothstep(1.-uCover,1.-uCover+.35,c),lit=clamp(.82-th*.5+az*.18+n2(q*3.1)*.12,0.,1.);
+    cc=mix(vec3(.560,.658,.636),vec3(.957,.965,.965),lit);
+    cc=mix(cc,cc*vec3(.945,.686,.294)+vec3(.101,.041,.017),uDusk*(.45+.55*az));
+    cc=mix(cc,vec3(.064,.090,.104)+vec3(.100,.141,.161)*lit*uMoonA,uNight);
+    cc=mix(cc,mix(vec3(.262,.339,.361),vec3(.498,.608,.613),lit)*(uDay*.85+.18),uStorm);}
+  col+=vec3(.957,.965,.965)*star*uNight*smoothstep(0.,.12,h)*1.7*(1.-cl);
+  col+=(vec3(.957,.965,.965)*max(0.,disc-cut*.9)*1.5+vec3(.718,.843,.816)*pow(max(md,0.),90.)*.3)*uMoonA*(1.-cl*.85);
+  col=mix(col,cc,cl*(.92+.08*uStorm));
+  col=mix(col,mix(vec3(.054,.075,.086),vec3(.423,.525,.539),uDay),uStorm*.6);
+  col*=.74;col=mix(col,uFog*.82,(1.-smoothstep(-.02,.16,h))*.75);
+  gl_FragColor=vec4(col,1.);}`}));
+SKY.mesh.renderOrder=1e6;SKY.mesh.frustumCulled=false;SKY.mesh.visible=false;scene.add(SKY.mesh);
+function skyTick(dt){const ok=owlCam.k||0;
+  /* owl's-eye view: tilt-shift, its sharp band set on whatever the owl is looking at, foreground and far background softened */
+  if(ok>0.001){UT.maxCoc.value*=1-ok;if(ok>0.5)UT.lens.value=0;UT.tilt.value=UT.tilt.value+(Math.max(L.tilt,0.9)-UT.tilt.value)*ok;UT.tiltCenter.value=UT.tiltCenter.value+(0.5-UT.tiltCenter.value)*ok;UT.tiltWidth.value=UT.tiltWidth.value+(0.13-UT.tiltWidth.value)*ok;}
+  const on=true;SKY.mesh.visible=on;U_SKYON(on);
+  const a=st.t*Math.PI*2,e=Math.sin(a),U=SKY.U,I=W.I||0;
+  U.uSun.value.set(Math.cos(a),e,0.35).normalize();U.uMoon.value.set(-Math.cos(a)*0.9,Math.max(-e,0)*0.9+0.08,-0.3).normalize();
+  U.uDay.value=smooth(-0.08,0.22,e);U.uNight.value=1-smooth(-0.2,0.02,e);U.uDusk.value=(1-smooth(0.02,0.34,Math.abs(e+0.04)))*(1-I*0.7);
+  {const k=smooth(0,0.45,e);U.uSunCol.value.setRGB(0.988+0.012*k,0.718+0.295*k,0.307+0.706*k);}
+  U.uMoonA.value=smooth(-0.02,0.12,-e)*(1-I);
+  const base=0.45+0.08*Math.sin((st.day||1)*1.7+st.t*2.0);U.uCover.value=base+(1.06-base)*smooth(0,0.35,I);U.uStorm.value=smooth(0.05,0.75,I);
+  SKY.off+=dt*(1+2.5*I);U.uT.value=SKY.off;U.uTw.value=T;U.uFog.value.copy(U_FOG());
+  SKY.mesh.position.copy(camera.position);if(typeof moon!=='undefined'&&moon&&(PH.on||ok>0.3||camCur.p<34))moon.visible=false;}
+const U_FOG=()=>U.fogColor.value,U_SKYON=on=>{U.skyOn.value=on?1:0;};
 hud();requestAnimationFrame(frame);
 })();
 </script>
