@@ -211,7 +211,7 @@ body.touch #prompt{bottom:128px}
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 46 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 47 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -241,7 +241,7 @@ body.touch #prompt{bottom:128px}
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 46 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 47 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -996,7 +996,7 @@ if(WORLD){const W_=WORLD_,{wr,wrr}=WORLDM,WS=W_.WS,CH=25;
   // campfire ring, logs and seats
   for(let k=0;k<9;k++){const a=k/9*6.283;S.add(G.dod,P.shale,M(FIRE.x+Math.cos(a)*0.62,0.08,FIRE.z+Math.sin(a)*0.62,a,0.17,0.13,0.17));}
   for(let k=0;k<3;k++)S.add(G.cyl6,P.earth,M(FIRE.x,0.1,FIRE.z,k*1.05,0.07,0.85,0.07,0,Math.PI/2));
-  [[0.4],[1.95],[3.5],[5.05]].forEach(([a])=>{const x=FIRE.x+Math.cos(a)*2.1,z=FIRE.z+Math.sin(a)*2.1;S.add(G.cyl6,P.earth,M(x,0.2,z,-a,0.2,1.5,0.2,0,Math.PI/2));});
+
   // tent facing the fire
   const tr=Math.atan2(-(FIRE.z-TENT.z),FIRE.x-TENT.x),dx=Math.cos(tr),dz=-Math.sin(tr);
   const S0=S;{const S=TENTM;S.add(G.tent,P.tent,M(TENT.x,0,TENT.z,tr,2.3,1.05,1.25));
@@ -1495,11 +1495,14 @@ function buildHiker(fit){const R=new Rig(!!fit);const B=P.truck,S=P.shale,E=P.ea
         'thighL.x':kf(u,[0,-0.1,0.25,0.25,0.5,0.45,0.7,-0.95,0.86,-0.55,1,-0.1]),'shinL.x':kf(u,[0,0.2,0.25,0.35,0.5,0.75,0.7,1.55,0.86,0.75,1,0.2]),
         'pelvis.py':kf(u,[0,-0.04,0.25,-0.13,0.5,-0.06,0.75,-0.02,1,-0.03]),'pelvis.y':kf(u,[0,0,0.25,-0.12,0.55,0.08,1,0])});
       legsLevel(o);}},
+    lie:{label:'Lie back, arms behind head',fade:0.9,dur:5,fn(o,t){const b=Math.sin(t/5*6.2832);
+      ad(o,{'armL.x':-2.75,'armR.x':-2.75,'armL.z':-0.4,'armR.z':0.4,'foreL.x':-2.05,'foreR.x':-2.05,'thighR.x':-0.75,'shinR.x':1.45,'thighL.x':-0.05,'shinL.x':0.08,
+        'chest.x':0.03*b,'spine.x':0.02*b,'neck.x':-0.28});}},
     sit:{label:'Sit by fire',fade:0.8,stage:'fire',fn(o,t){ad(o,SIT);const rub=kf(frac(t/8),[0,1,0.45,1,0.55,0,0.9,0,1,1]);
       A_(o,'foreL.x',0.1*sin(t*12)*rub);A_(o,'foreR.x',-0.1*sin(t*12)*rub);A_(o,'armL.z',-0.1*rub);A_(o,'armR.z',0.1*rub);A_(o,'foreL.x',0.25*(1-rub));A_(o,'foreR.x',0.25*(1-rub));
       A_(o,'neck.x',0.06*sin(t*0.6));A_(o,'neck.y',0.3*sin(t*0.23));const b=sin(t*TAU/4);A_(o,'chest.sx',0.025*b);A_(o,'chest.sy',0.02*b);}},
   };
-  return {tips,fit,bind,key:'hiker',label:'Hiker',rig:R,clips:C,order:['idle','walk','run','chop','cast','climb','scramble','sit'],walk:'walk',run:'run',camD:9,camY:1.0,jr:0.032};}
+  return {tips,fit,bind,key:'hiker',label:'Hiker',rig:R,clips:C,order:['idle','walk','run','chop','cast','climb','scramble','sit','lie'],walk:'walk',run:'run',camD:9,camY:1.0,jr:0.032};}
 
 /* ---------- owl ---------- */
 function buildOwl(fit){const R=new Rig(!!fit);const E=P.earth,T=P.tent,S=P.shale;let tips=null,bind=null,fold={w:0,t:0,z:0};
@@ -2687,7 +2690,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 46 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 46 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 47 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 47 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
@@ -2758,7 +2761,10 @@ function sndInit(){if(SND.ctx){if(SND.ctx.state==='suspended')SND.ctx.resume();r
   const rev=c.createConvolver();rev.buffer=sndImpulse(c,3.2,2.4);const wet=c.createGain();wet.gain.value=0.9;rev.connect(wet);wet.connect(master);SND.rev=rev;
   const mk=(name,pos)=>{const g=c.createGain();g.gain.value=0;let out=g;if(pos){const p=c.createPanner();p.panningModel='HRTF';p.distanceModel='inverse';p.refDistance=2.5;p.rolloffFactor=1.2;p.maxDistance=60;g.connect(p);p.connect(master);SND.n[name+'P']=p;const s=c.createGain();s.gain.value=0.15;p.connect(s);s.connect(rev);}else g.connect(master);SND.n[name]=g;
     fetch('audio/'+name+'.mp3').then(r=>r.arrayBuffer()).then(a=>new Promise((res,rej)=>c.decodeAudioData(a,res,rej))).then(buf=>{const s=c.createBufferSource();s.buffer=buf;s.loop=true;s.connect(g);s.start(0,Math.random()*buf.duration);SND.b[name]=s;}).catch(e=>console.warn('sound',name,e));};
-  mk('birds');mk('crickets');mk('rain');mk('stream',true);mk('steps_forest');mk('steps_snow');}
+  mk('birds');mk('crickets');mk('rain');mk('stream',true);mk('steps_forest');mk('steps_snow');mk('wade');mk('car_idle',true);mk('car_drive',true);
+  SND.one={};['car_start','car_brake'].forEach(n=>fetch('audio/'+n+'.mp3').then(r=>r.arrayBuffer()).then(a=>new Promise((res,rej)=>c.decodeAudioData(a,res,rej))).then(b=>{SND.one[n]=b;}).catch(()=>{}));}
+function sndOne(name,x,y,z,vol){const c=SND.ctx;if(!c||!SND.one||!SND.one[name])return;const s=c.createBufferSource(),g=c.createGain(),p=c.createPanner();s.buffer=SND.one[name];p.panningModel='HRTF';p.refDistance=3;p.rolloffFactor=1;
+  if(p.positionX){p.positionX.value=x;p.positionY.value=y;p.positionZ.value=z;}else p.setPosition(x,y,z);g.gain.value=vol;s.connect(g);g.connect(p);p.connect(SND.master);s.start();}
 ['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>sndInit(),{passive:true}));
 const sndSet=(name,v,t=0.6)=>{const g=SND.n[name];if(g)g.gain.setTargetAtTime(v,SND.ctx.currentTime,t);};
 /* an owl call, made on the fly: hoo… hoo-hoo… hoo, hoo. Near owls are clear and placed in 3D; far ones are mostly echo */
@@ -2787,9 +2793,18 @@ function sndTick(dt,night){const c=SND.ctx;if(!c||c.state!=='running')return;
   if(SND.wp){const p=SND.n.streamP;if(p.positionX){p.positionX.setTargetAtTime(SND.wp[0],c.currentTime,0.3);p.positionY.value=ly-1;p.positionZ.setTargetAtTime(SND.wp[1],c.currentTime,0.3);}else p.setPosition(SND.wp[0],ly-1,SND.wp[1]);}
   sndSet('stream',SND.wp?0.2*(snowI>0.6?0.6:1):0,0.8);
   /* footsteps: forest floor, or crunching snow when it lies deep; they follow your walking speed */
-  const walk=!inCar&&!player.climb&&player.moving&&player.spd>0.2&&depthAt(player.x,player.z,player.level)<0.05,sn=st.snow||0,sp=clamp(player.spd/2,0.5,1.4);
+  const walk=!inCar&&!player.climb&&!player.pose&&player.moving&&player.spd>0.2&&depthAt(player.x,player.z,player.level)<0.05,sn=st.snow||0,sp=clamp(player.spd/2,0.5,1.4);
   sndSet('steps_forest',walk?0.65*(1-smooth(0.3,0.6,sn)):0,0.08);sndSet('steps_snow',walk?0.75*smooth(0.3,0.6,sn):0,0.08);
   if(SND.b.steps_forest)SND.b.steps_forest.playbackRate.value=sp;if(SND.b.steps_snow)SND.b.steps_snow.playbackRate.value=sp*0.95;
+  /* wading: splashes that keep time with your stride */
+  {const d_=depthAt(player.x,player.z,player.level),wd=!inCar&&player.moving&&player.spd>0.15&&d_>0.04;sndSet('wade',wd?0.55*clamp(0.5+d_,0.5,1.1):0,0.12);if(SND.b.wade)SND.b.wade.playbackRate.value=clamp(player.spd/1.6,0.6,1.3);}
+  /* the van: the starter cranks, then it settles into idle; the driving loop swells and rises in pitch with speed; brakes squeal when you brake hard */
+  if(car){const v=Math.abs(car.v),on=car.occupied,start=SND.carStart||0,running=on&&T-start>1.8,dr=clamp(v/4,0,1);
+    for(const n of['car_idleP','car_driveP']){const p=SND.n[n];if(!p)continue;if(p.positionX){p.positionX.value=car.x;p.positionY.value=car.y+0.6;p.positionZ.value=car.z;}else p.setPosition(car.x,car.y+0.6,car.z);}
+    sndSet('car_idle',running?0.42*(1-0.65*dr):0,running?0.4:0.25);sndSet('car_drive',running?0.6*dr:0,0.3);
+    if(SND.b.car_idle)SND.b.car_idle.playbackRate.value=1+0.12*dr;if(SND.b.car_drive)SND.b.car_drive.playbackRate.value=0.8+0.55*clamp(v/9,0,1);
+    if(on&&!SND.wasOn){SND.carStart=T;sndOne('car_start',car.x,car.y+0.6,car.z,0.7);}SND.wasOn=on;
+    const braking=on&&((keys.down&&car.v>2.2)||(keys.up&&car.v<-1.6));if(braking&&!SND.brk&&T-(SND.brkT||-9)>1.2){SND.brkT=T;sndOne('car_brake',car.x,car.y+0.5,car.z,clamp(v/7,0.25,0.8));}SND.brk=braking;}
   /* owls call at dusk and night: the one nearby, placed where it sits; otherwise a far-off call echoing across the valley */
   if(night>0.35&&clear>0.4&&(SND.owlT-=dt)<=0){SND.owlT=rr(28,60);
     if(owl&&owl.R.root.visible!==false){owl.R.root.getWorldPosition(_ov);const d=hyp(_ov.x-lx,_ov.z-lz);if(d<28){hoot(_ov.x,_ov.y,_ov.z,true);return;}}
@@ -2985,7 +3000,7 @@ function setOwlCam(on){if(on===owlCam.on)return;owlCam.on=on;if(on){owl.R.root.g
 function upd3D(dt){
   for(const e of CH3D){const R=e.C.rig,clips=e.C.clips,has=n=>!!clips[n];let want='idle',x,z;
     if(e.kind==='hiker'){x=player.x;z=player.z;
-      if(player.climb&&player.climb.rapids)want=player.climb.climbing?'scramble':'walk';else if(player.climb)want='climb';else if(player.chopTree)want='chop';else if(fish.state!=='idle')want='cast';
+      if(player.pose==='lie')want='lie';else if(player.pose)want='sit';else if(player.climb&&player.climb.rapids)want=player.climb.climbing?'scramble':'walk';else if(player.climb)want='climb';else if(player.chopTree)want='chop';else if(fish.state!=='idle')want='cast';
       else if(player.moving>0)want=player.moving>1.2?'run':'walk';}
     else{const a=e.a;x=a.x;z=a.z;
       if(e.kind==='bear'&&(a.state==='rear'||a.rear>0.3))want='rear';
@@ -3210,10 +3225,24 @@ function setupCamp(){const fx=player.x+Math.sin(player.rot)*1.8,fz=player.z+Math
 inter.push({get x(){return CAMP.state==='set'&&TENT?TENT.x:1e9},get z(){return CAMP.state==='set'&&TENT?TENT.z:1e9},lv:'rim',r:3.2,on:()=>CAMP.state==='set',label:()=>'Pack up camp (P)',can:()=>true,act(){packCamp();}});
 function openInv(target){INV.target=target;setMenu(true);toggleIP(true);paintInv();}
 const INV={target:null};
+const SEATS=[],seatGeo=(()=>{const m=new Merger();m.add(G.cyl6,P.earth,M(0,0.2,0,0,0.2,1.5,0.2,0,Math.PI/2));for(const e of[-0.75,0.75])m.add(G.cyl6,P.tent,M(e,0.2,0,0,0.19,0.02,0.19,0,Math.PI/2));return m.build();})();
+function makeSeat(x,z,yaw){const me=new THREE.Mesh(seatGeo,matV);me.castShadow=me.receiveShadow=true;scene.add(me);const s_={me,x,z,yaw,carried:false};SEATS.push(s_);placeSeat(s_,x,z,yaw);
+  inter.push({get x(){return s_.carried?1e9:s_.x},get z(){return s_.carried?1e9:s_.z},lv:'rim',r:1.5,on:()=>!s_.carried&&!player.pose,label:()=>'Sit on the log (C: carry it)',can:()=>true,act(){sitOnSeat(s_);}});return s_;}
+function placeSeat(s_,x,z,yaw){s_.x=x;s_.z=z;s_.yaw=yaw;s_.me.position.set(x,gh(x,z),z);s_.me.rotation.set(0,yaw,0);}
+function sitOnSeat(s_){/* sit on whichever side faces the fire (or faces you if there's no fire) */const ax=Math.cos(s_.yaw),az=-Math.sin(s_.yaw),nx=-az,nz=ax;
+  const tx=CAMP.state==='set'&&hyp(FIRE.x-s_.x,FIRE.z-s_.z)<8?FIRE.x:player.x,tz=CAMP.state==='set'&&hyp(FIRE.x-s_.x,FIRE.z-s_.z)<8?FIRE.z:player.z,sd=((tx-s_.x)*nx+(tz-s_.z)*nz)>=0?1:-1;
+  player.seat={sx:s_.x-nx*sd*0.18,sz:s_.z-nz*sd*0.18,face:Math.atan2(nx*sd,nz*sd)};player.pose='sit';player.sitOnLog=true;player.chopTree=null;cancelFish();}
+[[0.4],[1.95],[3.5],[5.05]].forEach(([a])=>{makeSeat(FIRE.x+Math.cos(a)*2.1,FIRE.z+Math.sin(a)*2.1,-a);});
+let carriedSeat=null;
+function seatKey(){if(carriedSeat){const x=player.x+Math.sin(player.rot)*1.1,z=player.z+Math.cos(player.rot)*1.1;if(blocked(x,z,0.3,'rim')||inWater(x,z)){toast('No room to set the log down here.',1.6);return;}
+    carriedSeat.carried=false;placeSeat(carriedSeat,x,z,player.rot+Math.PI/2);carriedSeat=null;return;}
+  const s_=SEATS.filter(q=>!q.carried).sort((a,b)=>hyp(a.x-player.x,a.z-player.z)-hyp(b.x-player.x,b.z-player.z))[0];
+  if(s_&&hyp(s_.x-player.x,s_.z-player.z)<1.7){s_.carried=true;carriedSeat=s_;player.pose=null;toast('Carrying the log. Press C to set it down.',2);}}
+function poseKey(kind){if(car&&car.occupied||player.climb)return;if(player.pose===kind){player.pose=null;player.seat=null;return;}player.chopTree=null;cancelFish();player.seat=null;player.sitOnLog=false;player.pose=kind;}
 
 if(car)inter.push({get x(){return car.x},get z(){return car.z},r:3.1,on:()=>!car.occupied,label:()=>'Get in the van',can:()=>true,act(){enterCar();}});
 const exitIt={label:()=>'Get out of the van (W/S drive, A/D steer)',can:()=>true,act(){exitCar();}};
-function enterCar(){car.occupied=true;player.chopTree=null;cancelFish();player.spd=0;player.g.visible=false;carSync();
+function enterCar(){player.pose=null;player.seat=null;car.occupied=true;player.chopTree=null;cancelFish();player.spd=0;player.g.visible=false;carSync();
   if(!st.drove){st.drove=1;toast('In the van. W/S to drive and reverse, A/D to steer, Shift for more speed, E to get out.',5);}}
 function exitCar(){const sx=Math.sin(car.rot),cz=Math.cos(car.rot);
   for(const[lx,lz]of[[1.7,0.4],[-1.7,0.4],[0,-3.0],[0,3.0],[2.4,-1.5],[-2.4,-1.5]]){const x=car.x+cz*lx+sx*lz,z=car.z-sx*lx+cz*lz;
@@ -3566,7 +3595,7 @@ function poseAnimals(dt){
 /* ---------- input ---------- */
 const KM={KeyW:'up',ArrowUp:'up',KeyS:'down',ArrowDown:'down',KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',ShiftLeft:'run',ShiftRight:'run'};
 addEventListener('keydown',e=>{const tg=e.target&&e.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA'||tg==='BUTTON'&&(e.code==='Enter'||e.code==='Space'))return;
-  if(e.code==='KeyG'){toggleBP();return;}if(e.code==='KeyI'){INV.target=null;toggleIP();return;}if(e.code==='KeyP'&&CAMP.state==='set'&&TENT&&hyp(player.x-TENT.x,player.z-TENT.z)<3.5){packCamp();return;}if(e.code==='KeyM'||e.code==='Tab'){e.preventDefault();setMenu(!document.body.classList.contains('menuOpen'));return;}
+  if(e.code==='KeyG'){toggleBP();return;}if(st.playing&&e.code==='KeyX'){poseKey('sit');return;}if(st.playing&&e.code==='KeyZ'){poseKey('lie');return;}if(st.playing&&e.code==='KeyC'){seatKey();return;}if(e.code==='KeyI'){INV.target=null;toggleIP();return;}if(e.code==='KeyP'&&CAMP.state==='set'&&TENT&&hyp(player.x-TENT.x,player.z-TENT.z)<3.5){packCamp();return;}if(e.code==='KeyM'||e.code==='Tab'){e.preventDefault();setMenu(!document.body.classList.contains('menuOpen'));return;}
   if(st.playing&&(CABINKIT.busy()||!$('bp').hidden)){const c=e.code;
     if(c==='Digit1'){CABINKIT.craft('short');return;}if(c==='Digit2'){CABINKIT.craft('medium');return;}if(c==='Digit3'){CABINKIT.craft('long');return;}
     if(c==='KeyQ'||c==='KeyR'){CABINKIT.rotate();return;}if(c==='KeyF'){CABINKIT.drop();return;}if(c==='KeyC'){CABINKIT.cutDoor();return;}if(c==='KeyX'){CABINKIT.cutWindow();return;}
@@ -3680,10 +3709,10 @@ function updMapCompass(){$('cmpRose').setAttribute('transform','rotate('+(-camCu
   const[a,b]=m(player.x,player.z);x.fillStyle='#AB451C';x.strokeStyle='#F4F6F6';x.beginPath();x.arc(a,b,5,0,6.283);x.fill();x.stroke();
   x.beginPath();x.moveTo(a,b);x.lineTo(a+Math.sin(player.rot)*11,b+Math.cos(player.rot)*11);x.stroke();}
 /* ---------- quick build buttons ---------- */
-{const QB=[['wall',2.4,0,'Quick wall 2.4 m'],['wall',3.6,0,'Quick wall 3.6 m'],['cabin',3.6,2.4,'Quick cabin 3.6×2.4'],['cabin',4.8,3.6,'Quick cabin 4.8×3.6'],['roof',0,0,'Auto roof']];
-  const h=document.createElement('div');h.innerHTML='<h4>Quick build (testing)</h4><div class="btns" id="bQuick">'+QB.map((q,i)=>'<button data-q="'+i+'">'+q[3]+(q[0]!=='roof'?' · '+CABINKIT.quickCost(q[0],q[1],q[2]):'')+'</button>').join('')+'</div>';
-  $('bStat').before(h);$('bQuick').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b||b.disabled)return;const q=QB[+b.dataset.q];if(q[0]==='roof')CABINKIT.autoRoof();else if(q[0]==='wall')CABINKIT.quickWall(q[1]);else CABINKIT.quickCabin(q[1],q[2]);});
-  window._qbPaint=()=>{const have=st.sticks+st.logs*5;document.querySelectorAll('#bQuick [data-q]').forEach(b=>{const q=QB[+b.dataset.q];b.disabled=q[0]!=='roof'&&have<CABINKIT.quickCost(q[0],q[1],q[2]);b.style.opacity=b.disabled?0.45:1;});};}
+{const QB=[['seat',0,0,'Log seat'],['wall',2.4,0,'Quick wall 2.4 m'],['wall',3.6,0,'Quick wall 3.6 m'],['cabin',3.6,2.4,'Quick cabin 3.6×2.4'],['cabin',4.8,3.6,'Quick cabin 4.8×3.6'],['roof',0,0,'Auto roof']];
+  const h=document.createElement('div');h.innerHTML='<h4>Quick build (testing)</h4><div class="btns" id="bQuick">'+QB.map((q,i)=>'<button data-q="'+i+'">'+q[3]+(q[0]==='seat'?' · 10':q[0]!=='roof'?' · '+CABINKIT.quickCost(q[0],q[1],q[2]):'')+'</button>').join('')+'</div>';
+  $('bStat').before(h);$('bQuick').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b||b.disabled)return;const q=QB[+b.dataset.q];if(q[0]==='seat'){if(st.sticks<10){toast('A log seat needs 10 sticks.',1.6);return;}const x=player.x+Math.sin(player.rot)*1.4,z=player.z+Math.cos(player.rot)*1.4;if(blocked(x,z,0.3,'rim')){toast('No room here.',1.4);return;}st.sticks-=10;makeSeat(x,z,player.rot+Math.PI/2);toast('A new log seat.',1.4);}else if(q[0]==='roof')CABINKIT.autoRoof();else if(q[0]==='wall')CABINKIT.quickWall(q[1]);else CABINKIT.quickCabin(q[1],q[2]);});
+  window._qbPaint=()=>{const have=st.sticks+st.logs*5;document.querySelectorAll('#bQuick [data-q]').forEach(b=>{const q=QB[+b.dataset.q];b.disabled=q[0]==='seat'?st.sticks<10:q[0]!=='roof'&&have<CABINKIT.quickCost(q[0],q[1],q[2]);b.style.opacity=b.disabled?0.45:1;});};}
 /* ---------- cabin building kit hookup ---------- */$('onlineBtn').addEventListener('click',()=>toggleOP());$('opClose').addEventListener('click',()=>toggleOP(false));
 const toggleLP=f=>togglePanel('lp','lightBtn',f),toggleTP=f=>togglePanel('tp','timeBtn',f),toggleWP=f=>togglePanel('wp','weatherBtn',f),toggleBP=f=>togglePanel('bp','buildBtn',f);
 {const C_=CABINKIT.CFG.cost,CR=[['short','Short log 1.2 m','logShort'],['medium','Medium log 2.4 m','logMedium'],['long','Long log 3.6 m','logLong'],['door','Door','door'],['shutter','Shutter','shutter'],['roofPlank','Roof panel','roofPlank'],['floorPlank','Floor plank','floorPlank']];
@@ -3771,6 +3800,8 @@ function sim(dt,night){
   let ix=(keys.right?1:0)-(keys.left?1:0)+joy.x,iz=(keys.down?1:0)-(keys.up?1:0)+joy.y;let len=hyp(ix,iz);if(len>1){ix/=len;iz/=len;len=1;}
   {const yw=camCur.y*Math.PI/180,c=Math.cos(yw),sn=Math.sin(yw),wx=ix*c+iz*sn,wz=-ix*sn+iz*c;ix=wx;iz=wz;}
   if(car&&car.occupied){driveTick(dt);ix=0;iz=0;len=0;}
+  if(player.pose){if(len>0.3){player.pose=null;player.seat=null;}else{len=0;ix=0;iz=0;st.energy=Math.min(100,st.energy+dt*(player.pose==='lie'?0.9:0.45));
+    if(player.seat){player.x+=(player.seat.sx-player.x)*Math.min(1,dt*6);player.z+=(player.seat.sz-player.z)*Math.min(1,dt*6);player.rot=lerpAng(player.rot,player.seat.face,1-Math.exp(-6*dt));}}}
   const moving=len>0.12&&!player.climb,running=moving&&(keys.run||runHeld)&&st.energy>3;keys.runActive=running;
   if(!GZ&&!player.climb){const w_=waterAt(player.x,player.z);player.level=w_!==null&&player.y<w_-0.02?'low':'rim';
     if(WORLD_){const g=WORLD_.wBridge(player.x,player.z)||WORLD_.GG.find(g=>{const[u,v]=WORLD_.gLoc(g,player.x,player.z);return Math.abs(u)<3&&Math.abs(v)<g.bh+0.6;});if(g&&player.y<g.deck-1.2)player.level='low';}}
@@ -3877,6 +3908,8 @@ function visuals(dt){
   if(!player.climb&&!(car&&car.occupied))player.y+=(heightAt(player.x,player.z,player.level)-player.y)*Math.min(1,dt*12);
   const sw=player.moving*0.55,ph=player.phase;
   player.g.position.set(player.x,player.y+Math.abs(Math.sin(ph))*0.05*player.moving,player.z);player.g.rotation.y=player.rot;
+  {const lt=player.pose==='lie'?1:0,stt=player.pose==='sit'?1:0;player.lieK=(player.lieK||0)+(lt-(player.lieK||0))*Math.min(1,dt*2.2);player.sitK=(player.sitK||0)+(stt-(player.sitK||0))*Math.min(1,dt*3);
+    player.g.rotation.x=-Math.PI/2*player.lieK;player.g.position.y+=0.16*player.lieK-(player.sitOnLog?0.0:0.36)*player.sitK;}
   if(BRG&&player.level==='rim'&&!player.climb&&GZ.onSwing(player.x,player.z))player.g.position.z+=player.y*Math.sin(BRG.ang);
   player.legs[0].rotation.x=Math.sin(ph)*sw;player.legs[1].rotation.x=-Math.sin(ph)*sw;
   let armT=-Math.sin(ph)*sw*0.8,lean=0;
@@ -3901,7 +3934,7 @@ function visuals(dt){
   if(fish.state==='reel'){const fb=$('fbMark');fb.style.left=(fish.m*100).toFixed(1)+'%';$('fbProg').style.width=(fish.p*100).toFixed(1)+'%';
     const tt=fish.m>0.66?'Too tight! Ease off':fish.m<0.38?(isTouch?'Reel in! Hold Use':'Reel in! Hold E'):'Hold it in the green…';if($('fbTitle').textContent!==tt)$('fbTitle').textContent=tt;}
   player.g.rotation.x+=(lean-player.g.rotation.x)*Math.min(1,dt*12);{const nt=night>0.4,ax=nt?-0.6:Math.sin(ph)*sw*0.8,az=nt?0.38:0,k=Math.min(1,dt*8);player.arms[1].rotation.x+=(ax-player.arms[1].rotation.x)*k;player.arms[1].rotation.z+=(az-player.arms[1].rotation.z)*k;}
-  poseAnimals(dt);updBubbles(dt);upd3D(dt);owlTick(dt,night);updRipples(dt,night);updLine();updWeather(dt,night);CABINKIT.update(dt);updBuildPanel(dt);netTick(dt);sndTick(dt,night);updInvPanel(dt);updMapCompass();if(CAMP.state!=='set'){campBox.visible=CAMP.state==='carried';if(campBox.visible){campBox.position.set(player.x-Math.sin(player.rot)*0.35,player.y+0.9,player.z-Math.cos(player.rot)*0.35);campBox.rotation.y=player.rot;}}else campBox.visible=false;updTrees(dt,st.playing&&!st.busy);updChips(dt);
+  poseAnimals(dt);updBubbles(dt);upd3D(dt);owlTick(dt,night);updRipples(dt,night);updLine();updWeather(dt,night);CABINKIT.update(dt);updBuildPanel(dt);netTick(dt);sndTick(dt,night);if(carriedSeat){carriedSeat.me.position.set(player.x+Math.sin(player.rot)*0.5,player.y+0.75,player.z+Math.cos(player.rot)*0.5);carriedSeat.me.rotation.set(0,player.rot+Math.PI/2,0);}updInvPanel(dt);updMapCompass();if(CAMP.state!=='set'){campBox.visible=CAMP.state==='carried';if(campBox.visible){campBox.position.set(player.x-Math.sin(player.rot)*0.35,player.y+0.9,player.z-Math.cos(player.rot)*0.35);campBox.rotation.y=player.rot;}}else campBox.visible=false;updTrees(dt,st.playing&&!st.busy);updChips(dt);
   // camera follows the hiker; zoom, tilt and turn are limited
   const tx=clamp(player.x,CX[0],CX[1]),tz=clamp(player.z,CZ[0],CZ[1]);camT.x+=(tx-camT.x)*(1-Math.exp(-4*dt));camT.z+=(tz-camT.z)*(1-Math.exp(-4*dt));camT.y+=(player.y-camT.y)*(1-Math.exp(-3*dt));
   {const g=camGoal(),k=1-Math.exp(-7*dt);camCur.d+=(g.d-camCur.d)*k;camCur.p+=(g.p-camCur.p)*k;camCur.y=wrapDeg(camCur.y+wrapDeg(g.y-camCur.y)*k);setCamOff();
