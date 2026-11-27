@@ -198,7 +198,7 @@ body.touch #prompt{bottom:128px}
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 44 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 45 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -228,7 +228,7 @@ body.touch #prompt{bottom:128px}
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 44 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 45 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -308,7 +308,7 @@ if(MAP==='meadow'){
   const surf=(x,z)=>{const w=wq(x,z);let L=landY(x,z);L=Math.max(L,w.wl+0.4-0.45*Math.max(0,w.dd-w.B));
     if(w.dd<0)return w.wl-(0.08+0.72*smooth(0,Math.max(0.7,w.hw*0.85),-w.dd))*clamp((w.hw-0.9)/1.1,0.45,1);if(w.dd<w.B)return w.wl+0.02+(L-w.wl-0.02)*smooth(0,w.B,w.dd);return L;};
   const wadeable=(x,z)=>{const w=wq(x,z);return w.s>sB+0.25&&Math.abs(WL(w.s+0.3)-WL(w.s-0.3))<0.25;};
-  const steep=(x,z)=>{const w=wq(x,z);return (w.dd>=0&&w.dd<w.B&&w.B<1)||Math.abs(shelfD(x,z))<0.5;};
+  const steep=(x,z)=>Math.abs(shelfD(x,z))<0.5;
   inWater=(x,z)=>{const q=riverQ(x,z);return q.d<q.hw||hyp(x-LAKE.x,z-LAKE.z)<LAKE.r;};
   rx=z=>{for(let i=0;i<RP.length-1;i++){const a=RP[i],b=RP[i+1];if(z>=a[1]&&z<=b[1]){const t=(z-a[1])/(b[1]-a[1]||1);return a[0]+(b[0]-a[0])*t;}}return z<RP[0][1]?RP[0][0]:RP[RP.length-1][0];};
   snapRiver=(x,z)=>{const q=riverQ(x,z);return [q.px,q.pz];};
@@ -1087,7 +1087,7 @@ function quad(o){
 }
 const animals=[];
 const depthAt=(x,z,lv)=>{const w=waterAt(x,z);if(w===null)return 0;return Math.max(0,w-heightAt(x,z,lv));};
-const wadeK=d=>1-0.62*clamp(d/0.75,0,1);
+const wadeK=d=>1-0.4*clamp(d/0.75,0,1);
 function addAnimal(kind,parts,x,z,extra){const a=Object.assign({kind,x,z,rot:rng()*6,state:'idle',timer:0,tx:x,tz:z,phase:rng()*6,spd:0,rad:0.4,rear:0},parts,extra);scene.add(a.g);animals.push(a);return a;}
 // deer
 function makeDeer(x0,z0,kind){const q=quad({W:0.42,H:0.5,L:1.0,leg:0.62,lt:0.08,body:P.tent,legC:P.earth});
@@ -2644,7 +2644,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 44 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 44 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 45 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 45 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
@@ -3150,7 +3150,7 @@ function carBlocked(x,z,rot){const sx=Math.sin(rot),cz=Math.cos(rot);
 function driveTick(dt){const fwd=keys.up||joy.y<-0.35,back=keys.down||joy.y>0.35,stI=(keys.left?1:0)-(keys.right?1:0)-(Math.abs(joy.x)>0.2?joy.x:0),boost=keys.run||runHeld;
   const v0=car.v;
   if(fwd)car.v+=(car.v<0?9:4.2)*dt;else if(back)car.v-=(car.v>0?9:3.2)*dt;else car.v-=Math.sign(car.v)*Math.min(Math.abs(car.v),2.4*dt);
-  {const climb=clamp(-(car.tp||0)*Math.sign(car.v)*1.4,0,0.6);car.v=clamp(car.v,-3.2*(1-climb*0.5),(boost?10:6.5)*(waterAt(car.x,car.z)!==null?0.5:1)*(1-climb));}
+  {const climb=clamp(-(car.tp||0)*Math.sign(car.v)*1.4,0,0.6);car.v=clamp(car.v,-3.2*(1-climb*0.5),(boost?10:6.5)*(waterAt(car.x,car.z)!==null?0.8:1)*(1-climb));}
   car.steer+=(clamp(stI,-1,1)*0.55-car.steer)*Math.min(1,dt*5);
   const yaw=car.v/2.7*Math.tan(car.steer),nr=car.rot+yaw*dt,nx=car.x+Math.sin(nr)*car.v*dt,nz=car.z+Math.cos(nr)*car.v*dt;
   if(carBlocked(nx,nz,nr)){if(Math.abs(car.v)>2.5){st.shake=Math.max(st.shake,0.2);}car.v=-car.v*0.25;
@@ -3667,7 +3667,7 @@ function sim(dt,night){
    if(moving){const l=hyp(ix,iz)||1;player.dx=ix/l;player.dz=iz/l;}
    const sp=player.spd*wadeK(depthAt(player.x,player.z,player.level))*(1-0.35*clamp(((st.snow||0)-0.3)/0.7,0,1));
    if(sp>0.03&&player.dx!==undefined&&!player.climb){const nx=player.x+player.dx*sp*dt,nz=player.z+player.dz*sp*dt;
-     const here=blocked(player.x,player.z);const bl=(x,z)=>{if(here)return false;if(blocked(x,z))return true;if(GZ)return false;const dh=heightAt(x,z,player.level)-player.y;return dh>0.6||dh<-1.6;};
+     const here=blocked(player.x,player.z);const bl=(x,z)=>{if(here)return false;if(blocked(x,z))return true;if(GZ)return false;const dh=heightAt(x,z,player.level)-player.y;return dh>0.75||dh<-1.6;};
      if(!bl(nx,nz)){player.x=nx;player.z=nz;}else if(!bl(nx,player.z))player.x=nx;else if(!bl(player.x,nz))player.z=nz;
      if(moving)player.rot=lerpAng(player.rot,Math.atan2(ix,iz),1-Math.exp(-10*dt));player.phase+=dt*sp*2.6;}
    player.moving=sp>0.1?(sp>2.2?1.4:1):0;}
