@@ -211,7 +211,7 @@ body.touch #prompt{bottom:128px}
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 47 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 48 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -241,7 +241,7 @@ body.touch #prompt{bottom:128px}
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 47 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 48 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -2690,7 +2690,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 47 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 47 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 48 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 48 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
@@ -3203,7 +3203,7 @@ if(car)car.inv={logs:0,berries:0,fish:0};
   const g=new THREE.Group(),m=new Merger();m.add(G.box,[P.tent,P.rust,P.fern][i],M(0,0.32,0,0,0.8,0.64,0.6));m.add(G.box,P.earth,M(0,0.66,0,0,0.86,0.06,0.66));for(const sx of[-0.38,0.38])m.add(G.box,P.earth,M(sx,0.32,0,0,0.06,0.66,0.62));
   const me=new THREE.Mesh(m.build(),matV);me.castShadow=me.receiveShadow=true;g.add(me);g.position.set(x,gh(x,z),z);g.rotation.y=0.2*i;scene.add(g);colliders.push({x,z,r:0.5});
   inter.push({x,z,lv:'rim',r:1.7,on:()=>true,label:()=>'Open '+c.name.toLowerCase(),can:()=>true,act(){openInv(c);}});});}
-if(car)inter.push({get x(){return car.x},get z(){return car.z},r:3.3,on:()=>!car.occupied,label:()=>'Van storage (I)',can:()=>true,act(){openInv('van');}});
+
 /* the camp: pack the tent and fire into a box, carry it or load it in the van, set it up anywhere */
 CAMP.home={fx:FIRE.x,fz:FIRE.z,tx:TENT?TENT.x:0,tz:TENT?TENT.z:0};
 const campRing=(()=>{const m=new Merger();for(let k=0;k<9;k++){const a=k/9*6.283;m.add(G.dod,P.shale,M(Math.cos(a)*0.62,0.08,Math.sin(a)*0.62,a,0.17,0.13,0.17));}for(let k=0;k<3;k++)m.add(G.cyl6,P.earth,M(0,0.1,0,k*1.05,0.07,0.85,0.07,0,Math.PI/2));
@@ -3240,7 +3240,7 @@ function seatKey(){if(carriedSeat){const x=player.x+Math.sin(player.rot)*1.1,z=p
   if(s_&&hyp(s_.x-player.x,s_.z-player.z)<1.7){s_.carried=true;carriedSeat=s_;player.pose=null;toast('Carrying the log. Press C to set it down.',2);}}
 function poseKey(kind){if(car&&car.occupied||player.climb)return;if(player.pose===kind){player.pose=null;player.seat=null;return;}player.chopTree=null;cancelFish();player.seat=null;player.sitOnLog=false;player.pose=kind;}
 
-if(car)inter.push({get x(){return car.x},get z(){return car.z},r:3.1,on:()=>!car.occupied,label:()=>'Get in the van',can:()=>true,act(){enterCar();}});
+if(car)inter.push({get x(){return car.x},get z(){return car.z},r:3.1,on:()=>!car.occupied,label:()=>'Get in the van (I: van storage)',can:()=>true,act(){enterCar();}});
 const exitIt={label:()=>'Get out of the van (W/S drive, A/D steer)',can:()=>true,act(){exitCar();}};
 function enterCar(){player.pose=null;player.seat=null;car.occupied=true;player.chopTree=null;cancelFish();player.spd=0;player.g.visible=false;carSync();
   if(!st.drove){st.drove=1;toast('In the van. W/S to drive and reverse, A/D to steer, Shift for more speed, E to get out.',5);}}
