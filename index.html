@@ -299,9 +299,67 @@ body.menuOpen #gm{display:grid;animation:gmIn .18s ease-out}
 #wmap.d3{background:radial-gradient(ellipse at 50% 35%,#12302f 0,#071214 55%,#030809 100%)}
 #wmap.d3[data-sty=par]{background:radial-gradient(ellipse at 50% 35%,#3a2c1e 0,#1c1612 60%,#0d0a08 100%)}
 .wmZoom button.on{background:var(--g-acc)!important;color:#0b1412!important;border-color:var(--g-acc)!important}
+
+/* ===== Build 60: Photographer ===== */
+body.photoMode #menuBtn,body.photoMode #mapCompass,body.photoMode #mapBox,body.photoMode #prompt,body.photoMode .netName,body.photoMode #fishUI,body.photoMode #touch,body.photoMode #toast{display:none!important}
+#ph{position:fixed;inset:0;z-index:20;touch-action:none;cursor:crosshair;-webkit-user-select:none;user-select:none;color:#F4F6F6}
+#ph[hidden]{display:none}
+.phFrame{position:absolute;inset:7% 5% 15% 5%;pointer-events:none}
+.phC{position:absolute;width:38px;height:38px;border:2px solid rgba(244,246,246,.85)}
+.phC.tl{left:0;top:0;border-right:0;border-bottom:0}.phC.tr{right:0;top:0;border-left:0;border-bottom:0}.phC.bl{left:0;bottom:0;border-right:0;border-top:0}.phC.br{right:0;bottom:0;border-left:0;border-top:0}
+.phThirds{position:absolute;inset:0;background:linear-gradient(90deg,transparent calc(33.33% - .5px),rgba(244,246,246,.16) 0 calc(33.33% + .5px),transparent 0 calc(66.66% - .5px),rgba(244,246,246,.16) 0 calc(66.66% + .5px),transparent 0),linear-gradient(transparent calc(33.33% - .5px),rgba(244,246,246,.16) 0 calc(33.33% + .5px),transparent 0 calc(66.66% - .5px),rgba(244,246,246,.16) 0 calc(66.66% + .5px),transparent 0)}
+.phAF{position:fixed;left:50%;top:46%;width:74px;height:52px;transform:translate(-50%,-50%);border:1.5px solid rgba(244,246,246,.9);border-radius:3px;transition:left .15s,top .15s,border-color .2s,transform .2s}
+.phAF.lock{border-color:#B7D7D0;box-shadow:0 0 12px rgba(183,215,208,.7);transform:translate(-50%,-50%) scale(.86)}
+.phTop{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:18px;padding:10px 16px;background:linear-gradient(rgba(0,0,0,.55),transparent);font:18px/1 var(--g-d);letter-spacing:1.5px}
+.phTop b{font-weight:400;text-transform:uppercase;letter-spacing:4px;color:#B7D7D0}
+.phTop span{flex:1;text-align:center;font-variant-numeric:tabular-nums;white-space:pre}
+.phTop button,.phBH button{background:none;border:1px solid rgba(244,246,246,.4);color:#F4F6F6;width:34px;height:34px;border-radius:50%;font:18px/1 Nunito,sans-serif;cursor:pointer}
+.phBot{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;align-items:flex-end;gap:18px;padding:10px 16px;background:rgba(6,11,10,.55);border:1px solid rgba(183,215,208,.18);border-radius:12px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);max-width:calc(100vw - 16px);flex-wrap:wrap;justify-content:center}
+.phGrp small{display:block;font:800 9.5px Nunito,sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:#B7D7D0;margin-bottom:5px}
+.phGrp output{color:#F4F6F6}
+.phSeg{display:flex;border:1px solid rgba(183,215,208,.3);border-radius:5px;overflow:hidden}
+.phSeg button{background:none;border:0;border-left:1px solid rgba(183,215,208,.18);color:#F4F6F6;font:16px/1 var(--g-d);padding:7px 8px;min-width:34px;cursor:pointer}.phSeg button:first-child{border-left:0}
+.phSeg button.on{background:#B7D7D0;color:#0b1412}
+#phShut{width:62px;height:62px;border-radius:50%;border:3px solid #F4F6F6;background:radial-gradient(circle,#F4F6F6 0 54%,transparent 56%);cursor:pointer;flex:none}
+#phShut:active{transform:scale(.93)}
+.phFoc{display:flex;align-items:center;gap:6px}.phFoc button{background:none;border:1px solid rgba(183,215,208,.4);color:#F4F6F6;border-radius:5px;font:15px/1 var(--g-d);padding:6px 8px;cursor:pointer}.phFoc input{width:130px;accent-color:#B7D7D0}
+.phAlb{background:none;border:1px solid rgba(183,215,208,.4);color:#F4F6F6;border-radius:6px;font:700 12px Nunito,sans-serif;letter-spacing:1px;text-transform:uppercase;padding:8px 12px;cursor:pointer}.phAlb b{color:#B7D7D0;margin-left:4px}
+#phHint{position:absolute;left:50%;top:52px;transform:translateX(-50%);font:700 11.5px Nunito,sans-serif;letter-spacing:.8px;color:rgba(244,246,246,.75);text-shadow:0 1px 3px #000;transition:opacity 1s;white-space:nowrap;pointer-events:none}
+#phFlash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+#phFlash.go{animation:phF .45s ease-out}@keyframes phF{0%{opacity:.85}100%{opacity:0}}
+#phPrev{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(760px,92vw);padding:14px;background:rgba(6,11,10,.86);border:1px solid rgba(183,215,208,.25);border-radius:10px;cursor:default;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+#phPrev img,#phView img{display:block;width:100%;border-radius:4px}
+#phMeta,#phVMeta{margin:10px 2px 0;font:17px/1.3 var(--g-d);letter-spacing:1px;color:rgba(244,246,246,.85)}
+#phPrev .btns,#phView .btns{justify-content:flex-end}
+#phBook{position:absolute;inset:0;background:rgba(5,9,8,.92);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);padding:22px clamp(12px,4vw,56px);overflow:auto;cursor:default}
+.phBH{display:flex;align-items:center;gap:14px;margin-bottom:18px;font:32px/1 var(--g-d);letter-spacing:6px;text-transform:uppercase}
+.phBH small{flex:1;font:700 12px Nunito,sans-serif;letter-spacing:1.5px;color:#B7D7D0}
+#phGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.phCard{background:#F4F6F6;border:0;padding:8px 8px 10px;border-radius:2px;cursor:pointer;text-align:left;box-shadow:0 8px 20px rgba(0,0,0,.45);transform:rotate(var(--r,0deg));transition:transform .15s}
+.phCard:hover{transform:rotate(0) scale(1.03)}
+.phCard img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
+.phCard span{display:block;margin-top:7px;font:15px/1.2 var(--g-d);color:#2a2622;letter-spacing:.5px}
+#phView{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(980px,94vw);padding:14px;background:rgba(6,11,10,.95);border:1px solid rgba(183,215,208,.25);border-radius:10px}
+#phView[hidden],#phPrev[hidden],#phBook[hidden]{display:none}
+@media(max-width:700px){.phBot{gap:10px;padding:8px}.phFoc input{width:90px}#phHint{display:none}.phTop span{font-size:14px}}
 </style>
 </head>
 <body>
+<div id="rwIntro" style="position:fixed;inset:0;z-index:60;background:#000;transition:opacity .7s ease;cursor:pointer"><video id="rwVid" src="audio/intro.mp4" playsinline preload="auto" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000"></video>
+<div id="rwTap" hidden style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:22px/1 'Iceland',sans-serif;letter-spacing:6px;text-transform:uppercase;color:rgba(232,238,236,.75);animation:rwP 2s ease-in-out infinite">Tap to begin</div>
+<div id="rwSkip" hidden style="position:absolute;right:18px;bottom:14px;font:700 11px Nunito,sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:rgba(232,238,236,.4)">Tap to skip</div></div>
+<style>@keyframes rwP{50%{opacity:.35}}</style>
+<script>
+/* Riftwood Games studio intro: video + sound, then into the game. Tap to start if the browser blocks sound, tap again to skip. */
+(function(){const el=document.getElementById('rwIntro'),v=document.getElementById('rwVid'),tap=document.getElementById('rwTap'),skip=document.getElementById('rwSkip');let done=false,playing=false;
+let mute=false;try{mute=localStorage.getItem('plw-sound')==='off';}catch(e){}v.muted=mute;
+function end(){if(done)return;done=true;el.style.opacity='0';el.style.pointerEvents='none';setTimeout(()=>{try{v.pause();v.removeAttribute('src');v.load();}catch(e){}el.remove();},750);}
+function go(){v.play().then(()=>{playing=true;tap.hidden=true;skip.hidden=false;}).catch(()=>{tap.hidden=false;});}
+el.addEventListener('pointerdown',()=>{if(playing)end();else{tap.hidden=true;v.muted=mute;v.play().then(()=>{playing=true;skip.hidden=false;}).catch(()=>{v.muted=true;v.play().then(()=>{playing=true;skip.hidden=false;}).catch(end);});}});
+addEventListener('keydown',function k(e){if(done){removeEventListener('keydown',k);return;}if(playing){end();removeEventListener('keydown',k);}else{el.dispatchEvent(new PointerEvent('pointerdown'));}});
+v.addEventListener('ended',end);v.addEventListener('error',end);setTimeout(()=>{if(!playing&&!done&&tap.hidden)tap.hidden=false;},1500);setTimeout(()=>{if(playing&&!done)end();},16000);
+go();})();
+</script>
 <div id="game"></div>
 
 <button id="menuBtn" class="tag" aria-expanded="false" aria-label="Menu">☰</button>
@@ -336,6 +394,22 @@ body.menuOpen #gm{display:grid;animation:gmIn .18s ease-out}
   <div class="gmSec" style="margin-top:22px">Controls</div><div class="gmKeys" style="margin:0 0 0 4px"><kbd>WASD</kbd><span>Walk · Shift runs</span><kbd>E</kbd><span>Use, chop, pick up, enter van</span><kbd>1 2</kbd><span>Hands · fishing pole</span><kbd>X</kbd><span>Sit</span><kbd>Z</kbd><span>Lie down and rest</span><kbd>C</kbd><span>Carry a log seat</span><kbd>I</kbd><span>Inventory</span><kbd>G</kbd><span>Build</span><kbd>B</kbd><span>Weather</span><kbd>P</kbd><span>Pack up camp (by the tent)</span><kbd>M</kbd><span>This menu</span></div></div>
  </div><aside class="gmDetail" id="gmDetail"><h2 id="gmDT"></h2><p id="gmDP"></p><div class="gmKeys" id="gmDK"></div></aside></div>
  <div class="gmFoot"><span><kbd>M</kbd>Back to the trail</span><span><kbd>Esc</kbd>Close</span><span class="sp"></span><span id="gmBadge"></span></div>
+</div>
+<div id="ph" hidden>
+ <div class="phFrame"><i class="phC tl"></i><i class="phC tr"></i><i class="phC bl"></i><i class="phC br"></i><div class="phThirds"></div><div id="phAF" class="phAF"></div></div>
+ <div class="phTop"><b>Photographer</b><span id="phInfo"></span><button id="phX" aria-label="Close camera">×</button></div>
+ <div class="phBot">
+  <div class="phGrp"><small>Lens</small><div id="phLens" class="phSeg"></div></div>
+  <div class="phGrp"><small>Aperture</small><div id="phAp" class="phSeg"></div></div>
+  <button id="phShut" aria-label="Take picture"></button>
+  <div class="phGrp"><small>Focus <output id="phFv"></output></small><div class="phFoc"><button id="phAFb">AF</button><input type="range" id="phFoc" min="0" max="1000" aria-label="Focus distance"></div></div>
+  <button id="phAlb" class="phAlb">Album <b id="phCnt">0</b></button>
+ </div>
+ <div id="phHint">Drag to look · tap to focus · Space shoots · scroll focuses · 1–4 lens · [ ] aperture · B album · Esc exits</div>
+ <div id="phFlash"></div>
+ <div id="phPrev" hidden><img id="phImg" alt="Your photo"><div id="phMeta"></div><div class="btns"><button id="phDel">Delete</button><button id="phSave" class="on">Save to album</button></div></div>
+ <div id="phBook" hidden><div class="phBH"><span>Field Album</span><small id="phBN"></small><button id="phBX" aria-label="Close album">×</button></div><div id="phGrid"></div>
+  <div id="phView" hidden><img id="phVImg" alt="Photo"><div id="phVMeta"></div><div class="btns"><button id="phVBack">Back</button><button id="phVDel">Delete photo</button></div></div></div>
 </div>
 <div id="popTxt" aria-hidden="true"></div>
 <div id="netLabels"></div>
@@ -396,7 +470,7 @@ body.menuOpen #gm{display:grid;animation:gmIn .18s ease-out}
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 59 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 61 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -426,7 +500,7 @@ body.menuOpen #gm{display:grid;animation:gmIn .18s ease-out}
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 59 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 61 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -2875,7 +2949,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 59 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 59 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 61 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 61 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
@@ -4151,6 +4225,7 @@ function visuals(dt){
      camera.position.set(camera.position.x+(hx-camera.position.x)*e_,camera.position.y+(hy-camera.position.y)*e_,camera.position.z+(hz-camera.position.z)*e_);
      _ov.set(camT.x+(hx+fx*12-camT.x)*e_,camT.y+(hy+fy*12-camT.y)*e_,camT.z+(hz+fz*12-camT.z)*e_);camera.lookAt(_ov);}
    const fv=38+34*ok;if(Math.abs(camera.fov-fv)>0.05){camera.fov=fv;camera.updateProjectionMatrix();}}
+  phCam(dt);
   /* crescent moon: rises after dusk, peaks at midnight, sets before dawn; its reflection travels along the river */
   {const mt=(st.t-0.5)/0.5,up=mt>0&&mt<1?Math.sin(Math.PI*mt):0;moon.material.opacity=night*smooth(0,0.15,up);moon.visible=moon.material.opacity>0.01;
    if(moon.visible){const yw=camCur.y*Math.PI/180,fx=-Math.sin(yw),fz=-Math.cos(yw),dd=17-15*up+3*Math.sin(st.t*40);
@@ -4186,7 +4261,7 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(0.05,(now-las
   night=visuals(dt);
   if((hudT-=dt)<=0){hudT=0.1;hud();}
   if(L.reflect>0.01&&(!isTouch||(frameN++&1)===0))renderReflection();
-  renderer.setRenderTarget(rt);renderer.render(scene,camera);renderer.setRenderTarget(rtB);renderer.render(postScene,postCam);if(FLK.on||RAIN.on||LEAF.on){renderer.autoClear=false;for(const F of[LEAF,RAIN,FLK])if(F.on)renderer.render(F.sc,camera);renderer.autoClear=true;}if(L.lens>0.5){renderer.setRenderTarget(rtH1);renderer.render(bokScene,postCam);renderer.setRenderTarget(rtH2);renderer.render(softScene,postCam);}renderer.setRenderTarget(null);renderer.render(tiltScene,postCam);
+  renderer.setRenderTarget(rt);renderer.render(scene,camera);renderer.setRenderTarget(rtB);renderer.render(postScene,postCam);if(FLK.on||RAIN.on||LEAF.on){renderer.autoClear=false;for(const F of[LEAF,RAIN,FLK])if(F.on)renderer.render(F.sc,camera);renderer.autoClear=true;}if(L.lens>0.5||PH.on){renderer.setRenderTarget(rtH1);renderer.render(bokScene,postCam);renderer.setRenderTarget(rtH2);renderer.render(softScene,postCam);}renderer.setRenderTarget(null);renderer.render(tiltScene,postCam);if(PH.snap){PH.snap=false;phCap();}
   lpTick(dt);}
 
 /* ===== Build 51: unified glass menu ===== */
@@ -4398,6 +4473,81 @@ function u3(a,b){W3.n.set(a/WM.w*2-1,-(b/WM.h)*2+1);W3.ray.setFromCamera(W3.n,W3
 WM.d3=WM.lay.d3?1:0;
 const paint3d=()=>{$('wm3dBtn').classList.toggle('on',!!WM.d3);$('wmap').classList.toggle('d3',!!WM.d3);};paint3d();
 $('wm3dBtn').addEventListener('click',()=>{WM.d3=WM.d3?0:1;WM.lay.d3=WM.d3;try{localStorage.setItem('plw-maplay',JSON.stringify(WM.lay));}catch(_){}paint3d();WM.dirty=1;});
+
+/* ===== Build 60: secret Photographer mode (Shift+P, or hold the compass on touch) ===== */
+const PH={on:false,yaw:0,pitch:0,f:50,fCur:50,N:2.8,S:8,Sc:8,keys:{},preview:null,snap:false,fx:0.5,fy:0.46,infT:0,lastFov:0};
+const PH_LENS=[14,50,100,300],PH_STOPS=[1.8,2,2.8,4,5.6,8,11,16];
+const PDB={db:null,mem:[],open(){return new Promise(res=>{try{const r=indexedDB.open('plw-photos',1);r.onupgradeneeded=()=>r.result.createObjectStore('p',{keyPath:'id'});r.onsuccess=()=>{PDB.db=r.result;res();};r.onerror=()=>res();}catch(e){res();}});},
+  all(){return new Promise(res=>{if(!PDB.db)return res(PDB.mem.slice());try{const q=PDB.db.transaction('p').objectStore('p').getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>res([]);}catch(e){res(PDB.mem.slice());}});},
+  put(o){return new Promise(res=>{if(!PDB.db){PDB.mem.push(o);return res();}try{const t=PDB.db.transaction('p','readwrite');t.objectStore('p').put(o);t.oncomplete=res;t.onerror=()=>{PDB.mem.push(o);res();};}catch(e){PDB.mem.push(o);res();}});},
+  del(id){return new Promise(res=>{PDB.mem=PDB.mem.filter(o=>o.id!==id);if(!PDB.db)return res();try{const t=PDB.db.transaction('p','readwrite');t.objectStore('p').delete(id);t.oncomplete=res;t.onerror=res;}catch(e){res();}});}};
+const phCount=()=>PDB.all().then(a=>{$('phCnt').textContent=a.length;});PDB.open().then(phCount);
+const phFov=f=>2*Math.atan(12/f)*57.2958,phShutter=N=>{const v=250*Math.pow(2.8/N,2);return v>=1?'1/'+(v>=100?Math.round(v/10)*10:Math.round(v)):Math.round(1/v)+'s';};
+const fDist=d=>d>=100?'∞':d>=10?d.toFixed(0)+' m':d.toFixed(1)+' m',phSl=d=>Math.round(Math.log(clamp(d,0.3,200)/0.3)/Math.log(200/0.3)*1000),phSv=v=>0.3*Math.pow(200/0.3,v/1000);
+const phMetaTxt=m=>m.lens+' mm   f/'+m.N+'   '+phShutter(m.N)+'   focus '+fDist(m.S)+'      '+m.time+' · '+m.place;
+function phPaint(){$('phLens').innerHTML=PH_LENS.map((f,i)=>'<button data-f="'+f+'"'+(f===PH.f?' class="on"':'')+' title="Key '+(i+1)+'">'+f+'</button>').join('');
+  $('phAp').innerHTML=PH_STOPS.map(n=>'<button data-n="'+n+'"'+(n===PH.N?' class="on"':'')+'>'+n+'</button>').join('');$('phFoc').value=phSl(PH.S);$('phFv').textContent=fDist(PH.S);}
+function phLensSet(f){PH.f=f;phPaint();}
+function phApStep(d){const i=clamp(PH_STOPS.indexOf(PH.N)+d,0,PH_STOPS.length-1);PH.N=PH_STOPS[i];phPaint();}
+function phToggle(on){if(on===PH.on)return;if(on&&(!st.playing||st.busy))return;PH.on=on;$('ph').hidden=!on;document.body.classList.toggle('photoMode',on);
+  if(on){setMenu(false);if(owlCam.on)setOwlCam(false);for(const k in keys)keys[k]=false;joy.x=0;joy.y=0;
+    const inCar=car&&car.occupied;PH.yaw=inCar?car.rot:player.rot;PH.pitch=-0.03;PH.fCur=PH.f;phPaint();$('phHint').style.opacity=1;setTimeout(()=>{$('phHint').style.opacity=0;},6000);setTimeout(()=>phAF(0.5,0.46),120);}
+  else{camera.near=1.5;camera.updateProjectionMatrix();player.g.visible=!(car&&car.occupied);$('phPrev').hidden=true;$('phBook').hidden=true;PH.preview=null;PH.keys={};}}
+function phCam(dt){if(!PH.on)return;const k=PH.keys,fov=phFov(PH.fCur),turn=dt*1.6*fov/40;
+  if(k.KeyA||k.ArrowLeft)PH.yaw+=turn;if(k.KeyD||k.ArrowRight)PH.yaw-=turn;if(k.KeyW||k.ArrowUp)PH.pitch+=turn*0.7;if(k.KeyS||k.ArrowDown)PH.pitch-=turn*0.7;PH.pitch=clamp(PH.pitch,-1.35,1.35);
+  PH.fCur+=(PH.f-PH.fCur)*Math.min(1,dt*7);PH.Sc+=(PH.S-PH.Sc)*Math.min(1,dt*9);
+  const inCar=car&&car.occupied,ex=inCar?car.x:player.x,ey=(inCar?(car.y!==undefined?car.y:player.y)+1.75:player.y+1.58),ez=inCar?car.z:player.z,cp=Math.cos(PH.pitch);
+  player.g.visible=false;camera.position.set(ex,ey,ez);camera.lookAt(ex+Math.sin(PH.yaw)*cp,ey+Math.sin(PH.pitch),ez+Math.cos(PH.yaw)*cp);
+  if(Math.abs(camera.fov-fov)>0.01||camera.near!==0.1){camera.fov=fov;camera.near=0.1;camera.updateProjectionMatrix();}UT.cN.value=camera.near;
+  /* real optics: blur circle on a 36x24 mm sensor, in screen pixels */
+  const f=PH.fCur,S=Math.max(PH.Sc*1000,f*1.05),Kpx=f*f/(PH.N*(S-f))/24*rt.height;
+  UT.lens.value=1;UT.tilt.value=0;UT.focusRange.value=0;UT.focusZ.value=PH.Sc;UT.maxCoc.value=Math.min(42*rt.height/1080,Kpx/1.7);UT.vignette.value=Math.max(UT.vignette.value,0.35*(1-PH.N/20));
+  if(typeof DITHU!=='undefined')DITHU.uPR.value=0;
+  if((PH.infT-=dt)<=0){PH.infT=0.15;$('phInfo').textContent=Math.round(PH.fCur)+' mm    f/'+PH.N+'    '+phShutter(PH.N)+'    ISO 200    ◎ '+fDist(PH.Sc);}}
+const _phR=new THREE.Raycaster(),_phN=new THREE.Vector2(),_phF=new THREE.Vector3();
+const visChain=o=>{for(;o;o=o.parent)if(!o.visible)return false;return true;};
+function phAF(fx,fy){camera.updateMatrixWorld();_phN.set(fx*2-1,-(fy*2-1));_phR.setFromCamera(_phN,camera);_phR.near=0.15;_phR.far=260;let d=200;
+  try{const hits=_phR.intersectObjects(scene.children,true);camera.getWorldDirection(_phF);for(const h of hits){const o=h.object;if(o.isPoints||o.isLine||o.isSprite||!visChain(o))continue;const m=o.material;if(m&&!Array.isArray(m)&&m.transparent&&m.opacity<0.25)continue;d=h.point.clone().sub(camera.position).dot(_phF);break;}}catch(e){}
+  PH.S=clamp(d,0.3,200);PH.fx=fx;PH.fy=fy;const af=$('phAF');af.style.left=(fx*100)+'%';af.style.top=(fy*100)+'%';af.classList.remove('lock');void af.offsetWidth;af.classList.add('lock');$('phFoc').value=phSl(PH.S);$('phFv').textContent=fDist(PH.S);}
+function phShoot(){if(!$('phPrev').hidden||!$('phBook').hidden)return;PH.snap=true;const fl=$('phFlash');fl.classList.remove('go');void fl.offsetWidth;fl.classList.add('go');}
+function phCap(){try{const src=renderer.domElement,W=Math.min(1600,src.width),H=Math.round(src.height*W/src.width),c=document.createElement('canvas');c.width=W;c.height=H;c.getContext('2d').drawImage(src,0,0,W,H);
+  PH.preview={id:'p'+Date.now(),img:c.toDataURL('image/jpeg',0.9),meta:{lens:PH.f,N:PH.N,S:+PH.S.toFixed(1),time:$('clockTxt').textContent,place:regionAt(player.x,player.z),at:Date.now()}};
+  $('phImg').src=PH.preview.img;$('phMeta').textContent=phMetaTxt(PH.preview.meta);$('phPrev').hidden=false;}catch(e){console.warn('photo',e);}}
+function phSave(){const p=PH.preview;if(!p)return;PDB.put(p).then(phCount);PH.preview=null;$('phPrev').hidden=true;}
+function phDiscard(){PH.preview=null;$('phPrev').hidden=true;}
+function phBook(on){$('phBook').hidden=!on;$('phView').hidden=true;if(!on)return;PDB.all().then(a=>{a.sort((p,q)=>q.meta.at-p.meta.at);$('phBN').textContent=a.length+(a.length===1?' photo':' photos');
+  $('phGrid').innerHTML=a.length?a.map((o,i)=>'<button class="phCard" data-id="'+o.id+'" style="--r:'+((i*37%7)-3)*0.6+'deg"><img src="'+o.img+'" alt=""><span>'+o.meta.place+' · '+o.meta.lens+'mm f/'+o.meta.N+'</span></button>').join(''):'<p style="color:rgba(244,246,246,.6);font:600 14px Nunito,sans-serif">No photos yet. Frame something beautiful and press the shutter.</p>';PH.album=a;});}
+$('phGrid').addEventListener('click',e=>{const b=e.target.closest('.phCard');if(!b)return;const o=(PH.album||[]).find(q=>q.id===b.dataset.id);if(!o)return;PH.viewId=o.id;$('phVImg').src=o.img;$('phVMeta').textContent=phMetaTxt(o.meta);$('phView').hidden=false;});
+$('phVBack').addEventListener('click',()=>{$('phView').hidden=true;});
+$('phVDel').addEventListener('click',()=>{PDB.del(PH.viewId).then(()=>{phCount();phBook(true);});});
+$('phBX').addEventListener('click',()=>phBook(false));$('phAlb').addEventListener('click',()=>phBook(true));
+$('phSave').addEventListener('click',phSave);$('phDel').addEventListener('click',phDiscard);$('phX').addEventListener('click',()=>phToggle(false));
+$('phShut').addEventListener('click',phShoot);$('phAFb').addEventListener('click',()=>phAF(0.5,0.46));
+$('phLens').addEventListener('click',e=>{const f=e.target.dataset.f;if(f)phLensSet(+f);});$('phAp').addEventListener('click',e=>{const n=e.target.dataset.n;if(n){PH.N=+n;phPaint();}});
+$('phFoc').addEventListener('input',e=>{PH.S=phSv(+e.target.value);$('phFv').textContent=fDist(PH.S);$('phAF').classList.remove('lock');});
+/* look by dragging, focus by tapping, focus by scrolling */
+{const el=$('ph');let drag=null,moved=0;const free=t=>!t.closest('.phBot,.phTop,#phPrev,#phBook');
+  el.addEventListener('pointerdown',e=>{if(!free(e.target))return;drag=[e.clientX,e.clientY];moved=0;try{el.setPointerCapture(e.pointerId);}catch(_){}});
+  el.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag[0],dy=e.clientY-drag[1];drag=[e.clientX,e.clientY];moved+=Math.abs(dx)+Math.abs(dy);const k=phFov(PH.fCur)/57.2958/innerHeight;PH.yaw-=dx*k;PH.pitch=clamp(PH.pitch+dy*k,-1.35,1.35);});
+  el.addEventListener('pointerup',e=>{if(drag&&moved<6)phAF(e.clientX/innerWidth,e.clientY/innerHeight);drag=null;});el.addEventListener('pointercancel',()=>{drag=null;});
+  el.addEventListener('wheel',e=>{if(!free(e.target))return;e.preventDefault();PH.S=clamp(PH.S*Math.exp(e.deltaY*0.0015),0.3,200);$('phFoc').value=phSl(PH.S);$('phFv').textContent=fDist(PH.S);$('phAF').classList.remove('lock');},{passive:false});}
+addEventListener('keydown',e=>{const tg=e.target&&e.target.tagName;if((tg==='INPUT'&&e.target.type!=='range')||tg==='TEXTAREA')return;
+  if(e.code==='KeyP'&&e.shiftKey){e.preventDefault();e.stopImmediatePropagation();phToggle(!PH.on);return;}
+  if(!PH.on)return;e.stopImmediatePropagation();const c=e.code;
+  if(c==='Escape'){e.preventDefault();if(!$('phView').hidden)$('phView').hidden=true;else if(!$('phBook').hidden)phBook(false);else if(!$('phPrev').hidden)phDiscard();else phToggle(false);return;}
+  if(!$('phPrev').hidden){e.preventDefault();if(c==='Enter'||c==='Space'||c==='KeyS')phSave();else if(c==='Delete'||c==='Backspace'||c==='KeyX')phDiscard();return;}
+  if(!$('phBook').hidden){if(c==='KeyB')phBook(false);return;}
+  if(c==='Space'||c==='Enter'){e.preventDefault();phShoot();return;}
+  if(/^Digit[1-4]$/.test(c)){phLensSet(PH_LENS[+c.slice(5)-1]);return;}
+  if(c==='KeyQ'||c==='KeyE'){const i=clamp(PH_LENS.indexOf(PH.f)+(c==='KeyE'?1:-1),0,3);phLensSet(PH_LENS[i]);return;}
+  if(c==='BracketLeft'){phApStep(-1);return;}if(c==='BracketRight'){phApStep(1);return;}
+  if(c==='KeyF'){phAF(0.5,0.46);return;}if(c==='KeyB'){phBook(true);return;}
+  if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(c)){e.preventDefault();PH.keys[c]=1;}},true);
+addEventListener('keyup',e=>{if(PH.on)PH.keys[e.code]=0;},true);
+/* touch secret: hold the compass for 1.5 s */
+{let t=null,fired=false;const mc=$('mapCompass');mc.addEventListener('pointerdown',()=>{fired=false;clearTimeout(t);t=setTimeout(()=>{fired=true;phToggle(true);},1500);});
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>mc.addEventListener(ev,()=>clearTimeout(t)));
+  mc.addEventListener('click',e=>{if(fired){fired=false;e.stopImmediatePropagation();e.preventDefault();}},true);}
 hud();requestAnimationFrame(frame);
 })();
 </script>
