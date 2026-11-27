@@ -302,6 +302,30 @@ body.menuOpen #gm{display:grid;animation:gmIn .18s ease-out}
 </style>
 </head>
 <body>
+<div id="rwSplash" style="position:fixed;inset:0;z-index:60;background:#0c1610;transition:opacity .7s ease;cursor:pointer" role="img" aria-label="Riftwood Games"><canvas id="rwCv" style="width:100%;height:100%;display:block"></canvas><div style="position:absolute;right:18px;bottom:14px;font:700 11px Nunito,sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:rgba(254,243,199,.45)">Tap to skip</div></div>
+<script>
+/* Riftwood Games logo intro (from the Gemini splash, 75% speed): plays once, then fades into the game */
+(function(){const el=document.getElementById('rwSplash'),cv=document.getElementById('rwCv'),ctx=cv.getContext('2d');
+const SPEED=0.75,BASE=3.0,HOLD=0.7;const PAL={bgTop:'#0c1610',bgBottom:'#172b1d',mossDark:'#1b3322',mossMid:'#2e5938',amber:'#f59e0b',amberGlow:'rgba(245,158,11,0.35)',ember:'#ff6a1a',text:'#fef3c7'};
+const size=()=>{const a=innerWidth/Math.max(1,innerHeight);if(a>=1){cv.height=1080;cv.width=Math.round(1080*a);}else{cv.width=1200;cv.height=Math.round(1200/a);}};size();addEventListener('resize',size);
+const embers=Array.from({length:48},(_,i)=>({x:(i*197)%1920,y:(i*131)%1080,r:2+(i%4),speedY:28+(i%5)*14,drift:((i%7)-3)*8,phase:i*0.7}));
+const eo=t=>1-Math.pow(1-Math.min(1,Math.max(0,t)),3);
+function draw(t){const w=cv.width,h=cv.height,p=Math.min(1,t/BASE);
+  const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,PAL.bgTop);g.addColorStop(1,PAL.bgBottom);ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  const gr=260+eo(p)*240,rd=ctx.createRadialGradient(w/2,h/2-40,20,w/2,h/2-40,gr);rd.addColorStop(0,PAL.amberGlow);rd.addColorStop(1,'rgba(245,158,11,0)');ctx.fillStyle=rd;ctx.fillRect(0,0,w,h);
+  for(const e of embers){const ey=(((e.y*h/1080-t*e.speedY)%h)+h)%h,ex=e.x*w/1920+Math.sin(t*1.6+e.phase)*24+t*e.drift;ctx.beginPath();ctx.arc(((ex%w)+w)%w,ey,e.r,0,Math.PI*2);ctx.fillStyle=e.r>4?PAL.ember:PAL.amber;ctx.globalAlpha=0.75;ctx.fill();}ctx.globalAlpha=1;
+  const split=p<0.65?Math.sin((p/0.65)*Math.PI)*34:0,cx=w/2,cy=h/2-60,R=150;
+  ctx.save();ctx.translate(-split,0);ctx.beginPath();ctx.arc(cx,cy,R,Math.PI*0.5,Math.PI*1.5);ctx.closePath();ctx.fillStyle=PAL.mossMid;ctx.fill();ctx.lineWidth=6;ctx.strokeStyle=PAL.amber;ctx.stroke();ctx.restore();
+  ctx.save();ctx.translate(split,0);ctx.beginPath();ctx.arc(cx,cy,R,-Math.PI*0.5,Math.PI*0.5);ctx.closePath();ctx.fillStyle=PAL.mossDark;ctx.fill();ctx.lineWidth=6;ctx.strokeStyle=PAL.amber;ctx.stroke();ctx.restore();
+  if(split>1){ctx.save();ctx.strokeStyle=PAL.ember;ctx.shadowColor=PAL.amber;ctx.shadowBlur=24;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(cx,cy-R-14);ctx.lineTo(cx-10,cy-20);ctx.lineTo(cx+12,cy+35);ctx.lineTo(cx,cy+R+14);ctx.stroke();ctx.restore();}
+  const ta=eo((p-0.35)/0.5);if(ta>0){ctx.save();ctx.globalAlpha=ta;ctx.fillStyle=PAL.text;ctx.font='800 68px system-ui,-apple-system,sans-serif';ctx.textAlign='center';ctx.fillText('RIFTWOOD GAMES',cx,cy+R+95);
+    ctx.fillStyle=PAL.amber;ctx.font='600 24px system-ui,-apple-system,sans-serif';ctx.fillText('PRESENTS',cx,cy+R+135);ctx.restore();}}
+let t=0,last=performance.now(),done=false;
+function end(){if(done)return;done=true;el.style.opacity='0';el.style.pointerEvents='none';setTimeout(()=>el.remove(),750);}
+el.addEventListener('pointerdown',end);addEventListener('keydown',function k(){end();removeEventListener('keydown',k);});
+(function loop(now){if(done)return;const dt=Math.min(0.05,(now-last)/1000);last=now;t+=dt*SPEED;draw(Math.min(t,BASE));if(t>=BASE+HOLD*SPEED)end();else requestAnimationFrame(loop);})(last);
+})();
+</script>
 <div id="game"></div>
 
 <button id="menuBtn" class="tag" aria-expanded="false" aria-label="Menu">☰</button>
@@ -396,7 +420,7 @@ body.menuOpen #gm{display:grid;animation:gmIn .18s ease-out}
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 57 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 58 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -426,7 +450,7 @@ body.menuOpen #gm{display:grid;animation:gmIn .18s ease-out}
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 57 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 58 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -2875,7 +2899,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 57 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 57 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 58 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 58 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
