@@ -198,7 +198,7 @@ body.touch #prompt{bottom:128px}
 <div id="fishUI" class="tag" hidden><div class="fbt" id="fbTitle">Hold E to reel</div><div class="fbar"><i class="zs"></i><i class="zg"></i><i class="zr"></i><b id="fbMark"></b></div><div class="fprog"><b id="fbProg"></b></div></div>
 <div id="prompt" class="tag"><kbd class="keyOnly">E</kbd><span id="promptTxt"></span></div>
 <div id="toast" class="tag"></div>
-<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 43 · models: loading…</div>
+<div id="buildBadge" style="position:fixed;left:8px;bottom:6px;font:700 11px Nunito,sans-serif;color:var(--tent);opacity:.85;pointer-events:none;z-index:3">Build 44 · models: loading…</div>
 
 <div id="touch">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
@@ -228,7 +228,7 @@ body.touch #prompt{bottom:128px}
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
-    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 43 · paper-part models · loading 3D models…</p>
+    <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 44 · paper-part models · loading 3D models…</p>
   </div>
 </div>
 
@@ -2644,7 +2644,7 @@ const CH3D=[];
 (function(){
   let use3D=true;try{use3D=localStorage.getItem('plw-models')!=='0';}catch(err){}
   const MAPNAME=GZ?'Gorge test':WORLD?'Oregon Wilds':'Ember Hollow (test map)';
-  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 43 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 43 · models: '+t;};
+  const setTag=t=>{const el=document.getElementById('buildTag');if(el)el.textContent='Build 44 · '+MAPNAME+' · '+t;const b=document.getElementById('buildBadge');if(b)b.textContent='Build 44 · models: '+t;};
   const sw=document.getElementById('modelsBtn');if(sw){sw.textContent='3D models: '+(use3D?'On':'Off');sw.classList.toggle('on',use3D);
     sw.addEventListener('click',()=>{try{localStorage.setItem('plw-models',use3D?'0':'1');}catch(err){}location.reload();});}
   if(!use3D){setTag('papercraft characters (3D models off)');makeOwl(null);return;}
@@ -2721,8 +2721,8 @@ const sndSet=(name,v,t=0.6)=>{const g=SND.n[name];if(g)g.gain.setTargetAtTime(v,
 /* an owl call, made on the fly: hoo… hoo-hoo… hoo, hoo. Near owls are clear and placed in 3D; far ones are mostly echo */
 function hoot(x,y,z,near){const c=SND.ctx,t0=c.currentTime+0.05,out=c.createGain(),pan=c.createPanner();pan.panningModel='HRTF';pan.distanceModel='inverse';pan.refDistance=4;pan.rolloffFactor=1;
   if(pan.positionX){pan.positionX.value=x;pan.positionY.value=y;pan.positionZ.value=z;}else pan.setPosition(x,y,z);
-  const dry=c.createGain(),wet=c.createGain();dry.gain.value=near?1:0.18;wet.gain.value=near?0.35:1.2;out.connect(pan);pan.connect(dry);dry.connect(SND.master);pan.connect(wet);wet.connect(SND.rev);
-  const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=near?1400:700;lp.connect(out);out.gain.value=near?0.55:0.35;
+  const dry=c.createGain(),wet=c.createGain();dry.gain.value=near?1:0.15;wet.gain.value=near?0.3:0.9;out.connect(pan);pan.connect(dry);dry.connect(SND.master);pan.connect(wet);wet.connect(SND.rev);
+  const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=near?1400:700;lp.connect(out);out.gain.value=near?0.16:0.09;
   const f0=310+Math.random()*50;[[0,0.42,1],[0.62,0.18,0.9],[0.86,0.22,0.95],[1.45,0.4,1],[2.05,0.48,0.97]].forEach(([dt,len,k])=>{const o=c.createOscillator(),e=c.createGain(),v=c.createOscillator(),vg=c.createGain();
     o.type='sine';o.frequency.setValueAtTime(f0*k*1.04,t0+dt);o.frequency.exponentialRampToValueAtTime(f0*k*0.93,t0+dt+len);v.frequency.value=5.5;vg.gain.value=4;v.connect(vg);vg.connect(o.frequency);
     e.gain.setValueAtTime(0,t0+dt);e.gain.linearRampToValueAtTime(1,t0+dt+0.07);e.gain.setTargetAtTime(0,t0+dt+len*0.7,0.07);o.connect(e);e.connect(lp);o.start(t0+dt);v.start(t0+dt);o.stop(t0+dt+len+0.4);v.stop(t0+dt+len+0.4);});}
@@ -2742,10 +2742,10 @@ function sndTick(dt,night){const c=SND.ctx;if(!c||c.state!=='running')return;
     else for(const r of[1.5,3,5,8,12,17,24]){for(let k=0;k<12;k++){const a=k/12*6.283+r,x=lx+Math.cos(a)*r,z=lz+Math.sin(a)*r;if(waterAt(x,z)!==null){best=[x,z];bd=r;break;}}if(best)break;}
     SND.wp=best;SND.wd=bd;}
   if(SND.wp){const p=SND.n.streamP;if(p.positionX){p.positionX.setTargetAtTime(SND.wp[0],c.currentTime,0.3);p.positionY.value=ly-1;p.positionZ.setTargetAtTime(SND.wp[1],c.currentTime,0.3);}else p.setPosition(SND.wp[0],ly-1,SND.wp[1]);}
-  sndSet('stream',SND.wp?0.75*(snowI>0.6?0.6:1):0,0.8);
+  sndSet('stream',SND.wp?0.32*(snowI>0.6?0.6:1):0,0.8);
   /* footsteps: forest floor, or crunching snow when it lies deep; they follow your walking speed */
   const walk=!inCar&&!player.climb&&player.moving&&player.spd>0.2&&depthAt(player.x,player.z,player.level)<0.05,sn=st.snow||0,sp=clamp(player.spd/2,0.5,1.4);
-  sndSet('steps_forest',walk?0.32*(1-smooth(0.3,0.6,sn)):0,0.08);sndSet('steps_snow',walk?0.4*smooth(0.3,0.6,sn):0,0.08);
+  sndSet('steps_forest',walk?0.65*(1-smooth(0.3,0.6,sn)):0,0.08);sndSet('steps_snow',walk?0.75*smooth(0.3,0.6,sn):0,0.08);
   if(SND.b.steps_forest)SND.b.steps_forest.playbackRate.value=sp;if(SND.b.steps_snow)SND.b.steps_snow.playbackRate.value=sp*0.95;
   /* owls call at dusk and night: the one nearby, placed where it sits; otherwise a far-off call echoing across the valley */
   if(night>0.35&&clear>0.4&&(SND.owlT-=dt)<=0){SND.owlT=rr(9,22);
