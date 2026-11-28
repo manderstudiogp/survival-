@@ -4322,8 +4322,8 @@ function updTrees(dt,simOn){
     tr.mat.opacity=tr_?o:1;
   }
   for(const m of MTN){let target=1;const tx=m.x-px,tz=m.z-pz;let k=(tx*cx+tz*cz)/hl2;
-    if(k>0){k=clamp(k,0,1);const y=py+k*cy,d=hyp(tx-k*cx,tz-k*cz);if(y<m.H+0.5&&d<m.R)target=0.55;}
-    m.o+=(target-m.o)*Math.min(1,dt*0.7);const t_=m.o<0.995;for(const mt of m.mats){if(mt.transparent!==t_){mt.transparent=t_;mt.depthWrite=!t_;mt.needsUpdate=true;}mt.opacity=t_?m.o:1;}}
+    if(k>0){k=clamp(k,0,1);const y=py+k*cy,d=hyp(tx-k*cx,tz-k*cz);if(y<m.H+0.5&&d<m.R)target=0.35;}
+    m.o+=(target-m.o)*Math.min(1,dt*0.7);const t_=m.o<0.995;for(const mt of m.mats){if(mt.transparent!==t_){mt.transparent=t_;mt.depthWrite=true;mt.needsUpdate=true;}mt.opacity=t_?m.o:1;}}
 }
 bushes.forEach(b=>inter.push({x:b.x,z:b.z,lv:'rim',r:1.6,on:()=>true,label:()=>b.has?'Forage berries':'Berries regrowing…',can:()=>b.has,
   act(){b.has=false;b.berries.visible=false;b.timer=60;st.hunger=Math.min(100,st.hunger+30);st.berries=Math.min(CAP.berries,st.berries+1);
@@ -5120,7 +5120,7 @@ $('helpBtn').addEventListener('click',openHelp);
 
 /* ---------- camera ---------- */
 const camT=new THREE.Vector3(),camOff=new THREE.Vector3(),camCur={d:24,p:55,y:0};
-const CAMLIM={camDist:[17,54],camPitch:[38,70]};const pitchMin=d=>38-26*smooth(30,17,d);
+const CAMLIM={camDist:[17,54],camPitch:[38,70]};const pitchMin=d=>12;   /* tilt down to the horizon (12°) at every zoom level; zoom itself is unchanged */
 const wrapDeg=a=>((a+180)%360+360)%360-180;
 function camGoal(){const fl=smooth(37,54,L.camDist),cp=Math.max(L.camPitch,pitchMin(L.camDist));return {d:L.camDist*(innerWidth<innerHeight?1.25:1)*(1-0.12*fl),p:cp-(cp-11)*fl,y:L.camYaw};}
 function setCamOff(){const p=camCur.p*Math.PI/180,y=camCur.y*Math.PI/180;camOff.set(Math.sin(y)*Math.cos(p)*camCur.d,Math.sin(p)*camCur.d,Math.cos(y)*Math.cos(p)*camCur.d);}
@@ -5301,7 +5301,7 @@ function visuals(dt){
   const tx=clamp(player.x,CX[0],CX[1]),tz=clamp(player.z,CZ[0],CZ[1]);camT.x+=(tx-camT.x)*(1-Math.exp(-4*dt));camT.z+=(tz-camT.z)*(1-Math.exp(-4*dt));camT.y+=(player.y-camT.y)*(1-Math.exp(-3*dt));
   {const g=camGoal(),k=1-Math.exp(-7*dt);camCur.d+=(g.d-camCur.d)*k;camCur.p+=(g.p-camCur.p)*k;camCur.y=wrapDeg(camCur.y+wrapDeg(g.y-camCur.y)*k);setCamOff();
    const C=camera.position,ef=[smooth(-15,-19.5,C.z),smooth(15,19.5,C.z),smooth(-15,-19.5,C.x),smooth(15,19.5,C.x)];
-   edges.forEach((e,i)=>{const t=1-0.85*ef[i];e.o+=(t-e.o)*Math.min(1,dt*5);const tr_=e.o<0.995;if(e.mat.transparent!==tr_){e.mat.transparent=tr_;e.mat.depthWrite=!tr_;e.mat.needsUpdate=true;}e.mat.opacity=tr_?e.o:1;});
+   edges.forEach((e,i)=>{const t=1-0.85*ef[i];e.o+=(t-e.o)*Math.min(1,dt*5);const tr_=e.o<0.995;if(e.mat.transparent!==tr_){e.mat.transparent=tr_;e.mat.depthWrite=true;e.mat.needsUpdate=true;}e.mat.opacity=tr_?e.o:1;});
    compass.style.transform=`rotate(${camCur.y}deg)`;}
   if(camDirty){if((camSaveT-=dt)<=0){camDirty=false;saveL();if(!$('lp').hidden)syncLP();}}
   camera.position.copy(camT).add(camOff);
