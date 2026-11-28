@@ -1,0 +1,3 @@
+{"src":"source/watcher_hi3d.glb","name":"watcher","out_dir":"models","tris":150000,"tex":4096,"palette":0,
+ "size":{"axis":"y","length":1.30},
+ "glow":[{"group":"lights","kind":"color","rule":"cyan","gain":1.0}]}

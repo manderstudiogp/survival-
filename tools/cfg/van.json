@@ -1,0 +1,17 @@
+{"src":"source/van_hi3d.glb","name":"van","out_dir":"models","tris":150000,"tex":4096,"palette":0.3,
+ "size":{"axis":"z","length":4.20308},
+ "anchors":{"door":[-0.2165,0.150,-0.007],"doorOut":[-0.30,0.150,-0.007]},
+ "glow":[
+  {"group":"lamps","kind":"disc","c":[-0.112,-0.093,0],"r":0.033,"face":"+z","rgb":[255,236,196]},
+  {"group":"lamps","kind":"disc","c":[0.135,-0.093,0],"r":0.033,"face":"+z","rgb":[255,236,196]},
+  {"group":"lamps","kind":"disc","c":[0.145,-0.076,0],"r":0.017,"face":"-z","rgb":[255,140,30]},
+  {"group":"lamps","kind":"disc","c":[-0.118,-0.076,0],"r":0.017,"face":"-z","rgb":[255,140,30]},
+  {"group":"lamps","kind":"disc","c":[0.145,-0.112,0],"r":0.017,"face":"-z","rgb":[255,40,20]},
+  {"group":"lamps","kind":"disc","c":[-0.118,-0.112,0],"r":0.017,"face":"-z","rgb":[255,40,20]},
+  {"group":"windows","kind":"rect","side":"-x","u":[-0.330,-0.192],"v":[0.010,0.095],"rgb":[255,186,110],"tex":1},
+  {"group":"windows","kind":"rect","side":"-x","u":[0.160,0.296],"v":[0.008,0.099],"rgb":[255,186,110],"tex":1},
+  {"group":"windows","kind":"rect","side":"+x","u":[0.157,0.292],"v":[0.010,0.099],"rgb":[255,186,110],"tex":1},
+  {"group":"windows","kind":"rect","side":"+x","u":[-0.060,0.068],"v":[0.010,0.099],"rgb":[255,186,110],"tex":1},
+  {"group":"windows","kind":"rect","side":"+x","u":[-0.330,-0.195],"v":[0.010,0.099],"rgb":[255,186,110],"tex":1},
+  {"group":"windows","kind":"rect","side":"+z","u_axis":"x","u":[-0.135,0.145],"v":[-0.010,0.105],"depth":0.6,"rgb":[255,186,110],"tex":1},
+  {"group":"windows","kind":"rect","side":"-z","u_axis":"x","u":[-0.070,0.090],"v":[0.050,0.105],"depth":0.8,"rgb":[255,186,110],"tex":1}]}
