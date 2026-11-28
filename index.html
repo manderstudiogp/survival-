@@ -516,7 +516,7 @@ go();})();
   <div class="row"><label>Snow on the ground <output id="wSv">0%</output></label><input type="range" id="wSnow" min="0" max="100" step="1" aria-label="Snow cover"></div>
   <h4 class="devOnly">Night sky &amp; sea</h4>
   <div class="btns devOnly"><button id="ngSky">Sky: auto</button><button id="ngAur">Aurora: auto</button><button id="ngGlow">Sea glow: auto</button><button id="ngRays">Light rays: on</button></div>
-  <div class="row devOnly"><label>Aurora strength <output id="ngAv">100%</output></label><input type="range" id="ngA" min="0" max="200" step="1" value="100" aria-label="Aurora strength"></div>
+  <div class="row devOnly"><label>Aurora strength <output id="ngAv">100%</output></label><input type="range" id="ngA" min="0" max="300" step="1" value="100" aria-label="Aurora strength"></div>
   <div class="row devOnly"><label>Aurora colour <output id="ngHv">0</output></label><input type="range" id="ngH" min="-100" max="100" step="1" value="0" aria-label="Aurora colour, green to violet"></div>
   <div class="row devOnly"><label>Sea glow strength <output id="ngGv">100%</output></label><input type="range" id="ngG" min="0" max="300" step="1" value="100" aria-label="Sea glow strength"></div>
   <div class="row devOnly"><label>Marine layer height <output id="ngLv">0.3 m</output></label><input type="range" id="ngL" min="-20" max="40" step="1" value="3" aria-label="Marine layer height"></div>
@@ -1056,7 +1056,8 @@ void main(){
   vec3 glow=vec3(0.);
   for(int i=0;i<5;i++){vec3 dv=wp-lp[i];glow+=lc[i]*exp(-dot(dv,dv)/(lr[i]*lr[i]));}
   col*=exposure;
-  col=mix(col,fogColor*fogExpo,fog)+glow*(0.25+fog)*fogExpo;
+  float em=1.-texture2D(tColor,vUv).a;   /* glowing water marks itself in alpha so it shines through the fog */
+  col=mix(col,fogColor*fogExpo,fog*(1.-0.85*em))+glow*(0.25+fog)*fogExpo;
   /* light rays: march toward the sun through the depth buffer; open sky lets light through, land and rock block it */
   if(rays>0.001){vec2 dl=(sunUV-vUv)/float(RAYN);vec2 p=vUv+dl*h21(vUv*res);float acc=0.;
     for(int i=0;i<RAYN;i++){acc+=step(0.99999,texture2D(tDepth,clamp(p,0.,1.)).x);p+=dl;}acc/=float(RAYN);
@@ -1513,18 +1514,19 @@ if(CST){const O=CST,SEA=O.SEA,WLD=!OC,NA=WLD?(isTouch?900:1320):isTouch?200:288;
     float foam=clamp(max(max(f1,f2),max(cr,bb)),0.0,1.0)*(1.0-smoothstep(30.0,70.0,dist)*0.6);
     gl_FragColor.rgb=mix(gl_FragColor.rgb,hi*lk*0.92,foam*0.8);
     gl_FragColor.rgb=mix(gl_FragColor.rgb,vec3(dot(gl_FragColor.rgb,vec3(0.33)))*vec3(0.86,0.95,0.96),uStorm*0.3);
+    float gE=0.0;
     if(uGlow>0.001){float gT=uGT;
       float sp=on2(vW.xz*2.3+vec2(gT*0.04,-gT*0.03)),sp2=on2(vW.xz*7.0-vec2(gT*0.09,gT*0.05));
-      float base=smoothstep(0.8,0.97,sp2)*(0.35+0.65*sp)*0.2*uGlowB*(1.0-0.6*smoothstep(4.0,22.0,vSh));
+      float base=smoothstep(0.72,0.95,sp2)*(0.35+0.65*sp)*0.38*uGlowB*(1.0-0.6*smoothstep(4.0,22.0,vSh));
       float dots=0.45+0.55*smoothstep(0.45,0.85,sp2);
-      float shore=max(f1,f2*0.8)*smoothstep(0.5,2.4,vSk)*0.42*dots;
-      float ek=exp(-max(vSk,0.0)*1.4),stk=ek*(0.5+0.5*max(f1,smoothstep(0.3,0.8,lace)))*(0.7+0.3*sw)*dots;
+      float shore=max(f1,f2*0.8)*smoothstep(0.5,2.4,vSk)*0.6*dots;
+      float ek=exp(-max(vSk,0.0)*1.0),stk=1.4*ek*(0.5+0.5*max(f1,smoothstep(0.3,0.8,lace)))*(0.7+0.3*sw)*dots;
       float dz=0.0;for(int i=0;i<8;i++){vec4 q=uDst[i];if(q.w>0.0){float dd=distance(vW.xz,q.xy),ag=q.z;
         dz+=q.w*exp(-ag*1.2)*(exp(-pow((dd-0.2-ag*0.8)/0.22,2.0))*0.8+exp(-dd*dd*3.0)*0.6)*(0.55+0.45*smoothstep(0.3,0.7,on2(vW.xz*9.0+q.xy)));}}
-      float gs=base+shore+stk+min(dz,1.1)*0.8;
-      vec3 gc=mix(vec3(0.05,0.78,0.70),vec3(0.10,0.45,0.95),sp);
-      gl_FragColor.rgb=gl_FragColor.rgb*(1.0-0.35*min(gs*uGlow,1.0))+gc*gs*uGlow*(1.0-smoothstep(28.0,64.0,dist));}
-    gl_FragColor.rgb=mix(gl_FragColor.rgb,uFogC,smoothstep(uFade.x,uFade.y,dist)); }`);};
+      float gs=base+shore+stk+min(dz,1.2)*1.0;
+      vec3 gc=mix(vec3(0.04,0.42,1.0),vec3(0.08,0.85,1.0),sp*sp)*1.7;float gk=gs*uGlow*(1.0-smoothstep(34.0,80.0,dist));
+      gl_FragColor.rgb=gl_FragColor.rgb*(1.0-0.4*min(gk,1.0))+gc*gk;gE=min(gk,0.9);}
+    gl_FragColor.rgb=mix(gl_FragColor.rgb,uFogC,smoothstep(uFade.x,uFade.y,dist));gl_FragColor.a=1.0-gE; }`);};
   seaMat.customProgramCacheKey=()=>'ocean-sea';
   let sea,parts=[];
   if(!WLD){sea=new THREE.Mesh(g,seaMat);sea.receiveShadow=true;sea.frustumCulled=false;scene.add(sea);}
@@ -5835,18 +5837,22 @@ float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*n2(p);p=p*2.03+vec2(
 /* northern lights: curtains low over the north (-z) and south horizons, green at the foot, teal, then violet up high;
    pillars are seeded per night (uSeed) and ripple slowly on shared game time (uAT); soft paper-cut bands */
 vec3 aurora(vec3 v){float h=v.y;if(h<-.02)return vec3(0.);float ax=abs(v.z),side=step(0.,v.z);
-  float sk=smoothstep(.12,.55,ax/(length(v.xz)+1e-4))*mix(1.,.75,side);if(sk<.001)return vec3(0.);
+  float sk=smoothstep(.1,.5,ax/(length(v.xz)+1e-4))*mix(1.,.8,side);if(sk<.001)return vec3(0.);
   float u=v.x/(ax+.25)+side*11.3+uSeed*7.1,t=uAT*.004;
-  float base=.012+.035*(.5+.5*sin(u*.9+t*1.3+uSeed*3.))+.02*n2(vec2(u*1.7-t*2.,uSeed));
+  float base=.008+.03*(.5+.5*sin(u*.9+t*1.3+uSeed*3.))+.015*n2(vec2(u*1.7-t*2.,uSeed));
   float fold=.5+.5*sin(u*2.6+t*3.+sin(u*1.1-t*1.7)*2.2);
-  float pil=smoothstep(.35,.85,n2(vec2(u*7.5+t*1.5,uSeed*5.+side*3.)))*.75+.25*smoothstep(.5,.9,n2(vec2(u*23.-t*4.,side+uSeed)));
-  float y=h-base,top=.06+.15*pil*(.6+.4*fold);
-  float I=smoothstep(-.03,.012,y)*exp(-max(y,0.)/top*1.6)*(.3+.7*pil)*(.55+.45*fold)*smoothstep(.85,.4,h);
-  I=I*.6+floor(I*5.)/5.*.4;
-  float k=clamp(y/(top*1.8),0.,1.);
-  vec3 c=mix(vec3(.20,.95,.48),vec3(.16,.80,.72),smoothstep(0.,.35,k));
-  c=mix(c,vec3(.60,.30,.92),smoothstep(.22-.18*uAurH,.7-.3*uAurH,k));
-  return c*I*sk*1.7;}
+  float pil=smoothstep(.3,.8,n2(vec2(u*7.5+t*1.5,uSeed*5.+side*3.)))*.7+.3*smoothstep(.45,.9,n2(vec2(u*23.-t*4.,side+uSeed)));
+  /* vertical rays: fine streaks across the curtain, with light pulsing up and down them */
+  float ray=pow(.5+.5*sin(u*46.+n2(vec2(u*5.,t))*7.),2.)*.55+.45;
+  float y=h-base,top=.07+.17*pil*(.6+.4*fold);
+  float pulse=.7+.3*sin(y*70.-t*26.+u*4.)*sin(t*7.+u*9.);
+  float I=smoothstep(-.02,.008,y)*exp(-max(y,0.)/top*1.3)*(.35+.65*pil)*(.6+.4*fold)*ray*pulse*smoothstep(.9,.45,h);
+  I=I*.65+floor(I*6.)/6.*.35;
+  float k=clamp(y/(top*1.3),0.,1.);
+  vec3 c=mix(vec3(.15,1.,.42),vec3(.25,1.,.75),smoothstep(.15,.35,k));
+  c=mix(c,vec3(.78,.22,1.),smoothstep(.28-.2*uAurH,.6-.25*uAurH,k));
+  c=mix(c,vec3(.9,.25,.85),smoothstep(.004,-.012,y)*.8);   /* a magenta hem at the foot */
+  return c*I*sk*3.2;}
 void main(){vec3 v=normalize(vDir);float h=v.y,hh=clamp(h,0.,1.);
   vec3 dayC=mix(vec3(.718,.843,.816),vec3(.328,.462,.530),pow(hh,.55));
   vec3 nightC=mix(vec3(.107,.151,.173),vec3(.025,.035,.040),pow(hh,.6));
@@ -5867,11 +5873,11 @@ void main(){vec3 v=normalize(vDir);float h=v.y,hh=clamp(h,0.,1.);
     cc=mix(cc,vec3(.064,.090,.104)+vec3(.100,.141,.161)*lit*uMoonA,uNight);
     cc=mix(cc,mix(vec3(.262,.339,.361),vec3(.498,.608,.613),lit)*(uDay*.85+.18),uStorm);}
   col+=vec3(.957,.965,.965)*star*uNight*smoothstep(0.,.12,h)*1.7*(1.-cl);
-  if(uAur>.003)col+=aurora(v)*uAur*(1.-cl*.8);
   col+=(vec3(.957,.965,.965)*max(0.,disc-cut*.9)*1.5+vec3(.718,.843,.816)*pow(max(md,0.),90.)*.3)*uMoonA*(1.-cl*.85);
   col=mix(col,cc,cl*(.92+.08*uStorm));
   col=mix(col,mix(vec3(.054,.075,.086),vec3(.423,.525,.539),uDay),uStorm*.6);
   col*=.74;col=mix(col,uFog*.82,(1.-smoothstep(-.02,.16-.1*uClr,h))*.75*(1.-.5*uClr));col=mix(col,uHzC,uHz*(1.-smoothstep(-.01,.14,h)));
+  if(uAur>.003)col+=aurora(v)*uAur*(1.-cl*.8);
   gl_FragColor=vec4(col,1.);}`}));
 SKY.mesh.renderOrder=1e6;SKY.mesh.frustumCulled=false;SKY.mesh.visible=false;scene.add(SKY.mesh);
 function skyTick(dt){const ok=owlCam.k||0;
@@ -5906,7 +5912,7 @@ const NG=(()=>{
     const f=(d+t)*2,k=Math.floor(f);let clr=clrK(k-1)+(clrK(k)-clrK(k-1))*smooth(0,0.12,f-k);
     clr*=1-smooth(0.05,0.45,I);if(dev.sky)clr=dev.sky>0?1:0;o.clr=clr;
     /* aurora: about 30% of wet-week nights, 70% of winter nights; faint under the marine layer, gone in storms */
-    let aN=hs(d,23)<(wi?0.7:0.3)?0.4+0.6*hs(d,29):0;if(dev.aur)aN=dev.aur>0?Math.max(aN,0.9):0;
+    let aN=hs(d,23)<(wi?0.7:0.3)?0.65+0.35*hs(d,29):0;if(dev.aur)aN=dev.aur>0?Math.max(aN,0.9):0;
     o.aur=aN*smooth(0.08,0.3,-e)*(0.15+0.85*clr)*(1-smooth(0.05,0.5,I))*dev.aurK*(LITE?0.6:1);
     /* sea glow: about 70% of wet-week nights, 20% in winter; calm water only, none once snow lies */
     let gN=hs(d,37)<(wi?0.2:0.7)?0.5+0.5*hs(d,41):0;if(dev.glow)gN=dev.glow>0?Math.max(gN,0.9):0;
@@ -5916,7 +5922,7 @@ const NG=(()=>{
     const c=clr*(OCM&&OCM.kc?OCM.kc():0);if(OCM&&!WORLD)U.mistBase.value=MIST_BASE;   /* the bench never resets it itself */
     if(c>0.001){U.fogDensity.value*=1-0.72*c;U.fogStart.value+=5*c;
       U.mistBase.value+=(SEAY+dev.layer-U.mistBase.value)*c;U.mistFalloff.value+=(1.35-U.mistFalloff.value)*c;U.mist.value+=(0.72-U.mist.value)*c;
-      U.hzFix.value*=1-0.6*c;S.uHz.value*=1-0.6*c;S.uClr.value=c;S.uCover.value*=1-0.7*c;}
+      U.hzFix.value*=1-0.85*c;S.uHz.value*=1-0.85*c;S.uClr.value=c;S.uCover.value*=1-0.7*c;}
     /* light rays, everywhere: a low sun, softer through haze, none in storms */
     let ry=LITE||!dev.rays?0:smooth(-0.03,0.05,e)*(1-smooth(0.22,0.45,e))*(1-smooth(0.05,0.5,I))*(0.55+0.45*clr)*0.55;
     if(ry>0.001){camera.getWorldDirection(_w);ry*=smooth(0,0.3,_w.dot(S.uSun.value));
