@@ -3810,7 +3810,7 @@ function sndTick(dt,night){const c=SND.ctx;if(!c||c.state!=='running')return;
     sndSet('car_idle',running?0.42*(1-0.65*dr):0,running?0.4:0.25);sndSet('car_drive',running?0.6*dr:0,0.3);
     if(SND.b.car_idle)SND.b.car_idle.playbackRate.value=1+0.12*dr;if(SND.b.car_drive)SND.b.car_drive.playbackRate.value=0.8+0.55*clamp(v/9,0,1);
     if(on&&!SND.wasOn){SND.carStart=T;sndOne('car_start',car.x,car.y+0.6,car.z,0.7);}SND.wasOn=on;
-    const braking=on&&((keys.down&&car.v>2.2)||(keys.up&&car.v<-1.6));if(braking&&!SND.brk&&T-(SND.brkT||-9)>1.2){SND.brkT=T;sndOne('car_brake',car.x,car.y+0.5,car.z,clamp(v/7,0.25,0.8));}SND.brk=braking;}
+    const braking=on&&((car.inB&&car.v>2.2)||(car.inF&&car.v<-1.6));   /* keys or the touch stick */if(braking&&!SND.brk&&T-(SND.brkT||-9)>1.2){SND.brkT=T;sndOne('car_brake',car.x,car.y+0.5,car.z,clamp(v/7,0.25,0.8));}SND.brk=braking;}
   /* owls call at dusk and night: the one nearby, placed where it sits; otherwise a far-off call echoing across the valley */
   if(night>0.35&&clear>0.4&&(SND.owlT-=dt)<=0){SND.owlT=rr(28,60);
     if(owl&&owl.R.root.visible!==false){owl.R.root.getWorldPosition(_ov);const d=hyp(_ov.x-lx,_ov.z-lz);if(d<28){hoot(_ov.x,_ov.y,_ov.z,true);return;}}
@@ -4291,9 +4291,16 @@ function carBlocked(x,z,rot){const sx=Math.sin(rot),cz=Math.cos(rot);
     for(const c of colliders){if(car.cols.includes(c))continue;const dx=px_-c.x,dz=pz_-c.z;if(dx*dx+dz*dz<c.r*c.r)return true;}
     for(const tr of trees){if(tr.state!=='up')continue;const dx=px_-tr.x,dz=pz_-tr.z;const tr_=0.26+tr.s*0.04;if(dx*dx+dz*dz<tr_*tr_)return true;}}
   return false;}
-function driveTick(dt){const fwd=keys.up||joy.y<-0.35,back=keys.down||joy.y>0.35,stI=(keys.left?1:0)-(keys.right?1:0)-(Math.abs(joy.x)>0.2?joy.x:0),boost=keys.run||runHeld;
+function driveTick(dt){let fwd=keys.up,back=keys.down,stI=(keys.left?1:0)-(keys.right?1:0),thr=1;const boost=keys.run||runHeld;
+  /* touch: point the stick where you want to go (as you see it on screen). The van steers toward it, the push sets the throttle;
+     pointing behind the van brakes, then backs up toward it */
+  {const jm=hyp(joy.x,joy.y);if(jm>0.25){const yw=camCur.y*Math.PI/180,c=Math.cos(yw),sn=Math.sin(yw),wx=joy.x*c+joy.y*sn,wz=-joy.x*sn+joy.y*c,hd=Math.atan2(wx,wz);
+    const wrap=a=>((a+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI,d=wrap(hd-car.rot);thr=Math.min(1,jm);
+    if(Math.abs(d)<(car.v>1.5?2.5:2.0)){fwd=true;back=false;stI=clamp(d*1.8,-1,1);}
+    else{fwd=false;back=true;stI=-clamp(wrap(hd-car.rot-Math.PI)*1.8,-1,1);}}}
+  car.inF=fwd;car.inB=back;
   const v0=car.v;
-  if(fwd)car.v+=(car.v<0?9:4.2)*dt;else if(back)car.v-=(car.v>0?9:3.2)*dt;else car.v-=Math.sign(car.v)*Math.min(Math.abs(car.v),2.4*dt);
+  if(fwd)car.v+=(car.v<0?9:4.2*(0.35+0.65*thr))*dt;else if(back)car.v-=(car.v>0?9:3.2)*dt;else car.v-=Math.sign(car.v)*Math.min(Math.abs(car.v),2.4*dt);
   {const climb=clamp(-(car.tp||0)*Math.sign(car.v)*1.4,0,0.6);car.v=clamp(car.v,-3.2*(1-climb*0.5),(boost?10:6.5)*(waterAt(car.x,car.z)!==null?0.8:1)*(1-climb));}
   car.steer+=(clamp(stI,-1,1)*0.55-car.steer)*Math.min(1,dt*5);
   const yaw=car.v/2.7*Math.tan(car.steer),nr=car.rot+yaw*dt,nx=car.x+Math.sin(nr)*car.v*dt,nz=car.z+Math.cos(nr)*car.v*dt;
