@@ -392,6 +392,8 @@ body.menuOpen #dockBtn,body.menuOpen #dock,body.menuOpen #dockPane,body.photoMod
 #campBar #campOk{background:#B7D7D0;color:#0b1412}#campBar #campOk:disabled{background:#AB451C;color:#F4F6F6;cursor:not-allowed}
 body.touch #campBar{bottom:130px}
 #invBody table b{color:#E8EEEC}
+body:not(.dev) .devOnly{display:none!important}
+#devBox{margin:10px auto 0;text-align:center;font-size:12px}#devBox input{height:30px;width:150px;border-radius:5px;border:1px solid rgba(183,215,208,.35);background:rgba(25,32,30,.5);color:inherit;padding:0 8px}#devBox button{height:30px;margin-left:6px}
 </style>
 <link rel="icon" href="data:image/webp;base64,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">
 </head>
@@ -422,7 +424,7 @@ go();})();
   <div class="bar" id="bWolf" hidden><span>Wolf</span><i><b></b></i></div>
   <div class="items"><span>Sticks <strong id="iSticks">0/500</strong></span><span>Berries <strong id="iBerries">0</strong></span><span>Fish <strong id="iFish">0</strong></span><span>Fire <strong id="iFire">50%</strong></span></div>
 </div>
-<div id="clock" class="tag"><span id="compass" title="North">N</span><span id="orb"></span><span id="clockTxt">Day 1 · Morning</span><button id="timeBtn" class="mini" aria-expanded="false">Time</button><button id="lightBtn" class="mini" aria-expanded="false">Light</button><button id="weatherBtn" class="mini" aria-expanded="false">Weather</button><button id="buildBtn" class="mini" aria-expanded="false">Build</button><button id="onlineBtn" class="mini" aria-expanded="false">Online</button><button id="invBtn" class="mini" aria-expanded="false">Inventory</button><button id="soundBtn" class="mini" aria-pressed="true">Sound</button><button id="helpBtn" aria-label="How to play">?</button></div>
+<div id="clock" class="tag"><span id="compass" title="North">N</span><span id="orb"></span><span id="clockTxt">Day 1 · Morning</span><button id="timeBtn" class="mini devOnly" aria-expanded="false">Time</button><button id="lightBtn" class="mini devOnly" aria-expanded="false">Light</button><button id="weatherBtn" class="mini devOnly" aria-expanded="false">Weather</button><button id="buildBtn" class="mini" aria-expanded="false">Build</button><button id="onlineBtn" class="mini" aria-expanded="false">Online</button><button id="invBtn" class="mini" aria-expanded="false">Inventory</button><button id="soundBtn" class="mini" aria-pressed="true">Sound</button><button id="helpBtn" aria-label="How to play">?</button></div>
 <div id="tp" class="tag panel" hidden>
   <div class="lpHead">Time of day<span id="tpFps"></span><button id="tpClose" class="pClose" aria-label="Close time menu">×</button></div>
   <div class="tBig" id="tBig">Morning · 08:52</div>
@@ -539,11 +541,12 @@ go();})();
 <div id="intro">
   <div class="card tag">
     <div class="logo"><h1>PAPERLAND TRAILS:</h1><span>OREGON WILDS</span></div>
-    <div class="maps"><span>Map</span><button data-map="meadow">Oregon Wilds</button><button data-map="hollow">Ember Hollow</button><button data-map="gorge">Canyon Gorge · test</button><button data-map="ocean">Ocean · test</button></div>
+    <div class="maps devOnly"><span>Map</span><button data-map="meadow">Oregon Wilds</button><button data-map="hollow">Ember Hollow</button><button data-map="gorge">Canyon Gorge · test</button><button data-map="ocean">Ocean · test</button></div>
+    <div id="devBox"><input id="devPw" type="password" placeholder="Dev password" autocomplete="off" aria-label="Dev password"><button id="devGo" class="mini">Unlock</button><div id="devMsg" class="pnote"></div></div>
     <ul>
       <li><em>Move</em><span><span class="keyOnly">WASD or arrow keys. Hold <kbd>Shift</kbd> to run.</span><span class="touchOnly">Drag the joystick. Hold Run to run.</span></span></li>
       <li><em>Camera</em><span><span class="keyOnly">Drag the scene to tilt and turn, scroll to zoom, double-click to reset. <kbd>Q</kbd> <kbd>R</kbd> turn, <kbd>−</kbd> <kbd>=</kbd> zoom, <kbd>V</kbd> resets.</span><span class="touchOnly">Drag the scene to tilt and turn, pinch to zoom, double-tap to reset.</span></span></li>
-      <li><em>Testing</em><span><span class="keyOnly">Press <kbd>T</kbd> or tap</span><span class="touchOnly">Tap</span> Time to set the time of day, and <span class="keyOnly"><kbd>L</kbd> or </span>Light to tune fog, contrast and lights.</span></li>
+      <li class="devOnly"><em>Testing</em><span><span class="keyOnly">Press <kbd>T</kbd> or tap</span><span class="touchOnly">Tap</span> Time to set the time of day, and <span class="keyOnly"><kbd>L</kbd> or </span>Light to tune fog, contrast and lights.</span></li>
       <li><em>Use</em><span><span class="keyOnly">Press <kbd>E</kbd> near something</span><span class="touchOnly">Tap Use near something</span> to pick up sticks, chop trees for more sticks (stand still while you chop), forage berries, feed the fire or rest in the tent.</span></li>
       <li><em>Fishing</em><span><span class="keyOnly">Press <kbd>2</kbd> (or <kbd>F</kbd>)</span><span class="touchOnly">Tap Fishing pole</span> to hold your rod, face water and cast. After a bite, hold <span class="keyOnly"><kbd>E</kbd></span><span class="touchOnly">Use</span> to keep the marker in the green until the fish is landed. Cook fish at the fire.</span></li>
       <li><em>Gorge</em><span>On the Canyon Gorge map, ladders take you down to the plunge pool and river, or free climb anywhere along the rock walls (slower, costs energy). A rope bridge sways across. No predators there.</span></li>
@@ -556,6 +559,7 @@ go();})();
     <p class="tip">Keep the fire fed: wolves won't come near a burning campfire. If you collapse, you'll wake somewhere else and your camp will still be there.</p>
     <button id="startBtn">Start hiking</button>
     <button id="modelsBtn" class="mini" style="display:block;margin:12px auto 0;height:36px;padding:0 14px">3D models (beta): Off</button>
+    <button id="liteBtn" class="mini" style="display:block;margin:8px auto 0;height:36px;padding:0 14px">Lighter graphics: Off</button>
     <p class="tip" id="buildTag" style="margin:10px 0 0;font-size:12px;text-align:center">Build 72 · paper-part models · loading 3D models…</p>
   </div>
 </div>
@@ -579,12 +583,20 @@ const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
 const hyp=Math.hypot;
 const lerpAng=(a,b,k)=>{let d=((b-a+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;return a+d*k;};
 
+/* ---------- dev lock: only the dev picks maps and tunes time, light and weather ----------
+   The password (Help screen) is checked against this hash; tools/set_dev_password.py changes it. */
+const DEV_HASH='e5cd8e2b6e874b975932eee9cd3d00c5349bb3c88827c19d5e91b1d2f0f086ed';
+let DEV=false;try{DEV=localStorage.getItem('plw-dev')===DEV_HASH;}catch(e){}
+if(DEV)document.body.classList.add('dev');
+/* the address: "#hollow" (dev picks a map), "#pn-k3m9qa" (invite, main map) or "#hollow.pn-k3m9qa" (invite to the host's map) */
+const HASHP=(()=>{const h=decodeURIComponent(location.hash.slice(1)).toLowerCase(),m=h.match(/^(?:([a-z]+)[.~])?([a-z]{2}-[a-z0-9]{6})$/);return m?{map:m[1]||'meadow',code:m[2]}:{map:h,code:''};})();
+const MAPH=['hollow','gorge','ocean'].includes(HASHP.map)&&(DEV||HASHP.code)?HASHP.map:'meadow';
 /* ---------- map layout ---------- */
-const MAP=location.hash==='#gorge'?'gorge':location.hash==='#ocean'?'ocean':'meadow';
+const MAP=MAPH==='gorge'?'gorge':MAPH==='ocean'?'ocean':'meadow';
 let TENTMESH=null;const CAMP={state:'set',home:null};
 /* WORLD: Oregon Wilds, the full map, and the default when there is no #map in the address (a shared link opens it).
    '#hollow' loads only Ember Hollow, the original home map, for quick testing. */
-const WORLD=MAP==='meadow'&&location.hash!=='#hollow';let WORLD_=null;
+const WORLD=MAP==='meadow'&&MAPH!=='hollow';let WORLD_=null;
 const LIM=MAP==='ocean'?29:18, RHW=2.1, CYCLE=240;
 const segD=(x,z,a,b)=>{const dx=b[0]-a[0],dz=b[1]-a[1];const t=clamp(((x-a[0])*dx+(z-a[1])*dz)/(dx*dx+dz*dz),0,1);return hyp(x-a[0]-t*dx,z-a[1]-t*dz);};
 const noise=(x,z)=>Math.sin(x*0.31+1.3)*Math.cos(z*0.27)+0.5*Math.sin((x-z)*0.19+2);
@@ -991,11 +1003,12 @@ const PRESETS={
   'Original':{exposure:1,contrast:1,saturation:1,split:0,vignette:0.25,grain:0,bloom:0,fogDensity:0.015,fogStart:8,mist:0,mistNoise:0,fogBright:1,glow:0,sun:1,sunHeight:1,ambient:1,shadowSoft:1,fire:1,flash:1,head:1,tilt:0,autoExp:0}};
 const L=Object.assign({},DEF);
 try{const sv=JSON.parse(localStorage.getItem('plw-light-v3')||localStorage.getItem('plw-light-v2')||'null');const fresh=!localStorage.getItem('plw-light-v3');
-  if(sv)for(const k in DEF)if(typeof sv[k]==='number'&&!(fresh&&CAMK.includes(k)))L[k]=sv[k];}catch(err){}
+  if(sv)for(const k in DEF)if(typeof sv[k]==='number'&&!(fresh&&CAMK.includes(k))&&(DEV||CAMK.includes(k)))L[k]=sv[k];}catch(err){}
 try{if(!localStorage.getItem('plw-exp1')){L.exposure=1;localStorage.setItem('plw-exp1','1');}}catch(err){}
 try{if(!localStorage.getItem('plw-lens1')){Object.assign(L,{tilt:0.98,tiltWidth:0.10,tiltCenter:0.42,lens:1,fstop:2.0,focusRange:0.09,bokeh:1.59,catEye:1,camDist:37,camPitch:38});localStorage.setItem('plw-lens1','1');}}catch(err){}
 try{if(!localStorage.getItem('plw-zoom80')){L.camDist=37;localStorage.setItem('plw-zoom80','1');}}catch(err){L.camDist=37;}
 L.camDist=Math.min(L.camDist,54);
+let LITE=false;try{LITE=localStorage.getItem('plw-lite')==='1';}catch(err){}if(LITE)L.reflect=0;
 const saveL=()=>{try{localStorage.setItem('plw-light-v3',JSON.stringify(L));}catch(err){}};
 
 /* ---------- cinematic post pass: depth fog, ground mist, light bleeding into fog, bloom, grade ---------- */
@@ -3816,51 +3829,102 @@ function sndTick(dt,night){const c=SND.ctx;if(!c||c.state!=='running')return;
     if(owl&&owl.R.root.visible!==false){owl.R.root.getWorldPosition(_ov);const d=hyp(_ov.x-lx,_ov.z-lz);if(d<28){hoot(_ov.x,_ov.y,_ov.z,true);return;}}
     const a=Math.random()*6.283,r=rr(35,60);hoot(lx+Math.cos(a)*r,ly+6,lz+Math.sin(a)*r,false);}}
 /* ---------- online play hookup: other hikers appear in your world; the host keeps time, weather and the fire ---------- */
-const IN_CLAUDE=!!(window.claude&&typeof window.claude.use==='function');
 const NETC=[P.rust,P.truck,P.birch,P.fern,P.pumpkin,P.river,P.sage,P.white];
-const NET={others:new Map(),sendT:0,worldT:0,name:'',color:P.rust};
+const NET={others:new Map(),sendT:0,worldT:0,animT:0,wsig:'',name:'',color:P.rust,campCheck:false};
 try{NET.name=localStorage.getItem('plw-name')||'';NET.color=+localStorage.getItem('plw-color')||P.rust;}catch(e){}
 $('onName').value=NET.name||'Hiker';
 const hex=c=>'#'+c.toString(16).padStart(6,'0');
+/* a guest: in someone else's game. The host runs the clock, the weather and the animals; guests copy them. */
+function netGuest(){return NETKIT.inSession()&&!NETKIT.isHost();}
 function paintColors(){$('onColors').innerHTML=NETC.map(c=>`<button data-c="${c}" aria-label="colour" style="width:30px;height:30px;padding:0;background:${hex(c)};${c===NET.color?'outline:3px solid #F4F6F6;':''}"></button>`).join('');}
 paintColors();$('onColors').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;NET.color=+b.dataset.c;paintColors();try{localStorage.setItem('plw-color',NET.color);}catch(err){}if(NETKIT.inSession())NETKIT.profile({color:hex(NET.color)});});
 $('onName').addEventListener('change',()=>{NET.name=$('onName').value.trim().slice(0,16)||'Hiker';$('onName').value=NET.name;try{localStorage.setItem('plw-name',NET.name);}catch(err){}if(NETKIT.inSession())NETKIT.profile({name:NET.name});});
-function netConn(code){const pre=(code||'').slice(0,2);
-  if(pre==='pl'||(!code&&IN_CLAUDE)){NETKIT.config({transport:null,rate:12,joinWait:2500});return 'pl';}
-  NETKIT.config({transport:NETKIT_TRANSPORTS.trystero('nostr'),rate:12,joinWait:15000});return 'pn';}
+/* every game is peer-to-peer ("pn-" codes): the GitHub page and the Android app play together */
+function netConn(){NETKIT.config({transport:NETKIT_TRANSPORTS.trystero('nostr'),rate:12,joinWait:15000});return 'pn';}
 const netMsg=t=>{$('onMsg').textContent=t;};
-function netView(){const inS=NETKIT.inSession();$('onOut').hidden=inS;$('onIn').hidden=!inS;$('onState').textContent=inS?(NETKIT.isHost()?'Hosting':'Joined')+' · '+NETKIT.players().length+'/4':'Solo';if(inS)$('onCodeTx').textContent=NETKIT.code();
-  $('onList').innerHTML=inS?NETKIT.players().map(p=>`<li><i style="background:${p.color||'#84715C'}"></i>${String(p.name||'Hiker').replace(/[<>&]/g,'')}${p.isHost?' · host':''}${p.isMe?' (you)':''}</li>`).join(''):'';}
-const netFail=(e,kind)=>{if(kind==='pl'&&e&&e.code==='offline')return 'Online rooms only work when the game is opened on claude.ai while signed in. On GitHub or the Android app, codes start with "pn-".';
-  if(IN_CLAUDE&&kind==='pn')return 'Peer-to-peer codes ("pn-") can\'t connect from inside claude.ai. Use the GitHub web version or the Android app for those.';return (e&&e.message)||'Could not connect.';};
-$('onHost').onclick=async()=>{const kind=netConn();let c='';const a='abcdefghjkmnpqrstuvwxyz23456789';for(let i=0;i<6;i++)c+=a[(Math.random()*a.length)|0];netMsg('Opening a game…');
-  try{await NETKIT.host({code:kind+'-'+c,name:NET.name||'Hiker',color:hex(NET.color),maxPlayers:4,onHostLeave:'migrate',world:{day:st.day,t:st.t,fuel:st.fuel}});netMsg('Send your friends the invite. They join from their own device.');}catch(e){netMsg(netFail(e,kind));}netView();};
-$('onJoin').onclick=async()=>{const raw=$('onCode').value.trim().toLowerCase().replace(/^.*#/,'');if(!/^[a-z]{2}-[a-z0-9]{6}$/.test(raw)){netMsg('Codes look like pn-k3m9qa.');return;}const kind=netConn(raw);
-  netMsg(kind==='pn'?'Looking for the host (can take up to 15 s)…':'Looking for the game…');
-  try{await NETKIT.join(raw,{name:NET.name||'Hiker',color:hex(NET.color),maxPlayers:4});netMsg('');toast('You joined the game.',2.5);}catch(e){netMsg(netFail(e,kind));}netView();};
-$('onLeave').onclick=async()=>{await NETKIT.leave();netMsg('Back to solo.');netView();};
-$('onCopy').onclick=()=>{const code=NETKIT.code(),link=IN_CLAUDE?'Join my Paperland game on claude.ai with code '+code:location.href.split('#')[0].split('?')[0]+'#'+code;
+const netBase=()=>location.href.split('#')[0].split('?')[0];
+const netLink=code=>netBase()+'#'+(MAPKEY==='meadow'?'':MAPKEY+'.')+code;
+const CAMPW=['','camp pitched','carrying the camp','camp in the van'];
+function netView(){const inS=NETKIT.inSession(),host=inS&&NETKIT.isHost();$('onOut').hidden=inS;$('onIn').hidden=!inS;$('onState').textContent=inS?(host?'Hosting':'Joined')+' · '+NETKIT.players().length+'/4':'Solo';
+  $('onCodeTx').textContent=inS&&host?NETKIT.code():'';$('onCopy').hidden=!host;
+  $('onList').innerHTML=inS?NETKIT.players().map(p=>{const cs=p.isMe?netCampS():(p.state&&p.state.cs)|0;
+    return `<li><i style="background:${p.color||'#84715C'}"></i>${String(p.name||'Hiker').replace(/[<>&]/g,'')}${p.isHost?' · host':''}${p.isMe?' (you)':''}${cs?' · '+CAMPW[cs]:''}</li>`;}).join(''):'';}
+const netFail=e=>(e&&e.message)||'Could not connect.';
+/* a player who isn't the dev only gets a side map while in a game that's on it; afterwards it's back to the main map */
+function netBackToMain(){if(DEV||MAPKEY==='meadow')return;toast('Back to the main map…',2.5);setTimeout(()=>location.replace(netBase()),2500);}
+$('onHost').onclick=async()=>{netConn();let c='';const a='abcdefghjkmnpqrstuvwxyz23456789';for(let i=0;i<6;i++)c+=a[(Math.random()*a.length)|0];netMsg('Opening a game…');
+  try{await NETKIT.host({code:'pn-'+c,name:NET.name||'Hiker',color:hex(NET.color),maxPlayers:4,onHostLeave:'migrate',world:netWorld()});netMsg('Copy the invite and send it to your friends. They join on '+(MAPKEY==='meadow'?'the main map':'this map')+'.');}catch(e){netMsg(netFail(e));}netView();};
+$('onJoin').onclick=async()=>{const raw=$('onCode').value.trim().toLowerCase().replace(/^.*#/,'').replace(/^[a-z]+[.~]/,'');if(!/^[a-z]{2}-[a-z0-9]{6}$/.test(raw)){netMsg('Codes look like pn-k3m9qa.');return;}netConn();
+  netMsg('Looking for the host (can take up to 15 s)…');NET.campCheck=false;
+  try{await NETKIT.join(raw,{name:NET.name||'Hiker',color:hex(NET.color),maxPlayers:4});netMsg('');toast('You joined the game.',2.5);}catch(e){netMsg(netFail(e));netBackToMain();}netView();};
+$('onLeave').onclick=async()=>{await NETKIT.leave();netMsg('Back to solo.');netView();netBackToMain();};
+$('onCopy').onclick=()=>{const link=netLink(NETKIT.code());
   (navigator.clipboard?navigator.clipboard.writeText(link):Promise.reject()).then(()=>netMsg('Copied: '+link),()=>netMsg('Copy this: '+link));};
-if(/^#[a-z]{2}-[a-z0-9]{6}$/.test(location.hash)){$('onCode').value=location.hash.slice(1);setTimeout(()=>{setMenu(true);toggleOP(true);netMsg('Invite found. Pick a name and press Join.');},800);}
+if(HASHP.code){$('onCode').value=HASHP.code;let auto=false;try{auto=sessionStorage.getItem('plw-autojoin')===HASHP.code;sessionStorage.removeItem('plw-autojoin');}catch(e){}
+  setTimeout(()=>{setMenu(true);toggleOP(true);if(auto){netMsg('Moved to the host\'s map. Joining…');$('onJoin').click();}else netMsg('Invite found. Pick a name and press Join.');},800);}
 ['join','leave','host','ended','left','ready'].forEach(ev=>NETKIT.on(ev,(p)=>{netView();
-  if(ev==='join'&&p&&!p.isMe)toast((p.name||'A hiker')+' joined the trail.',2.5);if(ev==='leave'&&p&&!p.isMe)toast((p.name||'A hiker')+' left.',2.5);if(ev==='ended')toast('The host left; you are back to solo.',3);}));
-NETKIT.on('world',w=>{if(NETKIT.isHost()||!w)return;if(typeof w.day==='number'&&(w.day!==st.day||Math.abs(w.t-st.t)>0.01)){st.day=w.day;st.t=w.t;}if(typeof w.fuel==='number')st.fuel=w.fuel;});
-NETKIT.on('fuel',(d,from)=>{if(from&&from.isMe)return;if(NETKIT.isHost()&&d&&typeof d.add==='number')st.fuel=Math.min(1,st.fuel+d.add);});
+  if(ev==='join'&&p&&!p.isMe)toast((p.name||'A hiker')+' joined the trail.',2.5);if(ev==='leave'&&p&&!p.isMe)toast((p.name||'A hiker')+' left.',2.5);
+  if(ev==='ended'){toast('The host left; you are back to solo.',3);netBackToMain();}}));
+/* ---------- the host's world: map, clock, weather and snow ---------- */
+const WSYNC=['on','p','kind','dur','peak','frozen','season','manual','manualUntil','scrub'];
+function netWorld(){const w={};WSYNC.forEach(k=>{w[k]=typeof W[k]==='number'?+W[k].toFixed(4):W[k];});
+  return {map:MAPKEY,day:st.day,t:+st.t.toFixed(4),fr:st.frozen?1:0,sp:st.speed,snow:+(st.snow||0).toFixed(3),w};}
+NETKIT.on('world',w=>{if(NETKIT.isHost()||!w)return;
+  if(w.map&&w.map!==MAPKEY){const code=NETKIT.code();try{sessionStorage.setItem('plw-autojoin',code);}catch(e){}toast('Moving to the host\'s map…',3);
+    NETKIT.leave();setTimeout(()=>{location.replace(netBase()+'#'+(w.map==='meadow'?'':w.map+'.')+code);setTimeout(()=>location.reload(),60);},600);return;}
+  if(typeof w.day==='number'&&(w.day!==st.day||Math.abs(w.t-st.t)>0.01)){st.day=w.day;st.t=w.t;}
+  if(typeof w.fr==='number')st.frozen=!!w.fr;if(typeof w.sp==='number')st.speed=w.sp;
+  if(w.w&&typeof w.w==='object')WSYNC.forEach(k=>{if(k in w.w)W[k]=w.w[k];});
+  if(typeof w.snow==='number')st.snow=w.snow;});
+/* ---------- the host's animals: guests show exactly where the host's animals are and what they're doing ---------- */
+const r2=v=>Math.round(v*100)/100;
+function netAnimPack(){return animals.map(a=>[r2(a.x),r2(a.z),r2(a.rot),r2(a.spd||0),r2(a.rear||0),r2(a.sit||0),r2(a.crouch||0),
+  (a.g.visible?1:0)|(a.headDown?2:0)|(a.state==='alert'||a.watch?4:0)|(a.lv==='low'?8:0)|(a.band&&a.band.visible?16:0)]);}
+NETKIT.on('an',(d,from)=>{if(from&&from.isMe)return;if(!netGuest()||!d||!Array.isArray(d.a)||d.a.length!==animals.length)return;
+  d.a.forEach((v,i)=>{if(Array.isArray(v)&&v.length===8)animals[i].nt=v;});});
+function netAnimals(dt){const k=Math.min(1,dt*8);
+  for(const a of animals){const v=a.nt;if(!v)continue;const far=hyp(v[0]-a.x,v[1]-a.z)>4||!a.g.visible;
+    a.x=far?v[0]:a.x+(v[0]-a.x)*k;a.z=far?v[1]:a.z+(v[1]-a.z)*k;a.rot=far?v[2]:lerpAng(a.rot,v[2],k);a.spd=v[3];a.rear=v[4];a.sit=v[5];a.crouch=v[6];
+    const f=v[7];a.g.visible=!!(f&1);a.headDown=!!(f&2);a.watch=!!(f&4);a.state=f&4?'alert':'idle';a.lv=f&8?'low':'rim';if(a.band)a.band.visible=!!(f&16);}}
+/* ---------- camps: one each. Everyone sees the others' camps with the owner's name, and who is carrying one ---------- */
+function netCampS(){return CAMP.state==='set'?1:CAMP.state==='carried'?2:CAMP.state==='van'?3:0;}
+function netCampMake(){const g=new THREE.Group(),hq=!!TENTMESH,tent=(TENTMESH||tentPaper).clone();tent.visible=true;
+  const ring=campRing.clone();const fl=flame.clone();g.add(tent,ring,fl);scene.add(g);
+  const lab=document.createElement('div');lab.className='netName';$('netLabels').appendChild(lab);return {g,tent,ring,fl,lab,hq,key:''};}
+function netCampPlace(c,fx,fz){const tx=fx+CAMP.home.tx-CAMP.home.fx,tz=fz+CAMP.home.tz-CAMP.home.fz;
+  if(c.hq){c.tent.position.set(tx,gh(tx,tz),tz);c.tent.rotation.copy(TENTMESH.rotation);}else c.tent.position.set(tx-CAMP.home.tx,gh(tx,tz),tz-CAMP.home.tz);
+  c.fl.position.set(fx,gh(fx,fz)+0.1,fz);c.ring.position.set(fx,gh(fx,fz),fz);c.ring.visible=hyp(fx-CAMP.home.fx,fz-CAMP.home.fz)>=0.1;c.tx=tx;c.tz=tz;}
+function netCampDrop(o){if(!o.camp)return;scene.remove(o.camp.g);o.camp.lab.remove();o.camp=null;}
 function netAvatar(color){const g=new THREE.Group(),c=new THREE.Color(color);
   const body=new THREE.Mesh(G.cyl6,mat(c.getHex()));body.scale.set(0.2,0.62,0.16);body.position.y=0.78;const legs=new THREE.Mesh(G.box,mat(P.earth));legs.scale.set(0.26,0.5,0.14);legs.position.y=0.25;
   const head=new THREE.Mesh(G.ico,mat(P.tent));head.scale.setScalar(0.15);head.position.y=1.25;const hat=new THREE.Mesh(G.cone6,mat(c.getHex()));hat.scale.set(0.2,0.16,0.2);hat.position.y=1.42;
   [body,legs,head,hat].forEach(m=>{m.castShadow=true;g.add(m);});scene.add(g);return g;}
 const _nv=new THREE.Vector3();
+function netLabel(el,x,y,z,show){_nv.set(x,y,z).project(camera);const vis=show&&_nv.z<1;el.style.display=vis?'block':'none';if(vis){el.style.left=((_nv.x*0.5+0.5)*innerWidth)+'px';el.style.top=((-_nv.y*0.5+0.5)*innerHeight)+'px';}}
 function netTick(dt){const inS=NETKIT.inSession();
-  if(inS){NET.sendT-=dt;if(NET.sendT<=0){NET.sendT=0.08;NETKIT.state({x:+player.x.toFixed(2),y:+player.y.toFixed(2),z:+player.z.toFixed(2),r:+player.rot.toFixed(2),m:player.moving?1:0,c:car&&car.occupied?1:0});}
-    if(NETKIT.isHost()){NET.worldT-=dt;if(NET.worldT<=0){NET.worldT=1.5;NETKIT.world({day:st.day,t:+st.t.toFixed(4),fuel:+st.fuel.toFixed(3)});}}}
+  /* network timers run on real time, so a slow device still sends at a steady rate */
+  const now_=performance.now();
+  if(inS){if(now_>=NET.sendT){NET.sendT=now_+80;const cs=netCampS(),s={x:+player.x.toFixed(2),y:+player.y.toFixed(2),z:+player.z.toFixed(2),r:+player.rot.toFixed(2),m:player.moving?1:0,c:car&&car.occupied?1:0,cs};
+      if(cs===1){s.cx=+FIRE.x.toFixed(2);s.cz=+FIRE.z.toFixed(2);s.cf=Math.round(st.fuel*20)/20;}NETKIT.state(s);}
+    if(NETKIT.isHost()){const sig=[W.on,W.kind,W.frozen,W.season,W.manualUntil,W.peak,st.frozen,st.speed,st.day].join();
+      if(now_>=NET.worldT||sig!==NET.wsig){NET.worldT=now_+1500;NET.wsig=sig;NETKIT.world(netWorld());}
+      if(now_>=NET.animT&&NETKIT.players().length>1){NET.animT=now_+200;NETKIT.send('an',{a:netAnimPack()});}}}
   const seen=new Set();
   if(inS)for(const p of NETKIT.players()){if(p.isMe||!p.state||typeof p.state.x!=='number')continue;seen.add(p.id);let o=NET.others.get(p.id);
-    if(!o){o={g:netAvatar(p.color&&/^#/.test(p.color)?parseInt(p.color.slice(1),16):P.rust),x:p.state.x,y:p.state.y,z:p.state.z,r:p.state.r,lab:document.createElement('div'),ph:0};o.lab.className='netName';$('netLabels').appendChild(o.lab);NET.others.set(p.id,o);}
+    if(!o){o={g:netAvatar(p.color&&/^#/.test(p.color)?parseInt(p.color.slice(1),16):P.rust),x:p.state.x,y:p.state.y,z:p.state.z,r:p.state.r,lab:document.createElement('div'),ph:0,camp:null};o.lab.className='netName';$('netLabels').appendChild(o.lab);NET.others.set(p.id,o);}
     const s_=p.state,k=Math.min(1,dt*8);o.x+=(s_.x-o.x)*k;o.y+=(s_.y-o.y)*k;o.z+=(s_.z-o.z)*k;o.r=lerpAng(o.r,s_.r,k);o.ph+=s_.m?dt*9:0;
-    o.g.position.set(o.x,o.y+(s_.m?Math.abs(Math.sin(o.ph))*0.05:0),o.z);o.g.rotation.y=o.r;o.g.visible=!s_.c;o.lab.textContent=p.name||'Hiker';
-    _nv.set(o.x,o.y+1.75,o.z).project(camera);const vis=_nv.z<1&&!s_.c;o.lab.style.display=vis?'block':'none';if(vis){o.lab.style.left=((_nv.x*0.5+0.5)*innerWidth)+'px';o.lab.style.top=((-_nv.y*0.5+0.5)*innerHeight)+'px';}}
-  for(const[id,o]of NET.others)if(!seen.has(id)){scene.remove(o.g);o.lab.remove();NET.others.delete(id);}}
+    o.g.position.set(o.x,o.y+(s_.m?Math.abs(Math.sin(o.ph))*0.05:0),o.z);o.g.rotation.y=o.r;o.g.visible=!s_.c;
+    const nm=String(p.name||'Hiker');o.lab.textContent=nm+(s_.cs===2?' · carrying camp':s_.cs===3?' · camp in van':'');netLabel(o.lab,o.x,o.y+1.75,o.z,!s_.c);
+    /* their camp */
+    if(s_.cs===1&&typeof s_.cx==='number'){if(o.camp&&o.camp.hq!==!!TENTMESH)netCampDrop(o);if(!o.camp)o.camp=netCampMake();const c=o.camp,key=s_.cx+','+s_.cz;
+      if(c.key!==key){c.key=key;netCampPlace(c,s_.cx,s_.cz);}const fu=s_.cf||0;c.fl.visible=fu>0;c.fl.scale.setScalar(0.6+0.6*Math.min(1,fu*1.4)+Math.sin(T*9+o.ph)*0.04);
+      c.lab.textContent=nm+'’s camp';netLabel(c.lab,c.tx,gh(c.tx,c.tz)+2.3,c.tz,true);}
+    else netCampDrop(o);
+    /* a guest who joins with their own camp still standing where the host's camp is packs theirs away */
+    if(p.isHost&&netGuest()&&!NET.campCheck&&typeof s_.cs==='number'){NET.campCheck=true;
+      if(s_.cs===1&&CAMP.state==='set'&&hyp(FIRE.x-s_.cx,FIRE.z-s_.cz)<4){packCamp();CAMP.state='carried';toast('Your camp is packed and you are carrying it. Pitch it anywhere from Camp in the dock.',4.5);}}}
+  for(const[id,o]of NET.others)if(!seen.has(id)){scene.remove(o.g);o.lab.remove();netCampDrop(o);NET.others.delete(id);}
+  if(!inS)NET.campCheck=false;}
 /* ---------- cabin building kit hookup ---------- */
 let kitMouse=null,kitTap=null;const kitRay=new THREE.Raycaster();
 CABINKIT.init(scene,{
@@ -4197,7 +4261,7 @@ bushes.forEach(b=>inter.push({x:b.x,z:b.z,lv:'rim',r:1.6,on:()=>true,label:()=>b
 inter.push({get x(){return FIRE.x},get z(){return FIRE.z},lv:'rim',r:2.3,on:()=>CAMP.state==='set',
   label:()=>st.sticks>0&&fireRoom()>0?`Add ${Math.min(st.sticks,fireRoom())} stick${Math.min(st.sticks,fireRoom())>1?'s':''} to the fire`:st.sticks>0&&!(st.fish>0)?'The fire is full (holds 10 sticks)':st.fish>0&&st.fuel>0?'Cook & eat a fish':st.fuel<=0?'The fire is out. Find sticks.':'Campfire. Bring sticks to keep it going.',
   can:()=>(st.sticks>0&&fireRoom()>0)||(st.fish>0&&st.fuel>0),act(){
-    if(st.sticks>0&&fireRoom()>0){const was=st.fuel<=0,n=Math.min(st.sticks,fireRoom());st.fuel=Math.min(1,st.fuel+n/FIRE_CAP);if(NETKIT.inSession()&&!NETKIT.isHost())NETKIT.send('fuel',{add:n/FIRE_CAP});st.sticks-=n;toast((was?'The fire catches and crackles back to life. ':'The fire crackles happily. ')+`(${n} added, 5 last a full day)`,3);}
+    if(st.sticks>0&&fireRoom()>0){const was=st.fuel<=0,n=Math.min(st.sticks,fireRoom());st.fuel=Math.min(1,st.fuel+n/FIRE_CAP);st.sticks-=n;toast((was?'The fire catches and crackles back to life. ':'The fire crackles happily. ')+`(${n} added, 5 last a full day)`,3);}
     else{st.fish--;st.hunger=Math.min(100,st.hunger+45);st.warmth=Math.min(100,st.warmth+5);toast('Fish grilled over the fire. Smoky and delicious!');}}});
 inter.push({get x(){return TENT.x},get z(){return TENT.z},lv:'rim',r:2.5,on:()=>CAMP.state==='set',label:()=>st.t>0.42?'Sleep until morning':'Take a nap',can:()=>true,act(){rest();}});
 if(WTREES){let wt=null,wtT=0;inter.push({get x(){return wt?wt[0]:1e9},get z(){return wt?wt[1]:1e9},lv:'rim',r:1.45,
@@ -4593,9 +4657,9 @@ function interact(){if(!st.playing||st.busy||player.climb)return;
   if(!cur||!cur.can()){CABINKIT.interact(true);return;}cur.act();}
 
 function rest(){
-  if(st.t>0.42){fadeSeq('You crawl into the tent and listen to the fire pop…',()=>{if(pet)pet.bond=Math.max(8,pet.bond-20);st.t=0.03;st.day++;st.energy=100;st.warmth=Math.max(st.warmth,75);st.hunger=Math.max(0,st.hunger-12);st.warned={};resetWild();},
+  if(st.t>0.42){fadeSeq('You crawl into the tent and listen to the fire pop…',()=>{if(pet)pet.bond=Math.max(8,pet.bond-20);if(!netGuest()){st.t=0.03;st.day++;}st.energy=100;st.warmth=Math.max(st.warmth,75);st.hunger=Math.max(0,st.hunger-12);st.warned={};if(!netGuest())resetWild();},
     `Day ${st.day+1}. Birdsong and cold dew. You slept well.`);}
-  else fadeSeq('You stretch out for a short nap…',()=>{st.t+=0.05;st.energy=Math.min(100,st.energy+35);st.hunger=Math.max(0,st.hunger-4);},'Refreshed. Back to the trail.');
+  else fadeSeq('You stretch out for a short nap…',()=>{if(!netGuest())st.t+=0.05;st.energy=Math.min(100,st.energy+35);st.hunger=Math.max(0,st.hunger-4);},'Refreshed. Back to the trail.');
 }
 function resetWild(){bears.forEach(b=>{b.x=b.sx;b.z=b.sz;b.state='idle';b.rear=0;});wolves.forEach((w,i)=>{if(w.role)return;w.state='roam';w.x=DEN.x+i-1;w.z=DEN.z;});pack.cd=12;}
 function ko(cause){
@@ -4806,8 +4870,8 @@ addEventListener('keydown',e=>{const tg=e.target&&e.target.tagName;if(tg==='INPU
     if(c==='Digit1'){CABINKIT.craft('short');return;}if(c==='Digit2'){CABINKIT.craft('medium');return;}if(c==='Digit3'){CABINKIT.craft('long');return;}
     if(c==='KeyQ'||c==='KeyR'){CABINKIT.rotate();return;}if(c==='KeyF'){CABINKIT.drop();return;}if(c==='KeyC'){CABINKIT.cutDoor();return;}if(c==='KeyX'){CABINKIT.cutWindow();return;}
     if(c==='KeyT'&&!$('bp').hidden){cycleRoof();return;}if(c==='Escape'&&CABINKIT.busy()){CABINKIT.cancel();return;}}
-  if(e.code==='KeyL'){toggleLP();return;}if(e.code==='KeyT'){toggleTP();return;}
-  if(e.code==='BracketLeft'){stepHour(-1);return;}if(e.code==='BracketRight'){stepHour(1);return;}if(e.code==='KeyP'){setFreeze(!st.frozen);return;}
+  if(DEV){if(e.code==='KeyL'){toggleLP();return;}if(e.code==='KeyT'){toggleTP();return;}
+  if(e.code==='BracketLeft'){stepHour(-1);return;}if(e.code==='BracketRight'){stepHour(1);return;}if(e.code==='KeyP'){setFreeze(!st.frozen);return;}}
   if(e.code==='KeyV'){resetView();return;}if(e.code==='Minus'){camAdj(0,0,1.5);return;}if(e.code==='Equal'){camAdj(0,0,-1.5);return;}
   if(e.code==='KeyQ'){camAdj(-6,0,0);return;}if(e.code==='KeyR'){camAdj(6,0,0);return;}
   if(KM[e.code]){keys[KM[e.code]]=true;e.preventDefault();}
@@ -4816,7 +4880,7 @@ addEventListener('keydown',e=>{const tg=e.target&&e.target.tagName;if(tg==='INPU
   if(e.code==='Enter'&&st.playing&&!e.repeat)interact();
   if(e.code==='Enter'&&!st.playing&&!$('intro').classList.contains('hide'))start();
   if(e.code==='Escape'&&owlCam.on){setOwlCam(false);return;}
-  if(e.code==='KeyB'){toggleWP();return;}
+  if(e.code==='KeyB'&&DEV){toggleWP();return;}
   if(KM[e.code]&&owlCam.on)setOwlCam(false);
   if(e.code==='Escape'||e.code==='KeyH')openHelp();});
 addEventListener('keyup',e=>{if(KM[e.code])keys[KM[e.code]]=false;if(e.code==='KeyE'||e.code==='Space')keys.reel=false;});
@@ -4967,7 +5031,7 @@ function lpTick(dt){fpsAcc+=dt;fpsN++;if(fpsAcc>0.5){fpsTxt=Math.round(fpsN/fpsA
     const hrs=(6+st.t*24)%24,hh=Math.floor(hrs),mm=Math.floor((hrs-hh)*60);
     $('tBig').textContent=phaseName(st.t)+' · '+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');}}
 syncLP();markPreset(Object.keys(DEF).every(k=>CAMK.includes(k)||L[k]===DEF[k])?'Heavy mist':null);
-const MAPKEY=MAP==='meadow'&&location.hash==='#hollow'?'hollow':MAP;document.querySelectorAll('.maps button').forEach(b=>{b.classList.toggle('on',b.dataset.map===MAPKEY);
+const MAPKEY=MAP==='meadow'&&MAPH==='hollow'?'hollow':MAP;document.querySelectorAll('.maps button').forEach(b=>{b.classList.toggle('on',b.dataset.map===MAPKEY);
   b.addEventListener('click',()=>{if(b.dataset.map===MAPKEY)return;location.hash=b.dataset.map;location.reload();});});
 addEventListener('hashchange',()=>location.reload());
 function start(){$('intro').classList.add('hide');st.playing=true;if(!st.started){st.started=true;
@@ -4975,6 +5039,15 @@ function start(){$('intro').classList.add('hide');st.playing=true;if(!st.started
 function openHelp(){if(st.busy)return;st.playing=false;$('intro').classList.remove('hide');$('startBtn').textContent='Back to the trail';$('startBtn').focus();}
 $('startBtn').addEventListener('click',start);
 $('helpBtn').addEventListener('click',openHelp);
+{const paint=()=>{$('devPw').hidden=$('devGo').hidden=false;$('devPw').style.display=DEV?'none':'';$('devGo').textContent=DEV?'Lock dev tools':'Unlock';$('devMsg').textContent=DEV?'Dev tools on for this device.':'';};paint();
+  $('devGo').addEventListener('click',async()=>{if(DEV){try{localStorage.removeItem('plw-dev');}catch(e){}location.replace(location.href.split('#')[0]);return;}
+    if(!(window.crypto&&crypto.subtle)){$('devMsg').textContent='This browser can\'t check passwords here.';return;}
+    const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('paperland-dev:'+$('devPw').value)),h=[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    if(h!==DEV_HASH){$('devMsg').textContent='Wrong password.';$('devPw').value='';return;}
+    try{localStorage.setItem('plw-dev',h);}catch(e){}$('devMsg').textContent='Unlocked. Reloading…';setTimeout(()=>location.reload(),400);});
+  $('devPw').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')$('devGo').click();});
+  const lite=()=>{$('liteBtn').textContent='Lighter graphics: '+(LITE?'On':'Off');};lite();
+  $('liteBtn').addEventListener('click',()=>{LITE=!LITE;try{localStorage.setItem('plw-lite',LITE?'1':'0');}catch(e){}L.reflect=LITE?0:(DEV?L.reflect||DEF.reflect:DEF.reflect);lite();});}
 
 /* ---------- camera ---------- */
 const camT=new THREE.Vector3(),camOff=new THREE.Vector3(),camCur={d:24,p:55,y:0};
@@ -5062,7 +5135,7 @@ function sim(dt,night){
   // respawns
   sticks.forEach(s=>{if(!s.active&&s.respawn&&(s.timer-=dt)<=0)placeStick(s);});
   bushes.forEach(b=>{if(!b.has&&(b.timer-=dt)<=0){b.has=true;b.berries.visible=true;}});
-  updateWild(dt,night);
+  if(netGuest())netAnimals(dt);else updateWild(dt,night);
   if(st.energy<=0&&!st.busy)ko('tired');
   // nearest interactable
   let best=null,bd=99;for(const it of inter){if(!it.on())continue;if(GZ&&it.lv&&it.lv!==player.level)continue;const d=hyp(it.x-player.x,it.z-player.z),bb=it.tree?0.7:(it.bias||0);if(d<it.r&&d+bb<bd){bd=d+bb;best=it;}}
@@ -5589,7 +5662,7 @@ function phCancelExp(){if(!PH.exp)return;PH.exp=null;$('phShut').classList.remov
 const ICO=window.PLW_ICONS||{},icon=n=>ICO[n]||'';
 $('dockBtn').style.backgroundImage='url('+icon('trail')+')';
 const DK=[['ip','backpack','Inventory'],['health','firstaid','Health'],['camp','campfire','Camp'],['tools','axe','Tools'],['fishing','fish','Fishing'],['wild','binoculars','Wildlife'],['gear','boot','Gear & clothing'],['wp','storm','Weather'],['map','map','Map'],['bp','hammer','Build'],['op','walkie','Online'],['radio','radio','Radio'],['guide','lantern','Field guide']];
-$('dock').innerHTML=DK.map(d=>'<button data-k="'+d[0]+'" data-l="'+d[2]+'" aria-label="'+d[2]+'" style="background-image:url('+icon(d[1])+')"></button>').join('');
+$('dock').innerHTML=DK.filter(d=>DEV||d[0]!=='wp').map(d=>'<button data-k="'+d[0]+'" data-l="'+d[2]+'" aria-label="'+d[2]+'" style="background-image:url('+icon(d[1])+')"></button>').join('');
 const DKS={cur:null,moved:null,home:null,t:0};
 function dockToggle(on){const o=on===undefined?!$('dock').classList.contains('open'):on;$('dock').classList.toggle('open',o);$('dockBtn').setAttribute('aria-expanded',o);if(!o)dockClose();}
 function dockClose(){if(DKS.moved){DKS.home.appendChild(DKS.moved);if(DKS.moved.classList.contains('panel'))DKS.moved.hidden=true;DKS.moved=null;}DKS.cur=null;$('dockPane').hidden=true;[...$('dock').children].forEach(b=>b.classList.remove('on'));}
