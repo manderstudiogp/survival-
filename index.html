@@ -579,7 +579,7 @@ const MAP=location.hash==='#gorge'?'gorge':location.hash==='#ocean'?'ocean':'mea
 let TENTMESH=null;const CAMP={state:'set',home:null};
 /* WORLD: Oregon Wilds, the full map. '#hollow' loads only Ember Hollow, the original home map, for quick testing. */
 const WORLD=MAP==='meadow'&&location.hash==='#meadow';let WORLD_=null;
-const LIM=18, RHW=2.1, CYCLE=240;
+const LIM=MAP==='ocean'?29:18, RHW=2.1, CYCLE=240;
 const segD=(x,z,a,b)=>{const dx=b[0]-a[0],dz=b[1]-a[1];const t=clamp(((x-a[0])*dx+(z-a[1])*dz)/(dx*dx+dz*dz),0,1);return hyp(x-a[0]-t*dx,z-a[1]-t*dz);};
 const noise=(x,z)=>Math.sin(x*0.31+1.3)*Math.cos(z*0.27)+0.5*Math.sin((x-z)*0.19+2);
 let TRAILS=[];
@@ -805,58 +805,87 @@ if(MAP==='meadow'){
     rim:[g+s_*(FW+WW+0.9),0,z],top:[g+s_*(FW+WW-0.15),0.1,z],bot:[g+s_*(FW+0.1),-FD+0.15,z],floor:[g+s_*(FW-0.9),-FD,z]};});
   GZ={FD,FW,WW,RWg,gx,PC,PR,BZ,BX,BH,FSZ,fsdf,rimStream,onSwing,onFS,onLog,bridgeSag,wallY};
 }else{
-  /* ===== Ocean Test bench (#ocean): a clifftop headland with the open sea all around =====
-     Everything is built from one signed distance to the cliff edge (coastD, + inland). The clifftop sits at y≈0 (camp level),
-     the cliffs drop in three strata to the surf at SEA, a sandy pocket cove cuts in on the south-east,
-     sea stacks and two arches stand off the cliffs, and the sea mesh runs out to the horizon. North is up the screen (-z). */
-  const SEA=-8.5,CW=2.6;
+  /* ===== Ocean Test bench (#ocean): a headland with the open sea all around =====
+     The shore is drawn around a ragged base line Rb(θ) where the land meets the shore. Inland of it the ground rises to the
+     plateau (y≈0, camp level): as a three-step cliff in most places, or as long walkable slopes in three sectors
+     (the south-east beach cove, a north-east grassy slope and a narrow west gully). Seaward of it lies a sandy beach in the
+     cove and a walkable rock bench along every cliff foot, then the sea. Heights are baked into a 0.25 m grid. North is -z. */
+  const SEA=-8.5,CWc=2.8,CWs=10.5,HEAD=-2.3,COVE=0.78,NESL=-0.75,GULLY=2.75;
   const wA=a=>((a+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;
   const gau=(a,c,w)=>{const d=wA(a-c)/w;return Math.exp(-d*d);};
-  const COVE=0.78,HEAD=-2.3;
-  const Rt=a=>13+1.3*Math.sin(3*a+0.7)+0.8*Math.sin(5*a+2.1)+0.45*Math.sin(9*a+0.3)+3.4*gau(a,HEAD,0.24)+1.8*gau(a,1.95,0.2)-3.7*gau(a,COVE,0.2)-1.5*gau(a,-0.85,0.11);
-  const coastD=(x,z)=>{const r=hyp(x,z),a=Math.atan2(z,x),R=Rt(a),dR=(Rt(a+0.01)-Rt(a-0.01))/0.02;return (R-r)/Math.sqrt(1+(dR/Math.max(r,1))**2);};
-  const wc=a=>gau(a,COVE,0.27);
-  const top=(x,z)=>Math.max(0,0.5*noise(x*0.6,z*0.6)+0.2)*smooth(3.5,8,hyp(x-1.2,z-3.2))+1.8*Math.exp(-((x+9.6)**2+(z+9.4)**2)/24)+0.9*Math.exp(-((x-9)**2+(z+3)**2)/14);
-  const surf=(x,z)=>{const d=coastD(x,z);if(d>=0)return top(x,z);const a=Math.atan2(z,x),w=wc(a),foot=SEA-0.9+(SEA+0.55-(SEA-0.9))*w;
-    if(d>-CW){const k=(d+CW)/CW,s=k*3,f=Math.floor(Math.min(s,2.999)),p=(f+smooth(0.5,1,s-f))/3;return foot+(top(x,z)-foot)*p;}
-    const e=-d-CW,yS=SEA-0.9-2.2*smooth(0,7,e)+0.25*noise(x*0.9,z*0.9),yB=SEA+0.55-0.32*e-0.8*smooth(3,7,e);return yS+(yB-yS)*w;};
-  /* sea stacks: [angle, metres out from the cliff foot, waterline radius, top y]; small skerries are added after */
-  const STK=[[-2.78,4.6,2.0,-1.2],[-2.5,8.8,1.4,-3.6],[-1.95,6.2,1.8,0.7],[-1.62,3.4,1.1,-4.6],[-1.22,7.6,2.3,1.5],[-0.62,4.2,1.3,-2.3],
-    [-0.18,9.2,1.9,-0.5],[0.32,5.0,1.0,-5.4],[0.8,12.5,2.5,2.0],[1.32,6.6,1.6,-1.9],[1.68,10.5,1.2,-4.2],[2.62,8.4,1.5,-2.7],
-    [3.02,5.6,1.1,-5.7],[2.92,12.6,2.6,2.3],[-2.12,13.5,2.2,0.2],[0.05,14.5,1.7,-2.0],[1.1,17,2.8,3.0],[-1.0,16,2.0,-1.0]];
-  const STACKS=[];const footR=a=>Rt(a)+CW;
-  for(const[a,o,r,t]of STK){const R_=footR(a)+o;STACKS.push({x:Math.cos(a)*R_,z:Math.sin(a)*R_,r,top:t,k:'stack'});}
+  const Rlow=a=>17+1.5*Math.sin(3*a+0.7)+0.85*Math.sin(5*a+2.1)+3.2*gau(a,HEAD,0.22)+1.6*gau(a,1.95,0.2)-1.8*gau(a,COVE,0.42)-1.2*gau(a,-1.55,0.1);
+  const rag=a=>0.5*Math.sin(9*a+0.3)+0.3*Math.sin(17*a+1.1)+0.18*Math.sin(29*a+2.6);   /* the ragged bits: only near the shore */
+  const Rb=a=>Rlow(a)+rag(a);
+  const beachW=a=>gau(a,COVE,0.38);                                   /* the long sandy beach */
+  /* gradual areas: elliptical patches laid along each sector (radial reach, sideways reach), so slopes never pinch toward the middle */
+  const SLB=[[COVE,4,10,7.5],[NESL,3,8.5,4.8],[GULLY,3,9.5,1.9]].map(([a,o,ru,rv])=>({a,cx:Math.cos(a)*(Rb(a)-o),cz:Math.sin(a)*(Rb(a)-o),ux:Math.cos(a),uz:Math.sin(a),ru,rv}));
+  const slopeW=(x,z)=>{let m=0;for(const s of SLB){const dx=x-s.cx,dz=z-s.cz,u=(dx*s.ux+dz*s.uz)/s.ru,v=(-dx*s.uz+dz*s.ux)/s.rv;m=Math.max(m,Math.exp(-u*u-v*v));}return m;};
+  const cliffK=(x,z)=>1-smooth(0.3,0.75,slopeW(x,z)+0.07*Math.sin(Math.atan2(z,x)*23));   /* 1 = cliff, 0 = gradual slope; ragged at the seams */
+  const benchW=a=>2.0+0.9*(0.5+0.5*Math.sin(7*a+1.3))+0.4*Math.sin(19*a);
+  const coastD=(x,z)=>{const r=hyp(x,z),a=Math.atan2(z,x),RL=Rlow(a),R=RL+rag(a)*smooth(RL-4.5,RL-0.8,r),dR=(Rlow(a+0.01)-Rlow(a-0.01))/0.02;return (R-r)/Math.sqrt(1+(dR/Math.max(r,9))**2);};
+  const top=(x,z)=>Math.max(0,0.5*noise(x*0.6,z*0.6)+0.2)*smooth(3.5,8,hyp(x+2,z+1))+1.8*Math.exp(-((x+12.5)**2+(z+12.5)**2)/26)+0.9*Math.exp(-((x-11)**2+(z+5)**2)/16);
+  const strata=k=>{const s=clamp(k,0,1)*3,f=Math.floor(Math.min(s,2.999));return (f+smooth(0.45,1,s-f))/3;};
+  const ease=k=>{k=clamp(k,0,1);return 0.5*(k+k*k*(3-2*k));};
+  const surf0=(x,z)=>{const d=coastD(x,z),a=Math.atan2(z,x),c=cliffK(x,z),b=beachW(a),T=top(x,z),foot=SEA+0.45+0.35*b;
+    if(d>=0){const yc=foot+(T-foot)*strata(d/CWc),ys=foot+(T-foot)*ease(d/CWs)+0.12*Math.sin(x*1.3+z*0.7)*Math.sin(Math.PI*clamp(d/CWs,0,1));return ys+(yc-ys)*c;}
+    const e=-d,wb=benchW(a)*(1-b)+12*b,sl=0.05*(1-b)+0.11*b,yB=foot-sl*e+0.06*noise(x*2.1,z*2.1)*(1-b);
+    const floor=SEA-1.4-1.8*smooth(0,8,e-wb)+0.25*noise(x*0.9,z*0.9);return Math.max(floor,yB-2.4*smooth(wb,wb+0.9,e));};
+  /* baked height + slope grid */
+  const GR=0.25,GE=34,GN=Math.round(2*GE/GR)+1,HG=new Float32Array(GN*GN),SG=new Float32Array(GN*GN);
+  for(let j=0;j<GN;j++)for(let i=0;i<GN;i++)HG[j*GN+i]=surf0(-GE+i*GR,-GE+j*GR);
+  for(let j=1;j<GN-1;j++)for(let i=1;i<GN-1;i++){const k=j*GN+i;SG[k]=hyp((HG[k+1]-HG[k-1])/(2*GR),(HG[k+GN]-HG[k-GN])/(2*GR));}
+  const bil=(A,x,z)=>{const fx=clamp((x+GE)/GR,0,GN-1.001),fz=clamp((z+GE)/GR,0,GN-1.001),i=Math.floor(fx),j=Math.floor(fz),u=fx-i,v=fz-j,k=j*GN+i;
+    return (A[k]*(1-u)+A[k+1]*u)*(1-v)+(A[k+GN]*(1-u)+A[k+GN+1]*u)*v;};
+  const hAt=(x,z)=>bil(HG,x,z),slopeAt=(x,z)=>bil(SG,x,z);
+  const gradAt=(x,z)=>{const e=0.3;return [(hAt(x+e,z)-hAt(x-e,z))/(2*e),(hAt(x,z+e)-hAt(x,z-e))/(2*e)];};
+  /* distance over water to the nearest dry ground (for surf foam) */
+  const SD=new Float32Array(GN*GN);{const INF=1e4;for(let k=0;k<GN*GN;k++)SD[k]=HG[k]>SEA-0.02?0:INF;const d1=GR,d2=GR*1.4142;
+    for(let j=1;j<GN-1;j++)for(let i=1;i<GN-1;i++){const k=j*GN+i;SD[k]=Math.min(SD[k],SD[k-1]+d1,SD[k-GN]+d1,SD[k-GN-1]+d2,SD[k-GN+1]+d2);}
+    for(let j=GN-2;j>0;j--)for(let i=GN-2;i>0;i--){const k=j*GN+i;SD[k]=Math.min(SD[k],SD[k+1]+d1,SD[k+GN]+d1,SD[k+GN+1]+d2,SD[k+GN-1]+d2);}}
+  /* sea stacks: [angle, metres out from the bench edge, waterline radius, top y]; small surf rocks are added after */
+  const footR=a=>Rb(a)+benchW(a)*(1-beachW(a))+12*beachW(a)+0.6;
+  const STK=[[-2.78,4.6,2.0,-1.2],[-2.5,8.8,1.4,-3.6],[-1.95,6.2,1.8,0.7],[-1.62,3.4,1.1,-4.6],[-1.22,7.6,2.3,1.5],[-0.3,5.2,1.3,-2.3],
+    [0.05,9.2,1.9,-0.5],[0.85,9.5,2.5,2.0],[1.32,6.6,1.6,-1.9],[1.68,10.5,1.2,-4.2],[2.55,8.4,1.5,-2.7],
+    [3.02,5.6,1.1,-5.7],[2.92,12.6,2.6,2.3],[-2.12,13.5,2.2,0.2],[-0.1,14.5,1.7,-2.0],[1.15,16,2.8,3.0],[-1.0,16,2.0,-1.0]];
+  const STACKS=[];for(const[a,o,r,t]of STK){const R_=footR(a)+o;STACKS.push({x:Math.cos(a)*R_,z:Math.sin(a)*R_,r,top:t,k:'stack'});}
   {let s_=77;const h=()=>{s_=(Math.imul(s_,1664525)+1013904223)>>>0;return s_/4294967296;};
-    for(let i=0;i<26;i++){const a=h()*6.283;if(wc(a)>0.3)continue;const R_=footR(a)+0.6+h()*3.2;STACKS.push({x:Math.cos(a)*R_,z:Math.sin(a)*R_,r:0.5+h()*0.7,top:SEA+0.2+h()*1.3,k:'skerry'});}}
-  /* arches: the headland arch runs from the NW cliff tip out to a stack; a freestanding arch stands off the SW point */
-  const ARCH=[];{const a=HEAD,R0=Rt(a)-0.5,R1=footR(a)+6.5;
-    ARCH.push({A:[Math.cos(a)*R0,Math.sin(a)*R0],B:[Math.cos(a)*R1,Math.sin(a)*R1],yA:top(Math.cos(a)*R0,Math.sin(a)*R0)-0.15,yB:-0.6,rA:0,rB:1.9,land:true});
-    const b=2.12,Rb=footR(b)+6.8,cx=Math.cos(b)*Rb,cz=Math.sin(b)*Rb,tx=-Math.sin(b),tz=Math.cos(b);
+    for(let i=0;i<30;i++){const a=h()*6.283;if(beachW(a)>0.25)continue;const R_=footR(a)+0.3+h()*3.2;STACKS.push({x:Math.cos(a)*R_,z:Math.sin(a)*R_,r:0.5+h()*0.7,top:SEA+0.2+h()*1.3,k:'skerry'});}}
+  const ARCH=[];{const a=HEAD,R0=Rb(a)-CWc-0.3,R1=footR(a)+6.5,ax=Math.cos(a)*R0,az=Math.sin(a)*R0;
+    ARCH.push({A:[ax,az],B:[Math.cos(a)*R1,Math.sin(a)*R1],yA:top(ax,az)-0.15,yB:-0.6,rA:0,rB:1.9,land:true});
+    const b=2.12,Rb2=footR(b)+6.8,cx=Math.cos(b)*Rb2,cz=Math.sin(b)*Rb2,tx=-Math.sin(b),tz=Math.cos(b);
     ARCH.push({A:[cx-tx*3,cz-tz*3],B:[cx+tx*3,cz+tz*3],yA:-1.4,yB:-2.2,rA:1.7,rB:1.5,land:false});}
   ARCH.forEach(A=>{if(A.rA)STACKS.push({x:A.A[0],z:A.A[1],r:A.rA,top:A.yA,k:'leg'});STACKS.push({x:A.B[0],z:A.B[1],r:A.rB,top:A.yB,k:'leg'});});
-  const shoreD=(x,z)=>{const a=Math.atan2(z,x);let s=-coastD(x,z)-CW-2.0*wc(a);for(const S_ of STACKS){const d=hyp(x-S_.x,z-S_.z)-S_.r*1.05;if(d<s)s=d;}return s;};
+  const shoreD=(x,z)=>{let s=bil(SD,x,z);for(const S_ of STACKS){const d=hyp(x-S_.x,z-S_.z)-S_.r*1.05;if(d<s)s=d;}return s;};
+  const onStack=(x,z,m)=>STACKS.some(S_=>hyp(x-S_.x,z-S_.z)<S_.r*1.08+m)||hyp(x-ARCH[0].A[0],z-ARCH[0].A[1])<1.3+m;
+  const SLOPE_MAX=1.1;
   rx=()=>0;
-  inWater=(x,z)=>coastD(x,z)<-CW*0.5&&surf(x,z)<SEA-0.05;
-  walkable=(x,z,lim=LIM)=>Math.abs(x)<lim&&Math.abs(z)<lim&&coastD(x,z)>0.55;
-  heightAt=(x,z)=>surf(x,z);
-  gh=surf;
-  terrainY=(x,z,j)=>{const d=coastD(x,z);return surf(x,z)+j*(d<0&&d>-CW?3:1);};
-  groundCol=(cx,cy,cz,ny,n)=>{const d=coastD(cx,cz),w=wc(Math.atan2(cz,cx));
-    if(cy<SEA+1.3&&ny>0.75&&w>0.35)return cy<SEA+0.35?P.tent:(n>0.3?P.birch:P.tent);
-    if(cy<SEA+0.6)return P.earth;
-    if(ny<0.62||(d<-0.15&&cy<-0.6)){const b=Math.sin(cy*1.7+n*0.35);if(ny>0.45&&n>0.2)return P.fern;if(b>0.8&&cy<-2.5)return P.rust;return b<-0.45?P.earth:P.shale;}
+  inWater=(x,z)=>hAt(x,z)<SEA-0.05;
+  walkable=(x,z,lim=LIM)=>Math.abs(x)<lim&&Math.abs(z)<lim&&hAt(x,z)>SEA-0.55&&slopeAt(x,z)<SLOPE_MAX&&!onStack(x,z,0.25);
+  heightAt=(x,z)=>hAt(x,z);
+  gh=hAt;
+  terrainY=(x,z,j)=>surf0(x,z)+j*(slopeAt(x,z)>1.2?3:1);
+  groundCol=(cx,cy,cz,ny,n)=>{const a=Math.atan2(cz,cx),b=beachW(a),c=cliffK(cx,cz),d=coastD(cx,cz);
+    if(cy<SEA+1.25&&ny>0.72){if(b>0.3)return cy<SEA+0.3?P.tent:(n>0.25?P.birch:P.tent);return cy<SEA+0.25?P.earth:(n>0.35?P.shale:P.earth);}
+    if(cy<SEA+0.3)return P.earth;
+    if(ny<0.62){const s=Math.sin(cy*1.7+n*0.35);if(ny>0.45&&n>0.2)return P.fern;if(s>0.8&&cy<-2.5)return P.rust;return s<-0.45?P.earth:P.shale;}
     if(trailDist(cx,cz)<0.75||hyp(cx-FIRE.x,cz-FIRE.z)<2.4)return P.earth;
-    if(d<0.9)return n>0.1?P.birch:P.sage;
+    if(cy<SEA+2.6&&b>0.3)return n>0.1?P.birch:P.sage;                 /* dune grass at the back of the beach */
+    if(ny<0.85)return n>0.45?P.pine:n>-0.2?P.fern:P.sage;              /* lush slopes */
+    if(c>0.6&&d>CWc&&d<CWc+0.9)return n>0.1?P.birch:P.sage;            /* golden grass along the brink */
     return n>0.55?P.fern:n<-0.6?P.birch:P.sage;};
   waterAt=(x,z)=>inWater(x,z)?SEA:null;
-  freeMap=(x,z,m)=>{if(Math.abs(x)>17||Math.abs(z)>17)return false;if(coastD(x,z)<1.2+m)return false;
-    const A=ARCH[0];if(hyp(x-A.A[0],z-A.A[1])<2.6+m)return false;return true;};
-  sampleWater=()=>{for(let i=0;i<20;i++){const a=rng()*6.283,R_=footR(a)+0.8+rng()*11,x=Math.cos(a)*R_,z=Math.sin(a)*R_;if(STACKS.some(s=>hyp(x-s.x,z-s.z)<s.r+0.4))continue;return [x,SEA+0.06,z];}return [0,SEA,22];};
-  FIRE={x:1.2,z:3.2};TENT={x:3.7,z:1.3};START={x:-0.9,z:5.4};DEER={x:-6,z:-1.5};
-  BUSH_POS=[[-4.5,6.5],[6.5,-1.5],[-8,1.5],[2.5,-6.5],[-3,-8.5]];
-  TRAILS=[[[1.2,3.2],[-1.8,0],[-5.2,-4.6],[-8.6,-8.6]],[[1.2,3.2],[3.8,4.6],[5.6,5.3]],[[-0.9,5.4],[0.4,4.2]]];
+  freeMap=(x,z,m)=>{if(Math.abs(x)>LIM-1||Math.abs(z)>LIM-1)return false;const h=hAt(x,z);if(h<SEA+0.6||slopeAt(x,z)>0.7)return false;
+    if(onStack(x,z,1+m))return false;for(const[dx,dz]of[[m,0],[-m,0],[0,m],[0,-m]])if(slopeAt(x+dx,z+dz)>0.9)return false;return true;};
+  sampleWater=()=>{for(let i=0;i<30;i++){const a=rng()*6.283,R_=Rb(a)+rng()*16,x=Math.cos(a)*R_,z=Math.sin(a)*R_;if(!inWater(x,z)||onStack(x,z,0.4))continue;return [x,SEA+0.06,z];}return [0,SEA,26];};
+  FIRE={x:-2,z:-1};TENT={x:0.3,z:-2.9};START={x:-2.6,z:2.2};DEER={x:-6,z:4};
+  BUSH_POS=[[-6.5,3.5],[3.5,-5],[-9,-3],[3,4.5],[-4,-9],[8.5,1.5],[6,7.5]];
+  /* trails: down the slope to the beach, down to the north-east bench, out to the headland, and down the west gully */
+  const along=(a,ks,wig)=>ks.map((k,i)=>{const aa=a+wig*Math.sin(i*1.9),r=Rb(aa)-(k>0?CWs*k:k);return [Math.cos(aa)*r,Math.sin(aa)*r];});
+  TRAILS=[[[FIRE.x,FIRE.z],...along(COVE,[0.95,0.7,0.45,0.2,-2.5],0.05)],[[FIRE.x,FIRE.z],...along(NESL,[0.9,0.6,0.3,0.05,-1.2],0.04)],
+    [[FIRE.x,FIRE.z],[-5.5,-5],[-9.5,-10.2],[Math.cos(HEAD)*(Rb(HEAD)-CWc-2.4),Math.sin(HEAD)*(Rb(HEAD)-CWc-2.4)]],
+    [[FIRE.x,FIRE.z],[-6,0.8],...along(GULLY,[0.75,0.45,0.15,-1.0],0)],[[START.x,START.z],[-2.2,0.6]]];
   MIST_BASE=-10.5;
-  OC={SEA,CW,Rt,coastD,wc,top,surf,STACKS,ARCH,shoreD,footR,COVE,HEAD,gau};
+  OC={SEA,CWc,CWs,Rb,coastD,cliffK,beachW,slopeW,benchW,top,hAt,slopeAt,gradAt,surf0,STACKS,ARCH,shoreD,footR,COVE,HEAD,NESL,GULLY,gau,SLOPE_MAX,onStack};
 }
 
 /* ---------- renderer / scene ---------- */
@@ -1030,7 +1059,7 @@ const colliders=[],edges=[];
 
 /* ---------- ground ---------- */
 {
-  const SEG=MAP==='gorge'?96:OC?(isTouch?150:176):WORLD?130:128,GW=WORLD?65:OC?50:64,gg=new THREE.PlaneGeometry(GW,GW,SEG,SEG);gg.rotateX(-Math.PI/2);
+  const SEG=MAP==='gorge'?96:OC?(isTouch?170:224):WORLD?130:128,GW=WORLD?65:OC?68:64,gg=new THREE.PlaneGeometry(GW,GW,SEG,SEG);gg.rotateX(-Math.PI/2);
   const gp=gg.attributes.position;
   for(let i=0;i<gp.count;i++){const x=gp.getX(i),z=gp.getZ(i);gp.setY(i,terrainY(x,z,(rng()-0.5)*0.07));}
   gg.computeVertexNormals();
@@ -1223,13 +1252,13 @@ if(OC){const O=OC,SEA=O.SEA,NA=isTouch?200:288;
     SAND=new THREE.Color(P.river).lerp(new THREE.Color(P.tent),0.35).multiplyScalar(0.78),_c=new THREE.Color();
   const RHO=[];{let r=0,dr=0.4;while(r<175){RHO.push(r);r+=dr;if(r>13)dr*=1.075;}RHO.push(175);}
   const NR=RHO.length,pos=new Float32Array(NA*NR*3),col=new Float32Array(NA*NR*3),sh=new Float32Array(NA*NR);
-  for(let i=0;i<NA;i++){const a=-Math.PI+i/NA*Math.PI*2,R0=O.Rt(a)+0.2,ca=Math.cos(a),sa=Math.sin(a),w=O.wc(a);
-    for(let j=0;j<NR;j++){const r=R0+RHO[j],x=ca*r,z=sa*r,k=i*NR+j,s=RHO[j]<30?O.shoreD(x,z):RHO[j];
+  for(let i=0;i<NA;i++){const a=-Math.PI+i/NA*Math.PI*2,R0=O.Rb(a)-0.6,ca=Math.cos(a),sa=Math.sin(a),w=O.beachW(a);
+    for(let j=0;j<NR;j++){const r=R0+RHO[j],x=ca*r,z=sa*r,k=i*NR+j,s=RHO[j]<34?O.shoreD(x,z):RHO[j];
       pos[k*3]=x;pos[k*3+1]=SEA;pos[k*3+2]=z;sh[k]=s;
       _c.copy(NEAR).lerp(DEEP,smooth(0.3,6,s));
       const kn=0.5+0.5*Math.sin(x*0.45+Math.sin(z*0.3)*2)*Math.cos(z*0.38-x*0.12);
       if(s>2&&s<16)_c.lerp(KELP,0.6*smooth(0.45,0.75,kn)*smooth(2,4,s)*(1-smooth(11,16,s)));
-      if(w>0.2&&s<6)_c.lerp(SAND,w*(1-smooth(0,6,s))*0.8);
+      if(w>0.2&&s<7)_c.lerp(SAND,w*(1-smooth(0,7,s))*0.8);
       col[k*3]=_c.r;col[k*3+1]=_c.g;col[k*3+2]=_c.b;}}
   const idx=[];for(let i=0;i<NA;i++){const i2=(i+1)%NA;for(let j=0;j<NR-1;j++){const a=i*NR+j,b=i2*NR+j,c=i*NR+j+1,d=i2*NR+j+1;idx.push(a,c,b,b,c,d);}}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('color',new THREE.BufferAttribute(col,3));
@@ -1283,7 +1312,7 @@ if(OC){const O=OC,SEA=O.SEA,NA=isTouch?200:288;
     const fk=U.fogExpo.value/Math.max(1e-3,U.exposure.value);SU.uFogC.value.copy(U.fogColor.value).multiplyScalar(fk);
     U.hzFix.value=1;if(SKY&&SKY.U.uHz){SKY.U.uHz.value=1;SKY.U.uHzC.value.copy(SU.uFogC.value);}
     if(!snd.on)sndStart();
-    if(snd.on&&SND.ctx){const c=SND.ctx,st_=SU.uStorm.value,d=Math.max(0,O.coastD(player.x,player.z)),nr=0.35+0.65*Math.exp(-d/4.5);
+    if(snd.on&&SND.ctx){const c=SND.ctx,st_=SU.uStorm.value,d=Math.max(0,O.coastD(player.x,player.z)-O.CWc),nr=0.35+0.65*Math.exp(-d/4.5);
       const ph=T*1.05/(Math.PI*2)*0.42*6.2832,set=0.55+0.45*Math.sin(T*0.11),sw=Math.pow(0.5+0.5*Math.sin(T*0.62+Math.sin(T*0.13)*2),3)*set;
       const inCar=car&&car.occupied,k=(inCar?0.3:1)*nr*(1+1.3*st_);
       snd.gl.gain.setTargetAtTime(0.16*k*(0.6+0.4*sw),c.currentTime,0.4);snd.gh.gain.setTargetAtTime(0.11*k*(0.15+0.85*sw),c.currentTime,0.25);
@@ -1436,20 +1465,32 @@ if(WORLD){const W_=WORLD_,{wr,wrr}=WORLDM,WS=W_.WS,CH=25;
   // rope bridge anchor posts
   for(const sx_ of[-1,1])for(const o of[-0.72,0.72])S.add(G.cyl6,P.earth,M(g.BX+sx_*(g.BH+0.15),0.5,g.BZ+o,0,0.11,1.6,0.11));
   }
-  else if(OC){const O=OC,SEA=O.SEA;
+  else if(OC){const O=OC,SEA=O.SEA,hA=O.hAt;
   const dk=(c,k)=>(Math.round(((c>>16)&255)*k)<<16)|(Math.round(((c>>8)&255)*k)<<8)|Math.round((c&255)*k);
   const ROCK=[P.shale,dk(P.shale,0.88),dk(P.shale,0.76)],WET=dk(P.earth,0.95),rc=y=>y<SEA+0.8?WET:ROCK[(rng()*3)|0];
-  /* the cliff faces: faceted rock chunks set into the face, darker and wet at the bottom, moss on a few ledges */
-  for(let a=-Math.PI;a<Math.PI;a+=0.028){const R=O.Rt(a);
-    for(let k=0;k<2;k++){if(rng()<0.7)continue;const t=rr(0.15,1.0),r_=R+O.CW*t+0.1,x=Math.cos(a)*r_,z=Math.sin(a)*r_,y=gh(x,z),s=rr(0.3,0.62);
+  const pick=a=>a[(rng()*a.length)|0];
+  /* the cliff faces: a few faceted slabs set into the steep faces; talus along the bench edge */
+  for(let a=-Math.PI;a<Math.PI;a+=0.024){const R=O.Rb(a);
+    for(let k=0;k<2;k++){if(rng()<0.6)continue;const r_=R-rr(0.1,O.CWc),x=Math.cos(a)*r_,z=Math.sin(a)*r_;if(O.slopeAt(x,z)<1.6)continue;const y=hA(x,z),s=rr(0.3,0.62);
       S.add(G.dod,rc(y),M(x,y,z,-a+rr(-.3,.3),s*0.55,s*rr(1.4,2.4),s*rr(0.9,1.3)));
-      if(y>SEA+1.5&&rng()<0.18)S.add(G.dod,P.fern,M(x,y+s*0.8,z,rng()*6,s*0.7,s*0.18,s*0.7));}
-    /* talus and surf boulders at the foot (the cove keeps its sand clear) */
-    if(O.wc(a)<0.4&&rng()<0.5){const r_=O.footR(a)+rr(-0.2,1.4),x=Math.cos(a)*r_,z=Math.sin(a)*r_,s=rr(0.3,0.75);S.add(G.dod,WET,M(x,SEA-0.25+rr(-0.2,0.3),z,rng()*6,s,s*rr(0.6,1),s));}}
-  /* the beach in the cove: driftwood logs and a few sea-worn stones */
-  {const a=O.COVE,R0=O.footR(a)+0.9;for(let i=0;i<4;i++){const aa=a+rr(-0.12,0.12),r_=R0+rr(-0.2,1.3),x=Math.cos(aa)*r_,z=Math.sin(aa)*r_;
-      S.add(G.cyl6,dk(P.tent,0.9),M(x,gh(x,z)+0.12,z,aa+rr(1.2,1.9),0.13,rr(1.4,2.6),0.13,0,Math.PI/2));}
-    for(let i=0;i<14;i++){const aa=a+rr(-0.2,0.2),r_=R0+rr(-0.5,2.4),x=Math.cos(aa)*r_,z=Math.sin(aa)*r_,s=rr(0.12,0.3);S.add(G.dod,ROCK[(rng()*3)|0],M(x,gh(x,z)+0.03,z,rng()*6,s,s*0.6,s));}}
+      if(y>SEA+1.5&&rng()<0.2)S.add(G.dod,P.fern,M(x,y+s*0.8,z,rng()*6,s*0.7,s*0.18,s*0.7));}
+    if(O.beachW(a)<0.3&&rng()<0.55){const r_=O.footR(a)-rr(0.2,1.2),x=Math.cos(a)*r_,z=Math.sin(a)*r_,s=rr(0.3,0.75);S.add(G.dod,WET,M(x,hA(x,z)-0.1,z,rng()*6,s,s*rr(0.6,1),s));}}
+  /* the rock bench: pitted dark rock, little pools, barnacle-white crusts, mussel-dark clumps (tide pools come later) */
+  for(let i=0;i<520;i++){const a=rng()*6.283;if(O.beachW(a)>0.3)continue;const R=O.Rb(a)+rr(0.15,O.benchW(a)),x=Math.cos(a)*R,z=Math.sin(a)*R,y=hA(x,z);if(y<SEA-0.1)continue;const r=rng();
+    if(r<0.45){const s=rr(0.12,0.4);S.add(G.dod,rng()<0.5?WET:dk(P.shale,0.7),M(x,y+0.02,z,rng()*6,s,s*0.45,s));}
+    else if(r<0.62)S.add(G.cyl6,P.truck,M(x,y+0.015,z,rng()*6,rr(0.18,0.5),0.02,rr(0.15,0.4)));
+    else if(r<0.8){for(let q=0;q<4;q++)S.add(G.ico,P.white,M(x+rr(-.15,.15),y+0.03,z+rr(-.15,.15),0,0.035));}
+    else S.add(G.dod,P.pine,M(x,y+0.03,z,rng()*6,rr(0.1,0.22),0.06,rr(0.1,0.2)));}
+  /* the long beach: drift logs, kelp wrack along the tide line, sea-worn stones, dune grass and beach strawberry at the back */
+  {const b0=O.COVE;for(let i=0;i<11;i++){const a=b0+rr(-0.36,0.36),R=O.Rb(a)+rr(0.3,2.2),x=Math.cos(a)*R,z=Math.sin(a)*R;if(hA(x,z)<SEA+0.2)continue;
+      S.add(G.cyl6,dk(P.tent,rr(0.8,0.95)),M(x,hA(x,z)+0.12,z,a+rr(1.1,2.0),rr(0.09,0.17),rr(1.2,3.4),rr(0.09,0.17),0,Math.PI/2));
+      if(rng()<0.4)S.add(G.dod,dk(P.tent,0.8),M(x,hA(x,z)+0.18,z,rng()*6,0.22,0.18,0.22));}
+    for(let i=0;i<70;i++){const a=b0+rr(-0.4,0.4),R=O.Rb(a)+rr(4.5,6.5),x=Math.cos(a)*R,z=Math.sin(a)*R,y=hA(x,z);if(y<SEA+0.03||y>SEA+0.4)continue;
+      S.add(G.dod,rng()<0.6?dk(P.pine,0.7):P.earth,M(x,y+0.02,z,rng()*6,rr(0.15,0.35),0.04,rr(0.08,0.2)));}
+    for(let i=0;i<40;i++){const a=b0+rr(-0.4,0.4),R=O.Rb(a)+rr(0,7),x=Math.cos(a)*R,z=Math.sin(a)*R,y=hA(x,z);if(y<SEA)continue;const s=rr(0.08,0.24);S.add(G.dod,pick(ROCK),M(x,y+0.03,z,rng()*6,s,s*0.6,s));}
+    for(let i=0;i<160;i++){const a=b0+rr(-0.45,0.45),R=O.Rb(a)+rr(-1.6,1.2),x=Math.cos(a)*R,z=Math.sin(a)*R,y=hA(x,z);if(y<SEA+0.9||O.slopeAt(x,z)>1)continue;
+      if(rng()<0.75){for(let q=0;q<3;q++)S.add(G.cone4,q?P.birch:P.sage,M(x+rr(-.15,.15),y+0.22,z+rr(-.15,.15),rng()*6,0.06,rr(0.35,0.65),0.06,rr(-.35,.35),rr(-.35,.35)));}
+      else{S.add(G.dod,P.fern,M(x,y+0.05,z,rng()*6,0.25,0.08,0.25));S.add(G.ico,P.white,M(x+0.08,y+0.12,z,0,0.035));S.add(G.ico,P.rust,M(x-0.1,y+0.11,z+0.05,0,0.04));}}}
   /* sea stacks: stacked basalt-ish drums, each turned and nudged so the column looks weathered, with a grass cap on the tall ones */
   const stack=(st)=>{const base=SEA-2.6,H=st.top-base,n=Math.max(2,Math.ceil(H/1.05)),lean=rr(-0.06,0.06),la=rng()*6.28;
     for(let i=0;i<n;i++){const t=i/(n-1),y=base+H*t-H/n*0.35,ri=st.r*(1-0.2*t)*rr(0.88,1.12),ox=Math.cos(la)*lean*(y-SEA),oz=Math.sin(la)*lean*(y-SEA);
@@ -1458,47 +1499,59 @@ if(WORLD){const W_=WORLD_,{wr,wrr}=WORLDM,WS=W_.WS,CH=25;
     if(st.k!=='skerry'&&st.top>SEA+2.2){const tx=st.x+Math.cos(la)*lean*(st.top-SEA),tz=st.z+Math.sin(la)*lean*(st.top-SEA),cr=st.r*0.78;
       S.add(G.dod,P.fern,M(tx,st.top+0.12,tz,rng()*6,cr,0.32,cr));S.add(G.dod,P.sage,M(tx+rr(-.3,.3),st.top+0.3,tz+rr(-.3,.3),rng()*6,cr*0.6,0.2,cr*0.6));
       for(let k=0;k<5;k++){const aa=rng()*6.28,d=cr*rr(0.3,0.85);for(let q=0;q<3;q++)S.add(G.cone4,q?P.birch:P.sage,M(tx+Math.cos(aa)*d+rr(-.1,.1),st.top+0.42,tz+Math.sin(aa)*d+rr(-.1,.1),rng()*6,0.06,rr(0.35,0.6),0.06,rr(-.3,.3),rr(-.3,.3)));}
-      /* white streaks where the seabirds sit */
       for(let k=0;k<3;k++){const aa=rng()*6.28;S.add(G.dod,P.white,M(tx+Math.cos(aa)*cr*0.95,st.top-rr(0.1,0.8),tz+Math.sin(aa)*cr*0.95,rng()*6,0.14,rr(0.3,0.6),0.08));}
       if(st.r>2.2&&st.top>0.8)O.stackTrees.push([tx,st.top+0.25,tz]);}};
   O.stackTrees=[];
   for(const st of O.STACKS)stack(st);
-  /* arches: a span of rock chunks bowed between two legs, opening underneath */
   for(const A of O.ARCH){const n=16,dx=A.B[0]-A.A[0],dz=A.B[1]-A.A[1],ry=Math.atan2(-dz,dx),al=hyp(dx,dz)||1,px=-dz/al,pz=dx/al;
     for(let i=0;i<=n;i++){const t=i/n,x=A.A[0]+dx*t,z=A.A[1]+dz*t,y=A.yA+(A.yB-A.yA)*t+0.7*Math.sin(Math.PI*t);
-      for(let k=0;k<2;k++){const s=rr(0.9,1.25),off=(k?1:-1)*rr(0.2,0.45);S.add(G.dod,ROCK[(rng()*3)|0],M(x+px*off,y-0.75+rr(-0.15,0.1),z+pz*off,ry+rr(-.3,.3),s*1.1,s*0.85,s));}
+      for(let k=0;k<2;k++){const s=rr(0.9,1.25),off=(k?1:-1)*rr(0.2,0.45);S.add(G.dod,pick(ROCK),M(x+px*off,y-0.75+rr(-0.15,0.1),z+pz*off,ry+rr(-.3,.3),s*1.1,s*0.85,s));}
       S.add(G.dod,P.fern,M(x,y+0.05,z,rng()*6,0.85,0.18,0.85));if(i%3===0)for(let q=0;q<3;q++)S.add(G.cone4,q?P.sage:P.birch,M(x+rr(-.4,.4),y+0.3,z+rr(-.4,.4),rng()*6,0.06,0.45,0.06));}
     if(A.land)colliders.push({x:A.A[0],z:A.A[1],r:1.2});}
-  /* the clifftop: golden dune grass along the brink, salal, lupine and yarrow; flat stone path to the viewpoints */
-  for(let a=-Math.PI;a<Math.PI;a+=0.022){if(rng()<0.35)continue;const R=O.Rt(a)-rr(0.08,0.9),x=Math.cos(a)*R,z=Math.sin(a)*R;if(trailDist(x,z)<0.6||hyp(x-FIRE.x,z-FIRE.z)<3)continue;const y=gh(x,z);
-    for(let q=0;q<3;q++)S.add(G.cone4,q?P.birch:P.sage,M(x+rr(-.15,.15),y+0.22,z+rr(-.15,.15),rng()*6,0.07,rr(0.4,0.7),0.07,rr(-.35,.35),rr(-.35,.35)));}
-  for(let i=0,n=0;i<900&&n<170;i++){const x=rr(-16,16),z=rr(-16,16);if(!free(x,z,0.2))continue;const y=gh(x,z),r=rng();n++;
-    if(r<0.35){const s=rr(0.3,0.6);S.add(G.dod,rng()<0.6?P.fern:P.pine,M(x,y+s*0.45,z,rng()*6,s,s*0.7,s));}
-    else if(r<0.6){for(let k=0;k<3;k++){const ox=rr(-.3,.3),oz=rr(-.3,.3),h=rr(0.25,0.45);S.add(G.cyl5,P.fern,M(x+ox,y+h/2,z+oz,0,0.015,h,0.015));for(let q=0;q<3;q++)S.add(G.ico,rng()<0.6?P.truck:P.white,M(x+ox,y+h-0.04+q*0.06,z+oz,0,0.04-q*0.008));}}
-    else{for(let q=0;q<3;q++)S.add(G.cone4,q?P.sage:P.birch,M(x+rr(-.15,.15),y+0.2,z+rr(-.15,.15),rng()*6,0.07,rr(0.35,0.6),0.07,rr(-.3,.3),rr(-.3,.3)));}}
+  /* plants everywhere there is soil: what grows depends on where you are (exposed brink, open top, sheltered slopes, dune) */
+  const tuft=(x,y,z,c1,c2,h)=>{for(let q=0;q<3;q++)S.add(G.cone4,q?c1:c2,M(x+rr(-.15,.15),y+h*0.4,z+rr(-.15,.15),rng()*6,0.065,h*rr(0.8,1.2),0.065,rr(-.35,.35),rr(-.35,.35)));};
+  const PLANTS={
+    salal:(x,y,z)=>{const s=rr(0.3,0.6);S.add(G.dod,pick([P.fern,P.pine]),M(x,y+s*0.45,z,rng()*6,s,s*0.7,s));S.add(G.dod,P.fern,M(x+s*0.4,y+s*0.3,z,rng()*6,s*0.6,s*0.5,s*0.6));},
+    coyote:(x,y,z)=>{const s=rr(0.35,0.7);S.add(G.ico,P.sage,M(x,y+s*0.5,z,rng()*6,s,s*0.75,s));S.add(G.ico,dk(P.sage,0.85),M(x+s*0.3,y+s*0.75,z-s*0.2,0,s*0.55));},
+    fern:(x,y,z)=>{const c=rng()<0.7?P.fern:P.pine;for(let k=0;k<5;k++){const a=k*1.26+rng();S.add(G.cone4,c,M(x+Math.sin(a)*0.16,y+0.2,z+Math.cos(a)*0.16,a,0.15,0.5,0.05,Math.cos(a)*0.7,-Math.sin(a)*0.7));}},
+    lupine:(x,y,z)=>{for(let k=0;k<3;k++){const ox=rr(-.25,.25),oz=rr(-.25,.25),h=rr(0.25,0.45);S.add(G.cyl5,P.fern,M(x+ox,y+h/2,z+oz,0,0.015,h,0.015));for(let q=0;q<3;q++)S.add(G.ico,rng()<0.7?P.truck:P.white,M(x+ox,y+h-0.04+q*0.06,z+oz,0,0.04-q*0.008));}},
+    yarrow:(x,y,z)=>{for(let k=0;k<3;k++){const ox=rr(-.2,.2),oz=rr(-.2,.2),h=rr(0.2,0.35);S.add(G.cyl5,P.sage,M(x+ox,y+h/2,z+oz,0,0.012,h,0.012));S.add(G.cyl6,P.white,M(x+ox,y+h,z+oz,0,0.06,0.025,0.06));}},
+    thrift:(x,y,z)=>{S.add(G.dod,P.fern,M(x,y+0.05,z,rng()*6,0.16,0.08,0.16));for(let k=0;k<4;k++)S.add(G.ico,pick([P.rust,P.pumpkin]),M(x+rr(-.1,.1),y+rr(0.12,0.2),z+rr(-.1,.1),0,0.04));},
+    poppy:(x,y,z)=>{for(let k=0;k<3;k++){const ox=rr(-.2,.2),oz=rr(-.2,.2);S.add(G.cyl5,P.sage,M(x+ox,y+0.1,z+oz,0,0.01,0.2,0.01));S.add(G.cone5,P.pumpkin,M(x+ox,y+0.22,z+oz,0,0.05,0.06,0.05,Math.PI));}},
+    grass:(x,y,z)=>tuft(x,y,z,P.birch,P.sage,rr(0.35,0.6)),
+    sedge:(x,y,z)=>tuft(x,y,z,P.fern,P.sage,rr(0.3,0.5)),
+    berry:(x,y,z)=>{const s=rr(0.35,0.55);S.add(G.ico,P.fern,M(x,y+s*0.6,z,rng()*6,s,s*0.8,s));for(let k=0;k<4;k++)S.add(G.ico,pick([P.pumpkin,P.rust]),M(x+rr(-s,s)*0.7,y+s*rr(0.4,1.1),z+rr(-s,s)*0.7,0,0.045));},
+    log:(x,y,z)=>{S.add(G.cyl6,P.earth,M(x,y+0.15,z,rng()*6,0.15,rr(1.2,2.4),0.15,0,Math.PI/2));S.add(G.dod,P.fern,M(x,y+0.3,z,rng()*6,0.2,0.08,0.3));},
+    rock:(x,y,z)=>{const s=rr(0.2,0.55);S.add(G.dod,pick(ROCK),M(x,y+s*0.2,z,rng()*6,s,s*rr(.5,.8),s));if(rng()<0.5)S.add(G.dod,P.fern,M(x,y+s*0.6,z,rng()*6,s*0.8,s*0.18,s*0.8));}};
+  const MIX={brink:['grass','grass','thrift','grass','poppy','sedge'],top:['grass','salal','lupine','yarrow','coyote','poppy','grass','rock','berry'],
+    slope:['salal','salal','fern','fern','coyote','berry','sedge','lupine','yarrow','log','rock','grass'],dune:['grass','grass','grass','sedge','thrift']};
+  for(let i=0,n=0;i<9000&&n<(isTouch?650:1100);i++){const x=rr(-LIM+1,LIM-1),z=rr(-LIM+1,LIM-1);const y=hA(x,z),sl=O.slopeAt(x,z);if(y<SEA+0.9||sl>1.25)continue;
+    if(trailDist(x,z)<0.8||hyp(x-FIRE.x,z-FIRE.z)<3.2||hyp(x-TENT.x,z-TENT.z)<2||O.onStack(x,z,0.5))continue;
+    const a=Math.atan2(z,x),d=O.coastD(x,z),b=O.beachW(a),c=O.cliffK(x,z);
+    const zone=y<SEA+3&&b>0.25?'dune':c>0.55&&d>O.CWc-0.2&&d<O.CWc+1.4?'brink':y<-0.8||c<0.5?'slope':'top';
+    if(zone==='top'&&rng()<0.35)continue;PLANTS[pick(MIX[zone])](x,y,z);n++;}
   for(const L_ of TRAILS)for(let i=0;i<L_.length-1;i++){const a=L_[i],b=L_[i+1],l=hyp(b[0]-a[0],b[1]-a[1]);
-    for(let t=0;t<l;t+=0.6){const x=a[0]+(b[0]-a[0])*t/l+rr(-.25,.25),z=a[1]+(b[1]-a[1])*t/l+rr(-.25,.25);S.add(G.dod,P.shale,M(x,gh(x,z)+0.01,z,rng()*6,0.2,0.05,0.22));}}
-  /* wind-bent shore pines and cypress, flat-topped and leaning downwind (the wind comes off the sea from the west-north-west) */
+    for(let t=0;t<l;t+=0.6){const x=a[0]+(b[0]-a[0])*t/l+rr(-.25,.25),z=a[1]+(b[1]-a[1])*t/l+rr(-.25,.25);if(O.slopeAt(x,z)>1.3)continue;S.add(G.dod,P.shale,M(x,hA(x,z)+0.01,z,rng()*6,0.2,0.05,0.22));}}
+  /* trees: wind-bent cypress and shore pine on the exposed top and brink; Sitka spruce and alder in the shelter of the slopes */
   const WIND=[0.95,0.3],wy=Math.atan2(-WIND[1],WIND[0]);
   const bent=(v)=>{const m=new Merger(),j=k=>Math.sin(v*7.1+k*3.3);
     const tp=[[0,0,0],[0.25+0.1*j(1),1.3,0.05*j(2)],[0.85+0.2*j(3),2.3,0.1*j(4)],[1.7+0.3*j(5),2.95,0.05*j(6)]];
     for(let i=0;i<3;i++)m.add(G.cyl5,P.earth,beamM(tp[i],tp[i+1],0.17-0.035*i));
     m.add(G.cyl5,P.earth,beamM(tp[1],[-0.5,2.1,0.3*j(7)],0.06));m.add(G.cyl5,P.earth,beamM(tp[2],[0.6,3.0,-0.5],0.05));
-    /* dense flat-topped cypress pads: a tight crown swept downwind, a lower tier, and a few tufts on the windward side */
     const pads=[[1.75,3.2,0,0.95,0.42],[1.05,3.05,0.35,0.8,0.4],[2.45,2.95,-0.2,0.8,0.36],[1.4,3.5,-0.15,0.7,0.3],[2.1,3.4,0.3,0.6,0.28],
       [0.7,2.55,-0.35,0.6,0.32],[1.6,2.65,0.45,0.62,0.3],[0.05,2.25,0.25,0.42,0.26],[2.95,2.7,0.1,0.5,0.26]];
     pads.forEach(([x,y,z,w,h],k)=>m.add(G.dod,k%4===2?P.fern:P.pine,M(x+0.15*j(k+8),y,z,v+k,w,h,w*0.8)));
     return {geo:m.build(),H:3.8,R:1.1,pine:false};};
   const BENT=[bent(0.3),bent(1.7),bent(2.9)];O.BENT=BENT;
-  const GROVES=[[-6.5,-7,3.2,5],[-10.5,-2,2.4,3],[7.5,-6.5,2.8,4],[-3.5,9,2,2]];
-  for(const[gx_,gz_,gr,cnt]of GROVES)for(let i=0,n=0;i<80&&n<cnt;i++){const a=rng()*6.28,d=Math.sqrt(rng())*gr,x=gx_+Math.cos(a)*d,z=gz_+Math.sin(a)*d;
-    if(!free(x,z,0.8)||O.coastD(x,z)<1.6)continue;if(trees.some(t=>hyp(t.x-x,t.z-z)<1.9))continue;
-    addTree(x,z,rr(0.8,1.1),BENT[(rng()*3)|0],true);const tr=trees[trees.length-1],yw=wy+rr(-0.25,0.25);tr.yaw=yw;tr.mesh.rotation.y=yw;n++;}
-  /* lone wind-bent trees out near the brink, the classic coast silhouette */
-  for(const a of[-1.45,0.15,1.35,2.55,-2.75]){const R=O.Rt(a)-1.9,x=Math.cos(a)*R,z=Math.sin(a)*R;if(!free(x,z,0.3))continue;
-    addTree(x,z,rr(0.85,1.15),BENT[(rng()*3)|0],true);const tr=trees[trees.length-1],yw=wy+rr(-0.2,0.2);tr.yaw=yw;tr.mesh.rotation.y=yw;}
-  /* the big stacks get a tree of their own (scenery only, out of reach) */
-  for(const[x,y,z]of O.stackTrees){const b=BENT[(rng()*3)|0],me=new THREE.Mesh(b.geo,matV);me.position.set(x,y,z);me.rotation.y=wy+rr(-.2,.2);me.scale.setScalar(rr(0.6,0.8));me.castShadow=me.receiveShadow=true;scene.add(me);}
+  const okTree=(x,z,sp)=>free(x,z,0.6)&&!trees.some(t=>hyp(t.x-x,t.z-z)<sp);
+  const plantBent=(x,z,s)=>{addTree(x,z,s,pick(BENT),true);const tr=trees[trees.length-1],yw=wy+rr(-0.25,0.25);tr.yaw=yw;tr.mesh.rotation.y=yw;};
+  for(let i=0,n=0;i<900&&n<16;i++){const x=rr(-17,17),z=rr(-17,17),c=O.cliffK(x,z),d=O.coastD(x,z);if(c<0.6||hA(x,z)<-0.5||!okTree(x,z,2.2))continue;
+    if(d>O.CWc+6&&rng()<0.6)continue;plantBent(x,z,rr(0.8,1.15));n++;}
+  /* sheltered slope groves: spruce and alder along the trails down, thinning toward the shore */
+  for(let i=0,n=0;i<2500&&n<(isTouch?32:48);i++){const x=rr(-LIM+2,LIM-2),z=rr(-LIM+2,LIM-2),y=hA(x,z);if(y>-0.6||y<SEA+1.4||O.cliffK(x,z)>0.45)continue;
+    if(trailDist(x,z)<1.2||!okTree(x,z,1.7))continue;const lowK=smooth(SEA+1.4,SEA+4,y);if(rng()>0.35+0.65*lowK)continue;
+    if(rng()<0.3)addTree(x,z,rr(0.55,0.85),pick([DECID[2],DECID[3],DECID[4]]),true);else addTree(x,z,rr(0.6,1.05),pick([PINES[0],PINES[1],PINES[2],PINES[4]]),true);n++;}
+  for(const[x,y,z]of O.stackTrees){const b=pick(BENT),me=new THREE.Mesh(b.geo,matV);me.position.set(x,y,z);me.rotation.y=wy+rr(-.2,.2);me.scale.setScalar(rr(0.6,0.8));me.castShadow=me.receiveShadow=true;scene.add(me);}
   }
   // campfire ring, logs and seats
   for(let k=0;k<9;k++){const a=k/9*6.283;S.add(G.dod,P.shale,M(FIRE.x+Math.cos(a)*0.62,0.08,FIRE.z+Math.sin(a)*0.62,a,0.17,0.13,0.17));}
@@ -3797,7 +3850,7 @@ function setOwlCam(on){if(on===owlCam.on)return;owlCam.on=on;if(on){owl.R.root.g
 function upd3D(dt){
   for(const e of CH3D){const R=e.C.rig,clips=e.C.clips,has=n=>!!clips[n];let want='idle',x,z;
     if(e.kind==='hiker'){x=player.x;z=player.z;
-      if(player.pose==='lie')want='lie';else if(player.pose)want=player.sitOnLog&&has('sitlog')?'sitlog':'sit';else if(player.climb&&player.climb.rapids)want=player.climb.climbing?'scramble':'walk';else if(player.climb)want='climb';else if(player.chopTree)want='chop';else if(fish.state!=='idle')want='cast';
+      if(player.pose==='lie')want='lie';else if(player.pose)want=player.sitOnLog&&has('sitlog')?'sitlog':'sit';else if(player.climb&&player.climb.oc)want=player.climb.want||'idle';else if(player.climb&&player.climb.rapids)want=player.climb.climbing?'scramble':'walk';else if(player.climb)want='climb';else if(player.chopTree)want='chop';else if(fish.state!=='idle')want='cast';
       else if(player.moving>0)want=player.moving>1.2?'run':'walk';}
     else{const a=e.a;x=a.x;z=a.z;
       if(e.kind==='bear'&&(a.state==='rear'||a.rear>0.3))want='rear';
@@ -4142,10 +4195,10 @@ function rapidsTick(dt){const c=player.climb,g=c.segs[c.i];c.u+=dt/g.dur;const u
   if(c.u>=1){c.i++;c.u=0;if(c.i>=c.segs.length){player.climb=null;player.moving=0;{const w_=waterAt(player.x,player.z);player.level=w_!==null&&player.y<w_-0.02?'low':'rim';}
     toast(c.up?'You scramble up beside the lake. The whole valley opens below.':'Back down in the river.',2.6);}}}
 /* free climbing: anywhere along the canyon walls (slower than ladders, costs energy) */
-const freeClimbIt={label:()=>st.energy<8?'Too tired to climb':player.level==='rim'?'Free climb down the rocks':'Free climb up the rocks',can:()=>st.energy>=8,
-  act(){const c=fcCand;if(!c)return;st.energy=Math.max(0,st.energy-4);startClimb(c.path,c.to,c.face,1.1);}};
+const freeClimbIt={label:()=>st.energy<8?'Too tired to climb':fcCand&&fcCand.label?fcCand.label:player.level==='rim'?'Free climb down the rocks':'Free climb up the rocks',can:()=>st.energy>=8,
+  act(){const c=fcCand;if(!c)return;if(c.oc){OCL.start(c);return;}st.energy=Math.max(0,st.energy-4);startClimb(c.path,c.to,c.face,1.1);}};
 let fcCand=null;
-function findFreeClimb(){if(!GZ)return null;const g=GZ,x0=player.x,z0=player.z,f0=g.fsdf(x0,z0),rim=player.level==='rim';
+function findFreeClimb(){if(OCL)return OCL.find();if(!GZ)return null;const g=GZ,x0=player.x,z0=player.z,f0=g.fsdf(x0,z0),rim=player.level==='rim';
   if(rim?(f0<g.WW+0.35||f0>g.WW+1.4||g.onSwing(x0,z0)||g.onLog(x0,z0)):(f0>-0.35||f0<-1.4))return null;
   const e=0.15;let nx=g.fsdf(x0+e,z0)-g.fsdf(x0-e,z0),nz=g.fsdf(x0,z0+e)-g.fsdf(x0,z0-e);const l=hyp(nx,nz)||1;nx/=l;nz/=l;
   const sgn=rim?-1:1,goals=rim?[g.WW-0.15,0.1,-0.9]:[0.1,g.WW-0.15,g.WW+0.9],pts=[];let gi=0;
@@ -4156,6 +4209,165 @@ function findFreeClimb(){if(!GZ)return null;const g=GZ,x0=player.x,z0=player.z,f
   const yT=0.1,yB=-g.FD+0.15,path=rim?[[x0,0,z0],[pts[0][0],yT,pts[0][1]],[pts[1][0],yB,pts[1][1]],[end[0],-g.FD,end[1]]]
     :[[x0,-g.FD,z0],[pts[0][0],yB,pts[0][1]],[pts[1][0],yT,pts[1][1]],[end[0],0,end[1]]];
   return {path,to,face:Math.atan2(nx,nz)};}
+/* ===== Ocean map: free climbing on any rock face, one hand or foot at a time, and slips that end in a tumble =====
+   Hold W/S (or the joystick) to climb up or down, A/D to move sideways. Each step moves one limb to a new hold on the rock;
+   the body follows the holds. Arms and legs reach their holds with two-bone IK on the hiker's real bones. A slip turns the
+   hiker into a ragdoll (13 points joined by sticks) that tumbles down the rock until it rests on a ledge, the shore bench
+   or the beach, then gets up (or grabs on again if it stopped on the face). G lets go on purpose. */
+const OCL=OC?(()=>{const O=OC,hA=O.hAt,SEA=O.SEA;
+  const _a=new THREE.Vector3(),_b=new THREE.Vector3(),_c=new THREE.Vector3(),_d=new THREE.Vector3(),_e=new THREE.Vector3(),_q=new THREE.Quaternion(),_m=new THREE.Matrix4();
+  const DOWN=new THREE.Vector3(0,-1,0),STEEP=1.2,HAND_Y=1.72,FOOT_Y=0.34,OFF=0.42;
+  const nrm=(x,z)=>{const[gx,gz]=O.gradAt(x,z);const l=hyp(gx,gz)||1;return [-gx/l,-gz/l];};
+  /* the rock face at height y on the line through (x,z) along the outward normal n; null if the ground there is lower than y */
+  const wallAt=(x,z,y,n)=>{const px=x-n[0]*2.2,pz=z-n[1]*2.2;if(hA(px,pz)<y)return null;
+    for(let s=0;s<4.6;s+=0.04){const qx=px+n[0]*s,qz=pz+n[1]*s;if(hA(qx,qz)<y)return [qx-n[0]*0.02,qz-n[1]*0.02];}return null;};
+  const tanL=n=>[-n[1],n[0]];                       /* along the wall, to the climber's left (he faces the rock) */
+  /* a hold for one limb: on the face at height y, s metres sideways; over the top it lands on the lip instead */
+  const holdAt=(bx,bz,y,s,n)=>{const t=tanL(n),x=bx+t[0]*s,z=bz+t[1]*s,w=wallAt(x,z,y,n);
+    if(w)return {x:w[0]+n[0]*0.05,y,z:w[1]+n[1]*0.05,top:false};
+    const lx=x-n[0]*0.55,lz=z-n[1]*0.55;return {x:lx,y:hA(lx,lz)+0.04,z:lz,top:true};};
+  const rainI=()=>W.kind==='rain'?(W.I||0):(W.kind==='snow'?(W.I||0)*0.6:0);
+  let C=null;
+  const say=(t,d=2.4)=>toast(t,d);
+  /* ---------- finding a place to start ---------- */
+  function find(){if(player.climb||!walkable(player.x,player.z))return null;const x0=player.x,z0=player.z,y0=hA(x0,z0);let best=null,bs=-9;
+    for(let k=0;k<16;k++){const a=k/16*Math.PI*2,dx=Math.sin(a),dz=Math.cos(a),face=Math.cos(a-player.rot);
+      /* down: a drop right in front of you */
+      {const q1=hA(x0+dx*1.1,z0+dz*1.1),q2=hA(x0+dx*1.7,z0+dz*1.7);if(q2<y0-1.8&&Math.min(q1,q2)<y0-0.9){const n=[dx,dz],w=wallAt(x0,z0,y0-1.3,n);
+        if(w&&face+0.5>bs){bs=face+0.5;best={oc:true,dir:'down',n,label:'Free climb down the cliff'};}}}
+      /* up: a steep face rising in front of you */
+      {const qx=x0+dx*0.9,qz=z0+dz*0.9;if(hA(qx,qz)>y0+1.4&&O.slopeAt(qx,qz)>STEEP&&face+0.4>bs){bs=face+0.4;best={oc:true,dir:'up',n:[-dx,-dz],label:'Free climb up the rock'};}}}
+    return best;}
+  /* ---------- starting on the wall ---------- */
+  function begin(bx,bz,by,n,mode){const R0=Math.atan2(-n[0],-n[1]);
+    C={oc:true,mode:'climb',n:n.slice(),bx,bz,by,ty:by,rot:R0,seq:0,mv:-1,u:0,want:'idle',hang:0,sw:0,climbU:0};
+    C.holds=[0,1,2,3].map(L=>holdAt(bx-n[0]*OFF,bz-n[1]*OFF,by+(L<2?HAND_Y-(L?0.12:0):FOOT_Y+(L===3?0.1:0)),(L%2?-1:1)*(L<2?0.28:0.17),n));
+    if(mode)Object.assign(C,mode);player.climb=C;player.chopTree=null;if(typeof cancelFish==='function')cancelFish();player.moving=0;player.pose=null;}
+  function start(c){if(st.energy<8){say('Too tired to climb.');return;}const n=c.n;
+    if(c.dir==='down'){const y0=hA(player.x,player.z),w=wallAt(player.x,player.z,y0-1.1,n);if(!w)return;
+      begin(w[0]+n[0]*OFF,w[1]+n[1]*OFF,y0-1.55,n,{mode:'enter',u:0,ex:player.x,ez:player.z,ey:y0,er:player.rot});}
+    else{const y0=hA(player.x,player.z),w=wallAt(player.x,player.z,y0+1.0,n);if(!w)return;
+      begin(w[0]+n[0]*OFF,w[1]+n[1]*OFF,y0+0.05,n,{mode:'enter',u:0,ex:player.x,ez:player.z,ey:y0,er:player.rot});}
+    if(!st.climbTip){st.climbTip=1;say(isTouch?'Climbing: joystick up/down/sideways moves one hand or foot at a time. Use lets go.':'Climbing: W/S up and down, A/D sideways, one hand or foot at a time. G lets go.',4.5);}}
+  /* ---------- the climb itself ---------- */
+  const ORDER={up:[1,2,0,3],down:[2,1,3,0]};
+  function stepLimb(v,h){const L=(h!==0&&v===0)?((C.seq%2?2:0)+(h>0?0:1)):(v>0?ORDER.up:ORDER.down)[C.seq%4];C.seq++;
+    const t=tanL(C.n);C.ty+=v*0.17;C.sw+=h*0.13;
+    let nbx=C.bx+t[0]*h*0.13,nbz=C.bz+t[1]*h*0.13;
+    const hand=L<2,stag=((C.seq>>1)%2?0.11:-0.11),y=C.ty+(hand?HAND_Y:FOOT_Y)+stag*(v>=0?1:-1);
+    const to=holdAt(nbx-C.n[0]*OFF,nbz-C.n[1]*OFF,y,(L%2?-1:1)*(hand?0.28:0.17),C.n);
+    C.mv=L;C.u=0;C.from=Object.assign({},C.holds[L]);C.to=to;C.dur=(hand?0.36:0.3)*(st.energy<25?1.5:1)*(1+0.4*rainI());C.lastV=v;}
+  function tick(dt){if(!C||player.climb!==C){C=player.climb;}if(!C)return;
+    if(C.mode==='enter'){C.u+=dt/0.85;const k=smooth(0,1,Math.min(1,C.u));player.x=C.ex+(C.bx-C.ex)*k;player.z=C.ez+(C.bz-C.ez)*k;player.y=C.ey+(C.by-C.ey)*k;
+      player.rot=lerpAng(C.er,C.rot,smooth(0,0.6,C.u));if(C.u>=1)C.mode='climb';return;}
+    if(C.mode==='mantle'){C.u+=dt/1.25;const u=Math.min(1,C.u),kh=smooth(0.15,0.95,u),kv=smooth(0.05,0.7,u);
+      player.x=C.mx0+(C.mx1-C.mx0)*kh;player.z=C.mz0+(C.mz1-C.mz0)*kh;player.y=C.my0+(C.my1-C.my0)*kv;C.climbU=u;C.want='scramble';
+      if(u>=1)finish('You haul yourself over the top.');return;}
+    if(C.mode==='dismount'){C.u+=dt/0.45;const u=Math.min(1,C.u);player.x=C.mx0+(C.mx1-C.mx0)*u;player.z=C.mz0+(C.mz1-C.mz0)*u;player.y=C.my0+(C.my1-C.my0)*smooth(0,1,u);
+      if(u>=1)finish(null);return;}
+    if(C.mode==='fall'||C.mode==='down'||C.mode==='getup'){ragTick(dt);return;}
+    /* climbing: read the stick */
+    let v=(keys.up?1:0)-(keys.down?1:0)-(joy.y||0),hx=(keys.right?1:0)-(keys.left?1:0)+(joy.x||0);
+    {const yw=camCur.y*Math.PI/180,sr=[Math.cos(yw),-Math.sin(yw)],t=tanL(C.n),dot=sr[0]*t[0]+sr[1]*t[1];hx=hx*Math.sign(dot||1);}
+    const V=Math.abs(v)>0.35?Math.sign(v):0,H=Math.abs(hx)>0.35?Math.sign(hx):0;
+    st.energy=Math.max(0,st.energy-dt*0.12);
+    if(C.mv<0&&(V||H)){
+      /* over the top? */
+      if(V>0){const ix=C.bx-C.n[0]*(OFF+0.9),iz=C.bz-C.n[1]*(OFF+0.9),topY=hA(ix,iz);
+        if(C.ty+1.25>topY&&walkable(ix,iz)){C.mode='mantle';C.u=0;C.mx0=player.x;C.mz0=player.z;C.my0=player.y;C.mx1=ix;C.mz1=iz;C.my1=topY;return;}}
+      /* down onto the ground? */
+      if(V<0){const ox=C.bx+C.n[0]*0.35,oz=C.bz+C.n[1]*0.35,g=hA(ox,oz);
+        if(C.ty-0.17<g+0.05&&walkable(ox,oz)){C.mode='dismount';C.u=0;C.mx0=player.x;C.mz0=player.z;C.my0=player.y;C.mx1=ox;C.mz1=oz;C.my1=g;return;}}
+      stepLimb(V,H);}
+    if(C.mv>=0){C.u+=dt/C.dur;const u=Math.min(1,C.u),e=u*u*(3-2*u),A=C.from,B=C.to,L=C.mv,lift=Math.sin(Math.PI*u)*(L<2?0.14:0.1);
+      const hh=C.holds[L];hh.x=A.x+(B.x-A.x)*e+C.n[0]*lift;hh.y=A.y+(B.y-A.y)*e+(L<2?0.05:0.08)*Math.sin(Math.PI*u);hh.z=A.z+(B.z-A.z)*e+C.n[1]*lift;hh.top=B.top;
+      if(u>=1){C.mv=-1;st.energy=Math.max(0,st.energy-0.35);
+        const slope=O.slopeAt(B.x,B.z),p=0.008+(st.energy<20?0.05:0)+0.09*rainI()+((keys.run||runHeld)?0.05:0)+(slope<0.9&&!B.top?0.02:0);
+        if(st.energy<=0.5||rng()<p){say(L<2?'Your hand slips!':'Your foot slips!',1.8);fall(false);return;}}}
+    /* the body hangs from its holds */
+    let hx_=0,hz_=0,hy=0,fy=0;for(let i=0;i<4;i++){hx_+=C.holds[i].x;hz_+=C.holds[i].z;if(i<2)hy+=C.holds[i].y;else fy+=C.holds[i].y;}
+    hx_/=4;hz_/=4;const ty=0.55*(hy/2-HAND_Y)+0.45*(fy/2-FOOT_Y),k=Math.min(1,dt*5);
+    const nn=nrm(hx_,hz_);if(O.slopeAt(hx_,hz_)>0.9){C.n[0]+=(nn[0]-C.n[0])*dt*2;C.n[1]+=(nn[1]-C.n[1])*dt*2;const l=hyp(C.n[0],C.n[1])||1;C.n[0]/=l;C.n[1]/=l;}
+    const push=C.mv>=0?0.05*Math.sin(Math.PI*Math.min(1,C.u)):0;
+    C.bx+=(hx_+C.n[0]*(OFF+push)-C.bx)*k;C.bz+=(hz_+C.n[1]*(OFF+push)-C.bz)*k;C.by+=(ty-C.by)*k;C.rot=lerpAng(C.rot,Math.atan2(-C.n[0],-C.n[1]),k);
+    player.x=C.bx;player.z=C.bz;player.y=C.by;player.rot=C.rot;C.want='idle';}
+  function finish(msg){const c=C;C=null;player.climb=null;player.moving=0;player.level='rim';
+    if(c&&c.mode!=='getup'){player.y=hA(player.x,player.z);}if(msg)say(msg,2);}
+  /* ---------- ragdoll ---------- */
+  const PN=['head','armL','armR','thighL','thighR','foreL','foreR','handL','handR','shinL','shinR','footL','footR'];
+  const LINKS=[[0,1],[0,2],[1,2],[1,3],[2,4],[3,4],[1,4],[2,3],[1,5],[5,7],[2,6],[6,8],[3,9],[9,11],[4,10],[10,12],[0,3],[0,4]];
+  let RD=null;
+  function bonePts(){const R=HIKER3D&&HIKER3D.rig.root.parent?HIKER3D.rig:null;player.g.updateMatrixWorld(true);
+    if(R)return PN.map(n=>R.bones[n].getWorldPosition(new THREE.Vector3()));
+    /* papercraft hiker: a stand-in skeleton */
+    const loc=[[0,1.25,0],[0.25,1.0,0],[-0.25,1.0,0],[0.1,0.5,0],[-0.1,0.5,0],[0.3,0.75,0],[-0.3,0.75,0],[0.3,0.55,0],[-0.3,0.55,0],[0.1,0.27,0],[-0.1,0.27,0],[0.1,0.02,0],[-0.1,0.02,0]];
+    return loc.map(p=>player.g.localToWorld(new THREE.Vector3(...p)));}
+  function fall(onPurpose){const pts=bonePts(),n=C?C.n:[Math.sin(player.rot),Math.cos(player.rot)];
+    const P_=pts.map((p,i)=>{const kick=(i>=7?0.9:0.5)*(0.5+rng());return {x:p.x,y:p.y,z:p.z,px:p.x-(n[0]*1.1+rr(-0.4,0.4)*kick)/60,py:p.y-(rr(-0.2,0.6))/60,pz:p.z-(n[1]*1.1+rr(-0.4,0.4)*kick)/60};});
+    const L=LINKS.map(([a,b])=>[a,b,pts[a].distanceTo(pts[b])]);
+    const hip=pts[3].clone().add(pts[4]).multiplyScalar(0.5);player.g.updateMatrixWorld(true);const hl=player.g.worldToLocal(hip.clone());
+    RD={P:P_,L,hl,t:0,still:0,acc:0};if(!C){C={oc:true,n,holds:[]};player.climb=C;}C.mode='fall';C.want='idle';C.u=0;st.energy=Math.max(0,st.energy-(onPurpose?2:6));}
+  function ragStep(h){const P_=RD.P;
+    for(const p of P_){let vx=(p.x-p.px)*0.995,vy=(p.y-p.py)*0.995,vz=(p.z-p.pz)*0.995;if(p.y<SEA){vx*=0.9;vy*=0.85;vz*=0.9;vy+=0.6*h*h*60;}
+      p.px=p.x;p.py=p.y;p.pz=p.z;p.x+=vx;p.y+=vy-9.8*h*h;p.z+=vz;}
+    for(let it=0;it<6;it++){
+      for(const[a,b,l]of RD.L){const A=P_[a],B=P_[b],dx=B.x-A.x,dy=B.y-A.y,dz=B.z-A.z,d=Math.sqrt(dx*dx+dy*dy+dz*dz)||1e-6,f=(d-l)/d*0.5;
+        A.x+=dx*f;A.y+=dy*f;A.z+=dz*f;B.x-=dx*f;B.y-=dy*f;B.z-=dz*f;}
+      for(const p of P_){const g=hA(p.x,p.z)+0.07;if(p.y<g){const[gx,gz]=O.gradAt(p.x,p.z),nl=Math.sqrt(gx*gx+1+gz*gz),Nx=-gx/nl,Ny=1/nl,Nz=-gz/nl,pen=(g-p.y)*Ny;
+        p.x+=Nx*pen;p.y+=Ny*pen;p.z+=Nz*pen;p.px+=(p.x-p.px)*0.25;p.py+=(p.y-p.py)*0.25;p.pz+=(p.z-p.pz)*0.25;}}}}
+  function ragTick(dt){
+    if(C.mode==='fall'){RD.acc+=Math.min(dt,0.05);const h=1/120;while(RD.acc>=h){ragStep(h);RD.acc-=h;}RD.t+=dt;
+      const P_=RD.P,hx=(P_[3].x+P_[4].x)/2,hy=(P_[3].y+P_[4].y)/2,hz=(P_[3].z+P_[4].z)/2,sp=hyp(P_[3].x-P_[3].px,P_[3].y-P_[3].py,P_[3].z-P_[3].pz)*120;
+      player.x=hx;player.z=hz;player.y=hy-0.55;
+      RD.still=sp<0.35?RD.still+dt:0;if(RD.still>0.6||RD.t>9){C.mode='down';C.u=0;}return;}
+    if(C.mode==='down'){C.u+=dt;if(C.u<0.9)return;
+      const P_=RD.P,hx=(P_[3].x+P_[4].x)/2,hz=(P_[3].z+P_[4].z)/2;
+      /* where did we end up? */
+      if(walkable(hx,hz)){standUp(hx,hz,'Oof. You pick yourself up.');return;}
+      if(hA(hx,hz)>SEA-0.3&&O.slopeAt(hx,hz)>0.9){const n=nrm(hx,hz),y=hA(hx,hz);C=null;player.climb=null;begin(hx+n[0]*OFF,hz+n[1]*OFF,y-0.6,n);say('You grab onto the rock.',2);return;}
+      for(let r=0.5;r<8;r+=0.5)for(let k=0;k<12;k++){const a=k/12*6.283,x=hx+Math.cos(a)*r,z=hz+Math.sin(a)*r;if(walkable(x,z)){standUp(x,z,hA(hx,hz)<SEA?'You drag yourself out of the surf.':'You pick yourself up.');return;}}
+      standUp(START.x,START.z,'You find your way back.');return;}
+    if(C.mode==='getup'){C.u+=dt/1.1;C.want=C.u<0.55?'sit':'idle';if(C.u>=1){finish(C.msg);}}}
+  function standUp(x,z,msg){C.mode='getup';C.u=0;C.msg=msg;C.gx=x;C.gz=z;C.gy=hA(x,z);C.q0=player.g.quaternion.clone();C.p0=player.g.position.clone();
+    const P_=RD.P;C.gr=Math.atan2(P_[0].x-(P_[3].x+P_[4].x)/2,P_[0].z-(P_[3].z+P_[4].z)/2);player.x=x;player.z=z;player.y=C.gy;player.rot=C.gr;}
+  /* ---------- posing: runs after the clip pose each frame ---------- */
+  const aim=(bone,tx,ty,tz)=>{bone.getWorldPosition(_a);_b.set(tx-_a.x,ty-_a.y,tz-_a.z);if(_b.lengthSq()<1e-8)return;bone.parent.getWorldQuaternion(_q);_q.invert();_b.applyQuaternion(_q).normalize();
+    bone.quaternion.setFromUnitVectors(DOWN,_b);bone.updateMatrixWorld(true);};
+  /* two-bone IK: shoulder/hip → elbow/knee → hand/foot, the bend pushed toward `pole` */
+  const ik=(up,lo,end,T,pole)=>{up.getWorldPosition(_a);lo.getWorldPosition(_c);end.getWorldPosition(_d);const L1=_a.distanceTo(_c),L2=_c.distanceTo(_d);
+    _b.set(T[0]-_a.x,T[1]-_a.y,T[2]-_a.z);let D=_b.length();D=clamp(D,Math.abs(L1-L2)+0.01,L1+L2-0.005);_b.normalize();
+    const ca=clamp((L1*L1+D*D-L2*L2)/(2*L1*D),-1,1),sa=Math.sqrt(1-ca*ca);_e.set(pole[0],pole[1],pole[2]);_e.addScaledVector(_b,-_e.dot(_b)).normalize();
+    const ex=_a.x+_b.x*L1*ca+_e.x*L1*sa,ey=_a.y+_b.y*L1*ca+_e.y*L1*sa,ez=_a.z+_b.z*L1*ca+_e.z*L1*sa;
+    aim(up,ex,ey,ez);aim(lo,T[0],T[1],T[2]);};
+  function post(dt){if(!C||player.climb!==C)return;const R=HIKER3D&&HIKER3D.rig.root.parent?HIKER3D.rig:null,B=R&&R.bones;
+    if(C.mode==='getup'){const u=smooth(0,1,Math.min(1,C.u));_q.setFromEuler(new THREE.Euler(0,C.gr,0,'YXZ'));player.g.quaternion.copy(C.q0).slerp(_q,u);
+      player.g.position.set(C.p0.x+(C.gx-C.p0.x)*u,C.p0.y+(C.gy-C.p0.y)*u,C.p0.z+(C.gz-C.p0.z)*u);return;}
+    if(C.mode==='fall'||C.mode==='down'){const P_=RD.P,hip=_a.set((P_[3].x+P_[4].x)/2,(P_[3].y+P_[4].y)/2,(P_[3].z+P_[4].z)/2);
+      const sh=_b.set((P_[1].x+P_[2].x)/2,(P_[1].y+P_[2].y)/2,(P_[1].z+P_[2].z)/2);const Y=sh.clone().sub(hip).normalize();
+      const X=new THREE.Vector3(P_[1].x-P_[2].x+P_[3].x-P_[4].x,P_[1].y-P_[2].y+P_[3].y-P_[4].y,P_[1].z-P_[2].z+P_[3].z-P_[4].z);X.addScaledVector(Y,-X.dot(Y)).normalize();
+      const Z=new THREE.Vector3().crossVectors(X,Y);_m.makeBasis(X,Y,Z);player.g.quaternion.setFromRotationMatrix(_m);
+      const off=RD.hl.clone().applyQuaternion(player.g.quaternion);player.g.position.set(hip.x-off.x,hip.y-off.y,hip.z-off.z);player.g.updateMatrixWorld(true);
+      if(B){for(const n of['spine','chest','neck'])B[n].rotation.set(0,0,0);player.g.updateMatrixWorld(true);
+        const pt=i=>[P_[i].x,P_[i].y,P_[i].z];aim(B.armL,...pt(5));aim(B.foreL,...pt(7));aim(B.armR,...pt(6));aim(B.foreR,...pt(8));
+        aim(B.thighL,...pt(9));aim(B.shinL,...pt(11));aim(B.thighR,...pt(10));aim(B.shinR,...pt(12));aim(B.neck,...pt(0));}
+      else{player.arms[0].rotation.x=-2;player.arms[1].rotation.x=-1.2;}return;}
+    /* on the wall (and climbing in, over the top, or down off it) */
+    player.g.position.set(player.x,player.y,player.z);player.g.quaternion.setFromEuler(new THREE.Euler(0,player.rot,0,'YXZ'));
+    if(C.mode==='mantle'||C.mode==='dismount')return;
+    const n=C.n,t=tanL(n);
+    if(B){const up=C.mv>=0?(C.lastV||0):0;B.pelvis.rotation.set(-0.08,0,0);B.spine.rotation.set(0.12,0,0);B.chest.rotation.set(0.05,0,0);B.neck.rotation.set(up>0?-0.45:up<0?0.4:-0.1,0,0);
+      B.base.position.z+=0;player.g.updateMatrixWorld(true);
+      const Hd=C.holds,sideP=s=>[t[0]*s,0,t[1]*s];
+      ik(B.armL,B.foreL,B.handL,[Hd[0].x,Hd[0].y,Hd[0].z],[n[0]*0.6+t[0]*0.7,-0.8,n[1]*0.6+t[1]*0.7]);
+      ik(B.armR,B.foreR,B.handR,[Hd[1].x,Hd[1].y,Hd[1].z],[n[0]*0.6-t[0]*0.7,-0.8,n[1]*0.6-t[1]*0.7]);
+      ik(B.thighL,B.shinL,B.footL,[Hd[2].x,Hd[2].y,Hd[2].z],[-n[0]+t[0]*0.5,0.3,-n[1]+t[1]*0.5]);
+      ik(B.thighR,B.shinR,B.footR,[Hd[3].x,Hd[3].y,Hd[3].z],[-n[0]-t[0]*0.5,0.3,-n[1]-t[1]*0.5]);
+      for(const f of['footL','footR'])B[f].rotation.set(-0.2,0,0);}
+    else{const a0=-2.6+0.5*Math.sin(T*6)*(C.mv>=0?1:0);player.arms[0].rotation.x=a0;player.arms[1].rotation.x=-2.6-0.5*Math.sin(T*6)*(C.mv>=0?1:0);
+      player.legs[0].rotation.x=-0.6+0.4*Math.sin(T*6);player.legs[1].rotation.x=-0.6-0.4*Math.sin(T*6);}}
+  addEventListener('keydown',e=>{if(e.code==='KeyG'&&C&&player.climb===C){e.stopImmediatePropagation();e.preventDefault();if(C.mode==='climb'||C.mode==='enter'){say('You let go!',1.5);fall(true);}}},true);
+  {const ub=document.getElementById('useBtn');if(ub)ub.addEventListener('pointerdown',e=>{if(C&&player.climb===C&&C.mode==='climb'){e.stopImmediatePropagation();say('You let go!',1.5);fall(true);}},true);}
+  return {find,start,tick,post,wallAt,holdAt,get C(){return C;},fall};})():null;
 
 /* ---------- fishing ---------- */
 const FISH=[{name:'Cutthroat Trout',col:P.sage,acc:P.rust,w:[0.4,1.6],str:0.35,need:2.2,chance:0.55},
@@ -4594,7 +4806,7 @@ const MAPKEY=MAP==='meadow'&&location.hash!=='#meadow'?'hollow':MAP;document.que
   b.addEventListener('click',()=>{if(b.dataset.map===MAPKEY)return;location.hash=b.dataset.map;location.reload();});});
 addEventListener('hashchange',()=>location.reload());
 function start(){$('intro').classList.add('hide');st.playing=true;if(!st.started){st.started=true;
-  toast(OC?'Ocean Test bench. Walk out to the clifftop edge and pitch camp with a view of the sea (M menu, Camp).':GZ?'Canyon Gorge (test map). Take a ladder down to the plunge pool, or try fishing from the rope bridge.':'Gather sticks and berries before dark. Your camp is right here.',4.5);}}
+  toast(OC?'Ocean Test bench. Trails lead down to the beach and the rock shelf; at any cliff edge or rock face, press E to free climb.':GZ?'Canyon Gorge (test map). Take a ladder down to the plunge pool, or try fishing from the rope bridge.':'Gather sticks and berries before dark. Your camp is right here.',4.5);}}
 function openHelp(){if(st.busy)return;st.playing=false;$('intro').classList.remove('hide');$('startBtn').textContent='Back to the trail';$('startBtn').focus();}
 $('startBtn').addEventListener('click',start);
 $('helpBtn').addEventListener('click',openHelp);
@@ -4648,7 +4860,7 @@ function sim(dt,night){
   const moving=len>0.12&&!player.climb,running=moving&&(keys.run||runHeld)&&st.energy>3;keys.runActive=running;
   if(!GZ&&!player.climb){const w_=waterAt(player.x,player.z);player.level=w_!==null&&player.y<w_-0.02?'low':'rim';
     if(WORLD_){const g=WORLD_.wBridge(player.x,player.z)||WORLD_.GG.find(g=>{const[u,v]=WORLD_.gLoc(g,player.x,player.z);return Math.abs(u)<3&&Math.abs(v)<g.bh+0.6;});if(g&&player.y<g.deck-1.2)player.level='low';}}
-  if(player.climb)(player.climb.rapids?rapidsTick:climbTick)(dt);
+  if(player.climb)(player.climb.oc?OCL.tick:player.climb.rapids?rapidsTick:climbTick)(dt);
   /* never stuck on foot either: if you're pushing a direction and haven't moved for a moment, step to the nearest open ground */
   if(!(car&&car.occupied)&&!player.climb&&!st.busy){const pushing=len>0.3,mv_=hyp(player.x-(player.lx||0),player.z-(player.lz||0));player.lx=player.x;player.lz=player.z;
     player.stk=pushing&&mv_<dt*0.12?(player.stk||0)+dt:0;
@@ -4689,7 +4901,7 @@ function sim(dt,night){
   if(st.energy<=0&&!st.busy)ko('tired');
   // nearest interactable
   let best=null,bd=99;for(const it of inter){if(!it.on())continue;if(GZ&&it.lv&&it.lv!==player.level)continue;const d=hyp(it.x-player.x,it.z-player.z),bb=it.tree?0.7:(it.bias||0);if(d<it.r&&d+bb<bd){bd=d+bb;best=it;}}
-  if(GZ&&(!best||best.low)&&fish.state==='idle'&&!player.climb){fcCand=findFreeClimb();if(fcCand)best=freeClimbIt;}
+  if((GZ||OC)&&(!best||best.low)&&fish.state==='idle'&&!player.climb){fcCand=findFreeClimb();if(fcCand)best=freeClimbIt;}
   if(st.tool==='pole'&&fish.state==='idle'&&(!best||best.tree||best.low||best===freeClimbIt)){const ct=findCast();if(ct){fish.cand=ct;best=castIt;}}
   if(fish.state==='cast'||fish.state==='wait')best=fishIt;
   cur=(player.climb||fish.state==='reel')?null:best;
@@ -4777,7 +4989,7 @@ function visuals(dt){
   if(fish.state==='reel'){const fb=$('fbMark');fb.style.left=(fish.m*100).toFixed(1)+'%';$('fbProg').style.width=(fish.p*100).toFixed(1)+'%';
     const tt=fish.m>0.66?'Too tight! Ease off':fish.m<0.38?(isTouch?'Reel in! Hold Use':'Reel in! Hold E'):'Hold it in the green…';if($('fbTitle').textContent!==tt)$('fbTitle').textContent=tt;}
   player.g.rotation.x+=(lean-Math.PI/2*(player.lieK||0)-player.g.rotation.x)*Math.min(1,dt*12);{const nt=night>0.4,ax=nt?-0.6:Math.sin(ph)*sw*0.8,az=nt?0.38:0,k=Math.min(1,dt*8);player.arms[1].rotation.x+=(ax-player.arms[1].rotation.x)*k;player.arms[1].rotation.z+=(az-player.arms[1].rotation.z)*k;}
-  poseAnimals(dt);updBubbles(dt);upd3D(dt);owlTick(dt,night);watcherTick(dt,night);vanTick(night);updRipples(dt,night);updLine();updWeather(dt,night);CABINKIT.update(dt);updBuildPanel(dt);netTick(dt);sndTick(dt,night);if(carriedSeat){carriedSeat.me.position.set(player.x+Math.sin(player.rot)*0.5,player.y+0.75,player.z+Math.cos(player.rot)*0.5);carriedSeat.me.rotation.set(0,player.rot+Math.PI/2,0);}updInvPanel(dt);updMapCompass();if(CAMP.state!=='set'){campBox.visible=CAMP.state==='carried';if(campBox.visible){campBox.position.set(player.x-Math.sin(player.rot)*0.35,player.y+0.9,player.z-Math.cos(player.rot)*0.35);campBox.rotation.y=player.rot;}}else campBox.visible=false;updTrees(dt,st.playing&&!st.busy);updChips(dt);
+  poseAnimals(dt);updBubbles(dt);upd3D(dt);if(OCL)OCL.post(dt);owlTick(dt,night);watcherTick(dt,night);vanTick(night);updRipples(dt,night);updLine();updWeather(dt,night);CABINKIT.update(dt);updBuildPanel(dt);netTick(dt);sndTick(dt,night);if(carriedSeat){carriedSeat.me.position.set(player.x+Math.sin(player.rot)*0.5,player.y+0.75,player.z+Math.cos(player.rot)*0.5);carriedSeat.me.rotation.set(0,player.rot+Math.PI/2,0);}updInvPanel(dt);updMapCompass();if(CAMP.state!=='set'){campBox.visible=CAMP.state==='carried';if(campBox.visible){campBox.position.set(player.x-Math.sin(player.rot)*0.35,player.y+0.9,player.z-Math.cos(player.rot)*0.35);campBox.rotation.y=player.rot;}}else campBox.visible=false;updTrees(dt,st.playing&&!st.busy);updChips(dt);
   // camera follows the hiker; zoom, tilt and turn are limited
   const tx=clamp(player.x,CX[0],CX[1]),tz=clamp(player.z,CZ[0],CZ[1]);camT.x+=(tx-camT.x)*(1-Math.exp(-4*dt));camT.z+=(tz-camT.z)*(1-Math.exp(-4*dt));camT.y+=(player.y-camT.y)*(1-Math.exp(-3*dt));
   {const g=camGoal(),k=1-Math.exp(-7*dt);camCur.d+=(g.d-camCur.d)*k;camCur.p+=(g.p-camCur.p)*k;camCur.y=wrapDeg(camCur.y+wrapDeg(g.y-camCur.y)*k);setCamOff();
