@@ -4891,7 +4891,7 @@ $('invBody').addEventListener('click',e=>{const b=e.target.closest('button');if(
   paintInv();});
 let invT=0;function updInvPanel(dt){if($('ip').hidden||(invT-=dt)>0)return;invT=0.5;if(document.activeElement&&$('ip').contains(document.activeElement))return;paintInv();}
 /* ---------- compass and map ---------- */
-const mapImg=(()=>{const c=document.createElement('canvas'),N=150;c.width=c.height=N;const x=c.getContext('2d'),im=x.createImageData(N,N),E=WORLD?96:20,col=new THREE.Color();
+const mapImg=(()=>{const c=document.createElement('canvas'),N=150;c.width=c.height=N;const x=c.getContext('2d'),im=x.createImageData(N,N),E=WORLD?126:20,col=new THREE.Color();   /* Oregon Wilds: out to the sea all round */
   for(let j=0;j<N;j++)for(let i=0;i<N;i++){const wx=-E+2*E*i/N,wz=-E+2*E*j/N,y=gh(wx,wz),o=(j*N+i)*4;
     if(waterAt(wx,wz)!==null)col.setHex(P.river);else col.setHex(groundCol(wx,y,wz,0.95,0));const sh=0.75+clamp(y/12,-0.2,0.35);im.data[o]=col.r*255*sh;im.data[o+1]=col.g*255*sh;im.data[o+2]=col.b*255*sh;im.data[o+3]=255;}
   x.putImageData(im,0,0);return {c,E};})();
