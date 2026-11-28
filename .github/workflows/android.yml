@@ -1,7 +1,7 @@
 name: Build Android APK
 on:
   push:
-    branches: [main]
+    branches: [main, online-test]
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -41,10 +41,18 @@ jobs:
         with:
           name: paperland-trails-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-      - name: Publish the APK as the "latest" release (direct .apk download)
+      - name: Zip the web version (index.html with Three.js bundled, plus audio)
+        run: cd www && zip -qr ../PaperlandTrails-web.zip . && cd ..
+      - name: Publish the APK (main = "latest" release; online-test = its own test release)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp android/app/build/outputs/apk/debug/app-debug.apk PaperlandTrails.apk
-          gh release delete latest --yes --cleanup-tag || true
-          gh release create latest PaperlandTrails.apk --title "Paperland Trails (latest build)" --notes "Built from commit ${GITHUB_SHA::7}: $(git log -1 --pretty=%s)" --latest
+          NOTES="Built from ${GITHUB_REF_NAME} commit ${GITHUB_SHA::7}: $(git log -1 --pretty=%s)"
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            gh release delete latest --yes --cleanup-tag || true
+            gh release create latest PaperlandTrails.apk PaperlandTrails-web.zip --title "Paperland Trails (latest build)" --notes "$NOTES" --latest
+          else
+            gh release delete "${GITHUB_REF_NAME}" --yes --cleanup-tag || true
+            gh release create "${GITHUB_REF_NAME}" PaperlandTrails.apk PaperlandTrails-web.zip --target "${GITHUB_SHA}" --title "Paperland Trails (${GITHUB_REF_NAME} test build)" --notes "$NOTES" --prerelease --latest=false
+          fi

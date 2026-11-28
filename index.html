@@ -3868,7 +3868,7 @@ if(HASHP.code){$('onCode').value=HASHP.code;let auto=false;try{auto=sessionStora
 /* ---------- the host's world: map, clock, weather and snow ---------- */
 const WSYNC=['on','p','kind','dur','peak','frozen','season','manual','manualUntil','scrub'];
 function netWorld(){const w={};WSYNC.forEach(k=>{w[k]=typeof W[k]==='number'?+W[k].toFixed(4):W[k];});
-  return {map:MAPKEY,day:st.day,t:+st.t.toFixed(4),fr:st.frozen?1:0,sp:st.speed,snow:+(st.snow||0).toFixed(3),w,cr:CRATES.map(c=>Object.assign({},c.inv))};}
+  return {map:MAPKEY,day:st.day,t:+st.t.toFixed(4),fr:st.frozen?1:0,sp:st.speed,snow:+(st.snow||0).toFixed(3),w,cr:CRATES.map(c=>Object.assign({},c.inv)),vn:car&&car.inv?Object.assign({},car.inv):null};}
 NETKIT.on('world',w=>{if(NETKIT.isHost()||!w)return;
   if(w.map&&w.map!==MAPKEY){const code=NETKIT.code();try{sessionStorage.setItem('plw-autojoin',code);}catch(e){}toast('Moving to the host\'s map…',3);
     NETKIT.leave();setTimeout(()=>{location.replace(netBase()+'#'+(w.map==='meadow'?'':w.map+'.')+code);setTimeout(()=>location.reload(),60);},600);return;}
@@ -3876,7 +3876,9 @@ NETKIT.on('world',w=>{if(NETKIT.isHost()||!w)return;
   if(typeof w.fr==='number')st.frozen=!!w.fr;if(typeof w.sp==='number')st.speed=w.sp;
   if(w.w&&typeof w.w==='object')WSYNC.forEach(k=>{if(k in w.w)W[k]=w.w[k];});
   if(typeof w.snow==='number')st.snow=w.snow;
-  if(Array.isArray(w.cr))w.cr.forEach((inv,i)=>{const c=CRATES[i];if(c&&inv&&typeof inv==='object')for(const k of c.holds)if(typeof inv[k]==='number')c.inv[k]=inv[k];});});
+  const fresh=!(performance.now()<(NET.crHold||0));
+  if(fresh&&Array.isArray(w.cr))w.cr.forEach((inv,i)=>{const c=CRATES[i];if(c&&inv&&typeof inv==='object')for(const k of c.holds)if(typeof inv[k]==='number')c.inv[k]=inv[k];});
+  if(fresh&&w.vn&&typeof w.vn==='object'&&car&&car.inv)for(const k in VANCAP)if(VANCAP[k]>0&&typeof w.vn[k]==='number')car.inv[k]=w.vn[k];});
 /* ---------- the host's animals: guests show exactly where the host's animals are and what they're doing ---------- */
 const r2=v=>Math.round(v*100)/100;
 function netAnimPack(){return animals.map(a=>[r2(a.x),r2(a.z),r2(a.rot),r2(a.spd||0),r2(a.rear||0),r2(a.sit||0),r2(a.crouch||0),
@@ -3905,7 +3907,7 @@ function netLabel(el,x,y,z,show){_nv.set(x,y,z).project(camera);const vis=show&&
 function netTick(dt){const inS=NETKIT.inSession();
   /* network timers run on real time, so a slow device still sends at a steady rate */
   const now_=performance.now();
-  if(inS){if(now_>=NET.sendT){NET.sendT=now_+80;const cs=netCampS(),s={x:+player.x.toFixed(2),y:+player.y.toFixed(2),z:+player.z.toFixed(2),r:+player.rot.toFixed(2),m:player.moving?1:0,c:car&&car.occupied?1:0,cs,run:keys.runActive?1:0,b:st.berries|0,sh:CABINKIT.isSheltered(player.x,player.z)?1:0};
+  if(inS){if(now_>=NET.sendT){NET.sendT=now_+80;const cs=netCampS(),s={x:+player.x.toFixed(2),y:+player.y.toFixed(2),z:+player.z.toFixed(2),r:+player.rot.toFixed(2),m:player.moving?1:0,c:car&&car.occupied?1:0,cs,run:keys.runActive?1:0,b:st.berries|0,f:st.fish|0,e:Math.round(st.energy),sh:CABINKIT.isSheltered(player.x,player.z)?1:0};
       if(cs===1){s.cx=+FIRE.x.toFixed(2);s.cz=+FIRE.z.toFixed(2);s.cf=Math.round(st.fuel*20)/20;}NETKIT.state(s);}
     if(NETKIT.isHost()){const sig=[W.on,W.kind,W.frozen,W.season,W.manualUntil,W.peak,st.frozen,st.speed,st.day].join();
       if(now_>=NET.worldT||sig!==NET.wsig){NET.worldT=now_+1500;NET.wsig=sig;NETKIT.world(netWorld());}
@@ -3928,12 +3930,19 @@ function netTick(dt){const inS=NETKIT.inSession();
   if(!inS)NET.campCheck=false;}
 /* ---------- the world reacts to every player, not just the host ---------- */
 /* everyone the host's animals can notice: you, plus every guest (from what they send) */
-function netActors(){const me={me:true,id:NETKIT.inSession()?NETKIT.me():'solo',x:player.x,z:player.z,rot:player.rot,run:!!keys.runActive,car:!!(car&&car.occupied),ber:st.berries|0,sh:false};
+function netActors(){const me={me:true,id:NETKIT.inSession()?NETKIT.me():'solo',x:player.x,z:player.z,rot:player.rot,run:!!keys.runActive,car:!!(car&&car.occupied),ber:st.berries|0,fish:st.fish|0,en:st.energy,sh:false};
   if(!NETKIT.inSession())return [me];const out=[me];
   for(const p of NETKIT.players()){const s_=p.state;if(p.isMe||!s_||typeof s_.x!=='number')continue;
-    out.push({me:false,id:p.id,name:p.name||'Hiker',x:s_.x,z:s_.z,rot:s_.r||0,run:!!s_.run,car:!!s_.c,ber:s_.b|0,sh:!!s_.sh});}
+    out.push({me:false,id:p.id,name:p.name||'Hiker',x:s_.x,z:s_.z,rot:s_.r||0,run:!!s_.run,car:!!s_.c,ber:s_.b|0,fish:s_.f|0,en:typeof s_.e==='number'?s_.e:100,sh:!!s_.sh});}
   return out;}
 function netNear(x,z){const A=NET.act||[];let b=A[0],bd=1e9;for(const a of A){const d=hyp(a.x-x,a.z-z);if(d<bd){bd=d;b=a;}}return b||{me:true,x:player.x,z:player.z,rot:player.rot,run:false,car:false,ber:st.berries,sh:false};}
+/* the wolves' prey: whoever is the easiest catch with what they want (food). Alone, tired, out of the firelight,
+   not in the van or a cabin, no wolf of their own beside them. Host or guest makes no difference. */
+function netPrey(A,g0){let best=null,bs=-1e9;
+  for(const a of A){let iso=15;for(const b of A)if(b!==a)iso=Math.min(iso,hyp(a.x-b.x,a.z-b.z));
+    const v=(a.ber>0||a.fish>0?3:0)+Math.min(1,iso/15)*2+(1-clamp(a.en,0,100)/100)*1.5-(netLit(a.x,a.z,7)?4:0)-(a.car?10:0)-(a.me&&g0?4:0)-(a.sh?3:0)+(a.id===NET.wtId?0.5:0);
+    if(v>bs){bs=v;best=a;}}
+  NET.wtId=best&&best.id;return best;}
 /* other players' camps: a lit fire warms you, a pitched tent shelters you */
 function netCamps(){const out=[];if(!NETKIT.inSession())return out;for(const p of NETKIT.players()){const s_=p.state;if(!p.isMe&&s_&&s_.cs===1&&typeof s_.cx==='number')out.push(s_);}return out;}
 function netLitOther(x,z,r){return netCamps().some(c=>c.cf>0&&hyp(x-c.cx,z-c.cz)<r);}
@@ -3953,8 +3962,11 @@ const KOSAY={bear:'was knocked down by a bear!',wolf:'was worn down by the wolve
 function netSendKo(c){if(NETKIT.inSession())NETKIT.send('kod',{n:NET.name||'Hiker',c});}
 NETKIT.on('kod',(d,from)=>{if(!d||(from&&from.isMe)||!KOSAY[d.c])return;toast(String(d.n||'A hiker').slice(0,16)+' '+KOSAY[d.c],4);});
 /* the camp crates are shared: every take or put is sent to everyone, and the host's counts win */
-function netCrate(c,k,d){if(!d||!NETKIT.inSession())return;const i=CRATES.indexOf(c);if(i>=0)NETKIT.send('crate',{i,k,d});}
-NETKIT.on('crate',(m,from)=>{if(!m||(from&&from.isMe))return;const c=CRATES[m.i];if(!c||!c.holds.includes(m.k)||typeof m.d!=='number')return;c.inv[m.k]=clamp((c.inv[m.k]||0)+m.d,0,1000);if(!$('ip').hidden)paintInv();});
+/* the van is everyone's general storage too: each player has a van, and they all share one load */
+function netStore(i){if(i===-1)return car&&car.inv?{inv:car.inv,can:k=>VANCAP[k]>0,cap:k=>VANCAP[k]}:null;const c=CRATES[i];return c?{inv:c.inv,can:k=>c.holds.includes(k),cap:()=>1000}:null;}
+function netCrate(c,k,d){if(!d||!NETKIT.inSession())return;NET.crHold=performance.now()+3000;  /* our own change is on its way to the host: don't let an older copy undo it */
+  const i=c==='van'?-1:CRATES.indexOf(c);if(i>=-1)NETKIT.send('crate',{i,k,d});}
+NETKIT.on('crate',(m,from)=>{if(!m||(from&&from.isMe))return;const c=netStore(m.i);if(!c||!c.can(m.k)||typeof m.d!=='number')return;c.inv[m.k]=clamp((c.inv[m.k]||0)+m.d,0,c.cap(m.k));if(!$('ip').hidden)paintInv();});
 /* ---------- cabin building kit hookup ---------- */
 let kitMouse=null,kitTap=null;const kitRay=new THREE.Raycaster();
 CABINKIT.init(scene,{
@@ -4735,7 +4747,7 @@ function bubbleSprite(kind){const c=document.createElement('canvas');c.width=c.h
   else{x.fillStyle='#AB451C';x.beginPath();x.moveTo(66,78);x.bezierCurveTo(28,54,40,24,66,40);x.bezierCurveTo(92,24,104,54,66,78);x.fill();}
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true}));sp.scale.set(0.95,0.95,1);sp.visible=false;scene.add(sp);return sp;}
 const BUB={fish:bubbleSprite('fish'),heart:bubbleSprite('heart')};
-function wolfSpot(r0,r1){for(let i=0;i<80;i++){const a=rng()*6.28,r=rr(r0,r1),x=player.x+Math.cos(a)*r,z=player.z+Math.sin(a)*r;if(!aBlocked(x,z,0.35,player.level))return [x,z];}return null;}
+function wolfSpot(r0,r1){const c_=(typeof NET!=='undefined'&&NET.wt)||player;for(let i=0;i<80;i++){const a=rng()*6.28,r=rr(r0,r1),x=c_.x+Math.cos(a)*r,z=c_.z+Math.sin(a)*r;if(!aBlocked(x,z,0.35,player.level))return [x,z];}return null;}
 function startVisit(){let w=null;
   if(DEN&&pack.mode&&pack.mode!=='away')return null;
   if(DEN)w=wolves.filter(o=>!o.role&&o.state!=='lunge').sort((a,b)=>hyp(a.x-player.x,a.z-player.z)-hyp(b.x-player.x,b.z-player.z))[0];
@@ -4830,7 +4842,7 @@ function updateWild(dt,night){
      with your own wolf beside you they keep well back and steal nothing. Charge at one (run toward it) and it bolts. */
   const wild=wolves.filter(w=>!w.role);
   if(wild.length){
-    if(!pack.mode){pack.mode='away';pack.t=rr(25,40);pack.turn=0;pack.steals=0;pack.next=0;}
+    NET.wt=netPrey(ACT,guarded0);if(!pack.mode){pack.mode='away';pack.t=rr(25,40);pack.turn=0;pack.steals=0;pack.next=0;}
     pack.t-=dt*(pack.mode==='away'&&night>0.5?1.6:1);pack.ang+=dt*0.055;
     const fireD=hyp(px-FIRE.x,pz-FIRE.z),inLight=fireLit&&fireD<7,hasFood=st.fish>0||st.berries>0;
     const charging=w=>keys.runActive&&hyp(w.x-px,w.z-pz)<4.5&&Math.abs(angD(Math.atan2(w.x-px,w.z-pz),player.rot))<0.6;
@@ -4842,9 +4854,9 @@ function updateWild(dt,night){
       if(pack.t<=0||pack.steals>=1){pack.mode='leave';pack.t=11;wild.forEach(w=>{w.state='leave';});
         netSayAll(pack.steals?'Snacks in their jaws, the wolves melt back into the forest.':'The wolves lose interest and melt back into the forest.',3.5);}
       else{pack.next-=dt;
-        if(pack.next<=0&&pack.thief&&ACT.some(a=>a.ber>0&&!(a.me&&guarded0)&&!netLit(a.x,a.z,7)&&!a.car)&&!wild.some(w=>w.state==='dart'||w.state==='flee'||w.state==='bluff')){const w=wild[pack.turn++%wild.length];w.state='dart';w.timer=14;pack.next=rr(40,70);}}}
+        if(pack.next<=0&&pack.thief&&NET.wt.ber>0&&!(NET.wt.me&&guarded0)&&!netLit(NET.wt.x,NET.wt.z,7)&&!NET.wt.car&&!wild.some(w=>w.state==='dart'||w.state==='flee'||w.state==='bluff')){const w=wild[pack.turn++%wild.length];w.state='dart';w.timer=14;pack.next=rr(40,70);}}}
     else if(pack.mode==='leave'&&pack.t<=0){pack.mode='away';pack.t=rr(80,140);wild.forEach(w=>{w.state='roam';});}
-    wild.forEach((w,i)=>{const A_=netNear(w.x,w.z),px=A_.x,pz=A_.z,guarded=A_.me&&guarded0,inLight=netLit(px,pz,7),charging=w=>A_.run&&hyp(w.x-px,w.z-pz)<4.5&&Math.abs(angD(Math.atan2(w.x-px,w.z-pz),A_.rot))<0.6,provoked=w=>A_.run&&hyp(w.x-px,w.z-pz)<16&&Math.abs(angD(Math.atan2(w.x-px,w.z-pz),A_.rot))<0.35;const d=hyp(w.x-px,w.z-pz);w.watch=false;let cT=0;
+    wild.forEach((w,i)=>{const A_=NET.wt,px=A_.x,pz=A_.z,guarded=A_.me&&guarded0,inLight=netLit(px,pz,7),charging=w=>ACT.some(a=>a.run&&hyp(w.x-a.x,w.z-a.z)<4.5&&Math.abs(angD(Math.atan2(w.x-a.x,w.z-a.z),a.rot))<0.6),provoked=w=>ACT.some(a=>a.run&&hyp(w.x-a.x,w.z-a.z)<16&&Math.abs(angD(Math.atan2(w.x-a.x,w.z-a.z),a.rot))<0.35);const d=hyp(w.x-px,w.z-pz);w.watch=false;let cT=0;
       if(w.state==='stalk'){
         const R=(inLight||guarded?24:20)+(i%3)*2.2;
         const ang=pack.ang+i*(6.283/Math.max(1,wild.length))+Math.sin(T*0.23+i)*0.35,r=R+Math.sin(T*0.31+i*1.7)*3.2+Math.sin(T*0.9+i*2.3)*1.2;
@@ -4993,7 +5005,7 @@ $('invBody').addEventListener('click',e=>{const b=e.target.closest('button');if(
   else if(b.dataset.camp){startCampPlace();}
   else if(b.dataset.campvan){CAMP.state='van';toast('Camp box loaded in the van.',2);}
   else if(b.dataset.mv&&tg){const k=b.dataset.k,inv=tg==='van'?car.inv:tg.inv,cap=tg==='van'?VANCAP[k]:1000,want=b.dataset.n==='all'?1e9:+b.dataset.n;
-    if(b.dataset.mv==='take'){const n=Math.min(want,inv[k]||0,CAP[k]-(st[k]||0));inv[k]-=n;st[k]=(st[k]||0)+n;if(tg!=='van')netCrate(tg,k,-n);}else{const n=Math.min(want,st[k]||0,cap-(inv[k]||0));inv[k]=(inv[k]||0)+n;st[k]-=n;if(tg!=='van')netCrate(tg,k,n);}}
+    if(b.dataset.mv==='take'){const n=Math.min(want,inv[k]||0,CAP[k]-(st[k]||0));inv[k]-=n;st[k]=(st[k]||0)+n;netCrate(tg,k,-n);}else{const n=Math.min(want,st[k]||0,cap-(inv[k]||0));inv[k]=(inv[k]||0)+n;st[k]-=n;netCrate(tg,k,n);}}
   paintInv();});
 let invT=0;function updInvPanel(dt){if($('ip').hidden||(invT-=dt)>0)return;invT=0.5;if(document.activeElement&&$('ip').contains(document.activeElement))return;paintInv();}
 /* ---------- compass and map ---------- */

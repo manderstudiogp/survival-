@@ -205,7 +205,7 @@ def main():
         E(B, 'player.x=CRATES[2].x+1.5;player.z=CRATES[2].z+0.8;'); time.sleep(1)
         E(B, 'openInv()'); time.sleep(0.5)
         B.evaluate("()=>{const b=document.querySelector('#invBody [data-mv=take][data-k=berries][data-n=\"10\"]');if(b)b.click();window.__tk=!!b;}")
-        time.sleep(3)
+        time.sleep(5)   # also long enough for the host's next copy of the counts to arrive
         ca2, cb2, b_ber2 = J(A, 'CRATES[2].inv.berries'), J(B, 'CRATES[2].inv.berries'), E(B, 'st.berries')
         if not B.evaluate('window.__tk'):
             print('   dbg near', E(B, "String(nearContainer()&&nearContainer().name)"), 'pos', J(B,'[player.x,player.z,CRATES[2].x,CRATES[2].z]'), 'inv', E(B, "$('invBody').textContent.slice(0,200)"), 'ip hidden', E(B,"$('ip').hidden"))
@@ -216,6 +216,26 @@ def main():
         # ---- others' fires warm you
         lit = E(A, 'st.fuel')
         check('B is warmed by A\'s campfire', lit > 0 and E(B, 'netLitOther(CAMP.home.fx,CAMP.home.fz,5)'), f'A fire {lit:.2f}')
+
+        # ---- wolves have no favourite: they pick whoever is the easiest catch with food
+        OPEN = ('(()=>{for(let r=9;r<16;r+=1)for(let k=0;k<16;k++){const a=k*0.39,x=CAMP.home.fx+Math.cos(a)*r,z=CAMP.home.fz+Math.sin(a)*r;'
+                'if(walkable(x,z,LIM,"rim")&&!inWater(x,z)&&!netLit(x,z,9)&&!(BEAR&&hyp(x-BEAR.x,z-BEAR.z)<11)){player.x=x;player.z=z;player.level="rim";return [x,z];}}return null;})()')
+        bid, aid = E(B, 'NETKIT.me()'), E(A, 'NETKIT.me()')
+        E(A, 'st.berries=0;st.fish=0'); spotB = J(B, OPEN); time.sleep(4)
+        check('wolves go for B (alone, out of the firelight, carrying berries)', E(A, 'NET.wt&&NET.wt.id') == bid, f'B at {spotB}, B berries {E(B,"st.berries")}')
+        E(B, 'player.x=CAMP.home.fx+1.5;player.z=CAMP.home.fz+1.5;'); E(A, 'st.berries=10'); spotA = J(A, OPEN); time.sleep(4)
+        check('...and switch to A when A is the easier catch (host gets no special treatment)', E(A, 'NET.wt&&NET.wt.id') == aid, f'A at {spotA}')
+        E(A, 'player.x=CAMP.home.fx-1.5;player.z=CAMP.home.fz+1.5;st.berries=0')
+
+        # ---- the van is shared storage: B puts 10 berries in; A's van has them
+        E(B, 'player.x=car.x+2.4;player.z=car.z;'); time.sleep(1)
+        v0, bb0 = J(A, 'car.inv.berries'), E(B, 'st.berries')
+        E(B, 'openInv()'); time.sleep(0.5)
+        B.evaluate("()=>{const b=document.querySelector('#invBody [data-mv=put][data-k=berries][data-n=\"10\"]');if(b)b.click();window.__pv=!!b;}")
+        time.sleep(5); E(B, 'setMenu(false)')
+        va, vb = J(A, 'car.inv.berries'), J(B, 'car.inv.berries')
+        check('the van is shared storage (B put 10 berries in; A\'s van has them)', B.evaluate('window.__pv') and va == vb == v0 + 10 and E(B, 'st.berries') == bb0 - 10,
+              f'van A {v0}->{va}, B sees {vb}; B carried {bb0}->{E(B, "st.berries")}')
 
         # ---- the host's bear goes for B: B is knocked down, and everyone hears about it
         bx, bz = J(A, '[bears[0].x,bears[0].z]')
