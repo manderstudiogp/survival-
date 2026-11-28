@@ -201,7 +201,7 @@ def main():
         check('time of day follows the host', abs(ta - tb) < 0.02, f'A {ta:.4f} B {tb:.4f}')
         # night-glow: aurora, sea glow and clear-sky strength come only from the shared day, time, weather and snow
         E(A, 'st.t=0.76'); time.sleep(3)
-        ng = '{day:st.day,aur:+NG.aur.toFixed(3),glow:+NG.glow.toFixed(3),clr:+NG.clr.toFixed(3),hash:+NG.hs(st.day,23).toFixed(4)}'
+        ng = '{day:st.day,t:+st.t.toFixed(3),aur:+NG.aur.toFixed(3),glow:+NG.glow.toFixed(3),clr:+NG.clr.toFixed(3),hash:+NG.hs(st.day,23).toFixed(4)}'
         na, nb = J(A, ng), J(B, ng)
         check('night sky and sea glow match the host', na['day'] == nb['day'] and all(abs(na[k] - nb[k]) < 0.03 for k in ('aur', 'glow', 'clr', 'hash')), f'A {na} B {nb}')
 
