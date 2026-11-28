@@ -670,7 +670,7 @@ if(MAP==='meadow'){
      Ember Hollow (the original map) sits in the middle, unchanged. Around it: about 200 × 200 m of rolling meadows and forest,
      a ring road for the van, and four deep gorges with waterfalls and bridges. Heights come from a precomputed grid (fast). */
   if(WORLD){
-    const WS=100,WR=94,GRES=0.5,GN=Math.round(WS*2/GRES)+1;
+    const WS=100,WR=94,GRES=0.5,GE=128,GN=Math.round(GE*2/GRES)+1;   /* the height grid reaches past WS so the coast and the shallows fit */
     const hsh=(i,j)=>{let h=Math.imul((i*374761393+j*668265263)|0,1274126177);h=Math.imul(h^(h>>>13),1274126177);return ((h^(h>>>16))>>>0)/4294967296;};
     const vn=(x,z)=>{const i=Math.floor(x),j=Math.floor(z),fx=x-i,fz=z-j,u=fx*fx*(3-2*fx),v=fz*fz*(3-2*fz),a=hsh(i,j),b=hsh(i+1,j),c=hsh(i,j+1),d=hsh(i+1,j+1);return (a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v)*2-1;};
     const ew=(x,z)=>Math.max(Math.abs(x),Math.abs(z));
@@ -694,17 +694,56 @@ if(MAP==='meadow'){
       const s4=f*4,k=Math.floor(s4);return clamp((k+smooth(0.78,1,s4-k))/4,0,1);};           /* stepped like rock strata */
     const gorgeAt=(x,z)=>{let best=0,bg=null;for(const g of GG){const[u,v]=gLoc(g,x,z),f=gF(g,u,v);if(f>best){best=f;bg=g;}}return [best,bg];};
     /* border peaks and a big peak behind every waterfall */
-    const WMT=[];for(let s_=0;s_<4;s_++)for(let t=-WS;t<=WS;t+=17){const o=104+(hsh(s_,t|0)*6-3),al=t+hsh(t|0,s_+9)*6-3;const[x,z]=s_===0?[al,-o]:s_===1?[al,o]:s_===2?[-o,al]:[o,al];
-      WMT.push({m:hsh(s_*7,t|0)<0.5?'A':'B',x,z,s:[4.2+hsh(t|0,s_)*1.8,3.4+hsh(s_,t|0+3)*2.2,4.2+hsh(t|0+5,s_)*1.8],rot:hsh(t|0,s_*3)*6.28});}
+    /* a big peak behind every waterfall (the world's edge is the sea now, see COAST below) */
+    const WMT=[];
     GG.forEach(g=>{WMT.push({m:g.i%2?'A':'B',x:g.cx+g.ax*(g.L/2+15),z:g.cz+g.az*(g.L/2+15),s:[2.6,2.6,2.6],rot:g.i*1.7});});
     WMT.forEach(m=>{m.r=3.4*(m.s[0]+m.s[2])/2;});
     const wmBump=(x,z)=>{let y=0;for(const m of WMT){const d=hyp(x-m.x,z-m.z)/(m.r*1.2);if(d<1)y=Math.max(y,(1-d)*(1-d)*3.2*m.s[1]/2.5);}return y;};
     const rimCh=(x,z)=>{for(const g of GG){const[u,v]=gLoc(g,x,z);if(u>g.L/2-0.4&&u<g.L/2+16&&Math.abs(v)<1.3)return [g,u,v];if(hyp(u-g.L/2-16.5,v)<2.6)return [g,g.L/2+1,hyp(u-g.L/2-16.5,v)*0.5];}return null;};
+    /* ===== COAST: the world ends at the sea. Same build as the Ocean Test bench, scaled up: a ragged shore line Rb(θ) round a
+       rounded square (about 94 m out on the axes, 118 m on the diagonals); inland of it a three-step cliff, or a long walkable
+       slope in the gradual patches (one long-beach cove, three grassy slopes, three narrow gullies); seaward a rock shelf at every
+       cliff foot and the long sandy beach; then the sea. Ragged bits are set by arc length so they look the same size as on the bench. */
+    const SEA=-8.5,CWc=2.8,CZ=31;
+    const wA=a=>((a+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI,gau=(a,c,w)=>{const d=wA(a-c)/w;return Math.exp(-d*d);};
+    const BEACH=-1.15,HEADS=[[-2.05,9,0.06],[0.95,7,0.05],[2.12,8,0.055],[-0.6,6,0.045],[2.86,6,0.05]],
+      DIPS=[[BEACH,-9,0.22],[0.42,-4,0.1],[2.55,-4,0.12],[-2.45,-5,0.1],[1.2,-3,0.05],[-0.35,-3,0.05],[-2.68,-3,0.05],[1.62,-2.5,0.08]];
+    const RSQ=a=>{const c=Math.abs(Math.cos(a)),s=Math.abs(Math.sin(a));return 94*Math.pow(c**6+s**6,-1/6);};
+    const Rlow=a=>{let r=RSQ(a)+3*Math.sin(3*a+0.7)+2*Math.sin(5*a+2.1)+1.2*Math.sin(11*a+0.4);for(const[c,h,w]of HEADS)r+=h*gau(a,c,w);for(const[c,h,w]of DIPS)r+=h*gau(a,c,w);return r;};
+    const rag=a=>1.0*Math.sin(23*a+0.3)+0.6*Math.sin(53*a+1.7)+0.35*Math.sin(101*a+1.1)+0.2*Math.sin(173*a+2.6);
+    const Rb=a=>Rlow(a)+rag(a);
+    const beachW=a=>gau(a,BEACH,0.3);
+    const benchW=a=>2.0+0.9*(0.5+0.5*Math.sin(41*a+1.3))+0.4*Math.sin(113*a);
+    /* gradual patches: [angle, metres inland of the shore, radial reach, sideways reach]; ellipses in world space as on the bench */
+    const SLB=[[BEACH,6,16,26],[0.42,4,14,9],[2.55,4,14,10],[-2.45,4,13,8],[1.2,4,16,3.4],[-0.35,4,15,3.4],[-2.68,4,15,3.4]]
+      .map(([a,o,ru,rv])=>({a,cx:Math.cos(a)*(Rb(a)-o),cz:Math.sin(a)*(Rb(a)-o),ux:Math.cos(a),uz:Math.sin(a),ru,rv}));
+    const slopeW=(x,z)=>{let m=0;for(const s of SLB){const dx=x-s.cx,dz=z-s.cz,u=(dx*s.ux+dz*s.uz)/s.ru,v=(-dx*s.uz+dz*s.ux)/s.rv;if(u*u+v*v<9)m=Math.max(m,Math.exp(-u*u-v*v));}return m;};
+    const cliffK=(x,z)=>1-smooth(0.3,0.75,slopeW(x,z)+0.07*Math.sin(Math.atan2(z,x)*137));
+    /* the slope correction only holds near the shore: behind a narrow headland it would shrink the distance far inland */
+    const coastD=(x,z)=>{const r=hyp(x,z),a=Math.atan2(z,x),RL=Rlow(a),R=RL+rag(a)*smooth(RL-4.5,RL-0.8,r),dR=(Rlow(a+0.002)-Rlow(a-0.002))/0.004,k=Math.sqrt(1+(dR/Math.max(r,9))**2);
+      return (R-r)/(1+(k-1)*Math.exp(-Math.max(0,R-r)/12));};
+    const footR=a=>Rb(a)+benchW(a)*(1-beachW(a))+12*beachW(a)+0.6;
+    const strata=k=>{const s=clamp(k,0,1)*3,f=Math.floor(Math.min(s,2.999));return (f+smooth(0.45,1,s-f))/3;};
+    const ease=k=>{k=clamp(k,0,1);return 0.5*(k+k*k*(3-2*k));};
+    /* height at the coast over land height T (the land as it would be without the sea): the cliff or slope drops from T to the foot */
+    const cH=(x,z,T,d)=>{if(d===undefined)d=coastD(x,z);const a=Math.atan2(z,x),b=beachW(a),foot=SEA+0.45+0.35*b;
+      if(d>=0){const Tc=clamp(T,SEA+5.5,SEA+15),ws=clamp((Tc-foot)*1.4,9,20),Tu=Tc+(T-Tc)*smooth(ws,ws+10,d),c=cliffK(x,z);
+        const yc=foot+(Tu-foot)*strata(d/CWc),ys=foot+(Tu-foot)*ease(d/ws)+0.12*Math.sin(x*1.3+z*0.7)*Math.sin(Math.PI*clamp(d/ws,0,1));return ys+(yc-ys)*c;}
+      const e=-d,wb=benchW(a)*(1-b)+12*b,sl=0.05*(1-b)+0.11*b,yB=foot-sl*e+0.06*noise(x*2.1,z*2.1)*(1-b);
+      const floor=SEA-1.4-1.8*smooth(0,8,e-wb)+0.25*noise(x*0.9,z*0.9);return Math.max(floor,yB-2.4*smooth(wb,wb+0.9,e));};
+    /* sea stacks, skerries and arches round the whole coast (none off the long beach) */
+    const STACKS=[],ARCH=[];{let s_=4242;const h=()=>{s_=(Math.imul(s_,1664525)+1013904223)>>>0;return s_/4294967296;};
+      for(let i=0;i<70;i++){const a=h()*6.283-Math.PI;if(beachW(a)>0.2)continue;const R_=footR(a)+3+h()*13;STACKS.push({x:Math.cos(a)*R_,z:Math.sin(a)*R_,r:1.1+h()*1.8,top:SEA+2.8+h()*(h()<0.3?12:8),k:'stack'});}
+      for(let i=0;i<180;i++){const a=h()*6.283-Math.PI;if(beachW(a)>0.25)continue;const R_=footR(a)+0.3+h()*3.2;STACKS.push({x:Math.cos(a)*R_,z:Math.sin(a)*R_,r:0.5+h()*0.7,top:SEA+0.2+h()*1.3,k:'skerry'});}
+      for(const[a]of HEADS.slice(0,3)){const R0=Rb(a)-CWc-0.3,R1=footR(a)+6.5,ax=Math.cos(a)*R0,az=Math.sin(a)*R0;ARCH.push({A:[ax,az],B:[Math.cos(a)*R1,Math.sin(a)*R1],yA:0,yB:0,rA:0,rB:1.9,land:true,a});}
+      for(const b of[0.62,-1.85]){const Rb2=footR(b)+6.8,cx=Math.cos(b)*Rb2,cz=Math.sin(b)*Rb2,tx=-Math.sin(b),tz=Math.cos(b);ARCH.push({A:[cx-tx*3,cz-tz*3],B:[cx+tx*3,cz+tz*3],yA:SEA+7.1,yB:SEA+6.3,rA:1.7,rB:1.5,land:false});}
+      ARCH.forEach(A=>{if(A.rA)STACKS.push({x:A.A[0],z:A.A[1],r:A.rA,top:A.yA,k:'leg'});STACKS.push({x:A.B[0],z:A.B[1],r:A.rB,top:A.yB,k:'leg',arch:A});});}
+    const onStack=(x,z,m)=>{for(const S_ of STACKS)if(hyp(x-S_.x,z-S_.z)<S_.r*1.08+m)return true;for(const A of ARCH)if(A.land&&hyp(x-A.A[0],z-A.A[1])<1.3+m)return true;return false;};
     function rawH0(x,z){let h=base(x,z);const rd=roadD(x,z);const[f,g]=gorgeAt(x,z);
       if(rd<5&&f<0.02)h+=(low(x,z)*smooth(30,46,ew(x,z))-h)*(1-smooth(2.4,5,rd));
       h+=wmBump(x,z);if(g&&f>0)h+=(g.floor-h)*f;
       const rc=rimCh(x,z);if(rc){const[g2,u,v]=rc;h=Math.min(h,g2.top-0.55*(1-smooth(0.6,1.3,Math.abs(v)))*smooth(g2.L/2-0.4,g2.L/2+0.6,u)+0.0);}
-      const e=ew(x,z);if(e>WR-4)h+=(e-WR+4)*1.6;return h;}
+      return h;}
     const RIVS=[];
     const mkRiver=(pts,hw,pondR,startWL)=>{const R={pts,hw,pondR,S:[0]};for(let i=1;i<pts.length;i++)R.S.push(R.S[i-1]+hyp(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
       /* water level: follows the land downhill and never climbs; little drops become rapids */
@@ -721,41 +760,72 @@ if(MAP==='meadow'){
     const meander=(x0,z0,dx,dz,len,amp,seed)=>{const out=[];const l=hyp(dx,dz);dx/=l;dz/=l;for(let s_=0;s_<=len;s_+=3.5){const o=amp*Math.sin(s_*0.12+seed)+amp*0.5*Math.sin(s_*0.27+seed*2);out.push([x0+dx*s_-dz*o,z0+dz*s_+dx*o]);}return out;};
     GG.forEach((g,i)=>{const m0=[g.cx-g.ax*(g.L/2-5),g.cz-g.az*(g.L/2-5)],sd=i%2?1:-1,dx=-g.ax*0.45+(-g.az)*sd*0.9,dz=-g.az*0.45+g.ax*sd*0.9;
       const pts=meander(m0[0]-g.ax*3,m0[1]-g.az*3,dx,dz,26,2.2,i*1.7);pts.unshift(m0);while(pts.length>3&&ew(...pts[pts.length-1])<38)pts.pop();mkRiver(pts,1.25,3.6,g.wl);});
-    for(const[a,seed]of[[0.05,1],[3.0,4],[1.62,7]]){const x0=Math.cos(a)*91,z0=Math.sin(a)*91;mkRiver(meander(x0,z0,-x0,-z0,48,4,seed),1.5,4.5);}
+    for(const[a,seed]of[[0.05,1],[3.0,4],[1.62,7]]){const r0=Rlow(a)-24,x0=Math.cos(a)*r0,z0=Math.sin(a)*r0;mkRiver(meander(x0,z0,-x0,-z0,r0-43,4,seed),1.5,4.5);}   /* sources well inland of the cliffs */
     const riverAt=(x,z)=>{let best=null;for(const R of RIVS){const q=rQ(R,x,z);if(!q)continue;const dd=Math.min(q.d-R.hw,q.dp);if(!best||dd<best.dd)best={dd,q,R,pond:q.dp<q.d-R.hw};}return best;};
     function rawH(x,z){let h=rawH0(x,z);const r=riverAt(x,z);if(r&&r.dd<5.5){const wl=r.pond?r.q.wlEnd:r.q.wl,deep=roadD(x,z)<6?0.32:0.62,hw=r.pond?r.R.pondR:r.R.hw,dd=r.dd;
         const bed=dd<0?wl-0.08-deep*smooth(0,hw*0.8,-dd):wl+0.05+dd*0.45;if(bed<h)h=bed;}return h;}
-    const GH=new Float32Array(GN*GN);for(let j=0;j<GN;j++)for(let i=0;i<GN;i++)GH[j*GN+i]=rawH(-WS+i*GRES,-WS+j*GRES);
-    const gridH=(x,z)=>{const fx=clamp((x+WS)/GRES,0,GN-1.001),fz=clamp((z+WS)/GRES,0,GN-1.001),i=Math.floor(fx),j=Math.floor(fz),u=fx-i,v=fz-j,o=j*GN+i;
-      return GH[o]*(1-u)*(1-v)+GH[o+1]*u*(1-v)+GH[o+GN]*(1-u)*v+GH[o+GN+1]*u*v;};
+    /* bake: GT = the land as it would be without the sea, CDg = distance inland from the shore, GH = the ground with the coast cut in */
+    const NN=GN*GN,GH=new Float32Array(NN),GT=new Float32Array(NN),CDg=new Float32Array(NN);
+    for(let j=0;j<GN;j++)for(let i=0;i<GN;i++){const x=-GE+i*GRES,z=-GE+j*GRES,k=j*GN+i,d=coastD(x,z);CDg[k]=d;
+      if(d<0){GT[k]=SEA;GH[k]=cH(x,z,0,d);}else{const t=rawH(x,z);GT[k]=t;GH[k]=d<CZ?cH(x,z,t,d):t;}}
+    const bil=(A,x,z)=>{const fx=clamp((x+GE)/GRES,0,GN-1.001),fz=clamp((z+GE)/GRES,0,GN-1.001),i=Math.floor(fx),j=Math.floor(fz),u=fx-i,v=fz-j,o=j*GN+i;
+      return A[o]*(1-u)*(1-v)+A[o+1]*u*(1-v)+A[o+GN]*(1-u)*v+A[o+GN+1]*u*v;};
+    const gridH=(x,z)=>bil(GH,x,z),cdAt=(x,z)=>bil(CDg,x,z);
+    /* near the coast the height is worked out exactly (the cliffs are finer than the grid); elsewhere it is read from the grid */
+    const hAt=(x,z)=>{const d=cdAt(x,z);return d>CZ-1?gridH(x,z):cH(x,z,bil(GT,x,z));};
+    const SG=new Float32Array(NN);for(let j=1;j<GN-1;j++)for(let i=1;i<GN-1;i++){const k=j*GN+i;SG[k]=hyp(GH[k+1]-GH[k-1],GH[k+GN]-GH[k-GN])/(2*GRES);}
+    const slopeAt=(x,z)=>bil(SG,x,z),gradAt=(x,z)=>{const e=0.3;return [(hAt(x+e,z)-hAt(x-e,z))/(2*e),(hAt(x,z+e)-hAt(x,z-e))/(2*e)];};
+    /* distance over water to the nearest dry ground or rock (surf foam); stacks count as dry */
+    const SD=new Float32Array(NN);{const INF=1e4;for(let k=0;k<NN;k++)SD[k]=GH[k]>SEA-0.02||CDg[k]>2?0:INF;
+      for(const S_ of STACKS){const r=S_.r*1.05,i0=Math.floor((S_.x-r+GE)/GRES),i1=Math.ceil((S_.x+r+GE)/GRES),j0=Math.floor((S_.z-r+GE)/GRES),j1=Math.ceil((S_.z+r+GE)/GRES);
+        for(let j=Math.max(0,j0);j<=Math.min(GN-1,j1);j++)for(let i=Math.max(0,i0);i<=Math.min(GN-1,i1);i++)if(hyp(-GE+i*GRES-S_.x,-GE+j*GRES-S_.z)<r)SD[j*GN+i]=0;}
+      const d1=GRES,d2=GRES*1.4142;
+      for(let j=1;j<GN-1;j++)for(let i=1;i<GN-1;i++){const k=j*GN+i;SD[k]=Math.min(SD[k],SD[k-1]+d1,SD[k-GN]+d1,SD[k-GN-1]+d2,SD[k-GN+1]+d2);}
+      for(let j=GN-2;j>0;j--)for(let i=GN-2;i>0;i--){const k=j*GN+i;SD[k]=Math.min(SD[k],SD[k+1]+d1,SD[k+GN]+d1,SD[k+GN+1]+d2,SD[k+GN-1]+d2);}}
+    const shoreD=(x,z)=>bil(SD,x,z);
+    for(const A of ARCH)if(A.land){A.yA=hAt(A.A[0],A.A[1])-0.15;A.yB=Math.min(A.yA-1.5,SEA+7.9);STACKS.find(S_=>S_.arch===A).top=A.yB;}
+    const SLOPE_MAX=1.1;
     /* bridges where the ring road crosses each gorge */
     GG.forEach(g=>{g.bh=g.Wt/2+3;const a=gridH(g.cx-g.az*g.bh,g.cz+g.ax*g.bh),b=gridH(g.cx+g.az*g.bh,g.cz-g.ax*g.bh);g.deck=Math.max(a,b)+0.12;});
     const wBridge=(x,z)=>{for(const g of GG){const[u,v]=gLoc(g,x,z);if(Math.abs(u)<2.1&&Math.abs(v)<g.bh)return g;}return null;};
-    const wWater=(x,z)=>{const r=riverAt(x,z);if(r&&r.dd<0)return r.pond?r.q.wlEnd:r.q.wl;for(const g of GG){const[u,v]=gLoc(g,x,z);if(u>-g.L/2+6&&u<g.L/2&&Math.abs(v)<g.Wb/2-0.25&&gridH(x,z)<g.wl)return g.wl;
+    const wWater=(x,z)=>{if(cdAt(x,z)<1&&gridH(x,z)<SEA-0.05)return SEA;const r=riverAt(x,z);if(r&&r.dd<0)return r.pond?r.q.wlEnd:r.q.wl;for(const g of GG){const[u,v]=gLoc(g,x,z);if(u>-g.L/2+6&&u<g.L/2&&Math.abs(v)<g.Wb/2-0.25&&gridH(x,z)<g.wl)return g.wl;
       if(u>=g.L/2-0.4&&u<g.L/2+16&&Math.abs(v)<0.9)return g.top-0.18;if(hyp(u-g.L/2-16.5,v)<1.9)return g.top-0.18;}return null;};
     const WK=new Uint8Array(GN*GN);
     for(let j=1;j<GN-1;j++)for(let i=1;i<GN-1;i++){const o=j*GN+i,sl=Math.max(Math.abs(GH[o+1]-GH[o-1]),Math.abs(GH[o+GN]-GH[o-GN]))/(2*GRES);
-      const x=-WS+i*GRES,z=-WS+j*GRES;WK[o]=(sl<1.05&&ew(x,z)<WR&&!WMT.some(m=>hyp(x-m.x,z-m.z)<m.r*0.8))?1:0;}
-    const walkW=(x,z,lv)=>{if(lv!=='low'&&wBridge(x,z))return true;const i=Math.round((x+WS)/GRES),j=Math.round((z+WS)/GRES);if(i<1||j<1||i>=GN-1||j>=GN-1)return false;return WK[j*GN+i]===1;};
-    const hW=(x,z,lv)=>{const g=lv!=='low'&&wBridge(x,z);return g?g.deck:gridH(x,z);};
+      const x=-GE+i*GRES,z=-GE+j*GRES;WK[o]=(sl<1.05&&GH[o]>SEA-0.55&&!WMT.some(m=>hyp(x-m.x,z-m.z)<m.r*0.8))?1:0;}
+    for(const S_ of STACKS){const r=S_.r*1.08+0.25;for(let j=Math.floor((S_.z-r+GE)/GRES);j<=Math.ceil((S_.z+r+GE)/GRES);j++)for(let i=Math.floor((S_.x-r+GE)/GRES);i<=Math.ceil((S_.x+r+GE)/GRES);i++)
+      if(i>0&&j>0&&i<GN&&j<GN&&hyp(-GE+i*GRES-S_.x,-GE+j*GRES-S_.z)<r)WK[j*GN+i]=0;}
+    const walkW=(x,z,lv)=>{if(lv!=='low'&&wBridge(x,z))return true;const i=Math.round((x+GE)/GRES),j=Math.round((z+GE)/GRES);if(i<1||j<1||i>=GN-1||j>=GN-1)return false;return WK[j*GN+i]===1;};
+    const hW=(x,z,lv)=>{const g=lv!=='low'&&wBridge(x,z);return g?g.deck:hAt(x,z);};
     const bl=(x,z)=>smooth(22,30,ew(x,z));
     const H0={walkable,heightAt,waterAt,inWater,gh,terrainY,groundCol};
     heightAt=(x,z,lv)=>{const t=bl(x,z);if(t<=0)return H0.heightAt(x,z,lv);const w=hW(x,z,lv);return t>=1?w:H0.heightAt(x,z,lv)*(1-t)+w*t;};
-    gh=(x,z)=>{const t=bl(x,z);if(t<=0)return H0.gh(x,z);const w=gridH(x,z);return t>=1?w:H0.gh(x,z)*(1-t)+w*t;};
+    gh=(x,z)=>{const t=bl(x,z);if(t<=0)return H0.gh(x,z);const w=hAt(x,z);return t>=1?w:H0.gh(x,z)*(1-t)+w*t;};
     terrainY=(x,z,j)=>{const t=bl(x,z);if(t<=0)return H0.terrainY(x,z,j);return H0.terrainY(x,z,j)*(1-t)+gridH(x,z)*t;};
     walkable=(x,z,lim,lv)=>{const e=ew(x,z);if(e<22)return H0.walkable(x,z,999,lv);if(e<30)return H0.walkable(x,z,999,lv)&&walkW(x,z,lv);return walkW(x,z,lv);};
     inWater=(x,z)=>ew(x,z)<26?H0.inWater(x,z):wWater(x,z)!==null;
     waterAt=(x,z)=>ew(x,z)<26?H0.waterAt(x,z):wWater(x,z);
+    /* the coast's colours, as on the bench: sand and wet rock at the waterline, banded cliffs, lush slopes, golden grass on the brink */
+    const cCol=(x,y,z,ny,n,d)=>{const a=Math.atan2(z,x),b=beachW(a);
+      if(y<SEA+1.25&&ny>0.72){if(b>0.3)return y<SEA+0.3?P.tent:(n>0.25?P.birch:P.tent);return y<SEA+0.25?P.earth:(n>0.35?P.shale:P.earth);}
+      if(y<SEA+0.3)return P.earth;
+      if(ny<0.62){const s=Math.sin(y*1.7+n*0.35);if(ny>0.45&&n>0.2)return P.fern;if(s>0.8&&y<SEA+6)return P.rust;return s<-0.45?P.earth:P.shale;}
+      if(y<SEA+2.6&&b>0.3)return n>0.1?P.birch:P.sage;
+      if(ny<0.85)return n>0.45?P.pine:n>-0.2?P.fern:P.sage;
+      if(d>CWc&&d<CWc+0.9&&cliffK(x,z)>0.6)return n>0.1?P.birch:P.sage;
+      return null;};
     const worldCol=(x,y,z,ny,n)=>{const rd=roadD(x,z),[f]=gorgeAt(x,z),m=vn(x/9,z/9),au=vn(x/40+9,z/40-4);
       const band=[P.shale,P.tent,P.shale,P.earth,P.sage][((Math.floor((y+40+m*0.4)/1.25))%5+5)%5];
-      if(f>0.02&&ny<0.8)return band;if(f>0.02&&f<0.95)return m>0.1?P.fern:P.sage;if(f>0.9)return m>0.35?P.shale:m>-0.2?P.sage:P.fern;if(ny<0.62)return band;
+      if(f>0.02&&ny<0.8)return band;if(f>0.02&&f<0.95)return m>0.1?P.fern:P.sage;if(f>0.9)return m>0.35?P.shale:m>-0.2?P.sage:P.fern;
+      {const d=cdAt(x,z);if(d<CZ-6){const c=cCol(x,y,z,ny,n,d);if(c!==null)return c;}}
+      if(ny<0.62)return band;
       {const r=riverAt(x,z);if(r&&r.dd<0.9)return r.dd<0?P.shale:m>0?P.sage:P.earth;}
       if(rd<2.1)return m>0.55?P.sage:P.earth;if(rd<3)return m>0?P.sage:P.earth;
-      if(ew(x,z)>WR-5)return n>0?P.shale:P.fern;
       if(au>0.35)return m>0.35?P.rust:m>-0.2?P.birch:P.sage;
       return m>0.5?P.pine:m>0.05?P.fern:m>-0.45?P.sage:P.birch;};
     groundCol=(cx,cy,cz,ny,n)=>bl(cx,cz)>0.5?worldCol(cx,cy,cz,ny,n):H0.groundCol(cx,cy,cz,ny,n);
-    WORLD_={WS,WR,GG,WMT,RING,SPOKE,roadD,gorgeAt,gLoc,wBridge,gridH,worldCol,vn,hsh,ew,bl,rimCh,walkW,RIVS,rAt,rWL,riverAt};
+    const C={SEA,CWc,CZ,GE,Rb,Rlow,rag,coastD,cdAt,cliffK,beachW,benchW,slopeW,footR,cH,hAt,slopeAt,gradAt,shoreD,STACKS,ARCH,onStack,SLOPE_MAX,BEACH,HEADS,SLB,cCol,gau,Rm:100,BAND:7};
+    WORLD_={WS,WR,GE,GG,WMT,RING,SPOKE,roadD,gorgeAt,gLoc,wBridge,gridH,hAt,cdAt,worldCol,vn,hsh,ew,bl,rimCh,walkW,RIVS,rAt,rWL,riverAt,C};
   }
 }else if(MAP==='gorge'){
   /* Canyon Gorge: rim is y=0, the canyon floor sits FD metres below */
@@ -1097,7 +1167,38 @@ if(WORLD){const W_=WORLD_,WS=W_.WS;let ws=987654321;const wr=()=>{ws=(Math.imul(
     const ax=pa[i+3]-pa[i],ay=pa[i+4]-pa[i+1],az=pa[i+5]-pa[i+2],bx=pa[i+6]-pa[i],by=pa[i+7]-pa[i+1],bz=pa[i+8]-pa[i+2];let fx=ay*bz-az*by,fy=az*bx-ax*bz,fz=ax*by-ay*bx;const fl=hyp(fx,fy,fz)||1;fx/=fl;fy/=fl;fz/=fl;if(fy<0){fx=-fx;fy=-fy;fz=-fz;}
     col.setHex(W_.worldCol(cx,cy,cz,fy,noise(cx,cz)));const k=0.92+wr()*0.08;
     for(let j=0;j<9;j+=3){ca[i+j]=0.5*ca[i+j]+0.5*col.r*k;ca[i+j+1]=0.5*ca[i+j+1]+0.5*col.g*k;ca[i+j+2]=0.5*ca[i+j+2]+0.5*col.b*k;let x=0.5*na[i+j]+0.5*fx,y=0.5*na[i+j+1]+0.5*fy,z=0.5*na[i+j+2]+0.5*fz;const l=hyp(x,y,z)||1;na[i+j]=x/l;na[i+j+1]=y/l;na[i+j+2]=z/l;}}
-  const gm=new THREE.Mesh(gnd,new THREE.MeshPhongMaterial({vertexColors:true,shininess:0,specular:0}));gm.receiveShadow=true;gm.castShadow=true;scene.add(gm);
+  /* the coast band below takes over within a few metres of the shore and out to sea: drop those triangles here */
+  {const C=W_.C,keep=[];for(let i=0;i<pa.length;i+=9){if(Math.max(C.cdAt(pa[i],pa[i+2]),C.cdAt(pa[i+3],pa[i+5]),C.cdAt(pa[i+6],pa[i+8]))>=C.BAND-1)keep.push(i);}
+    const f=a=>{const o=new Float32Array(keep.length*9);keep.forEach((i,n)=>o.set(a.subarray(i,i+9),n*9));return o;};
+    for(const k of['position','color','normal'])gnd.setAttribute(k,new THREE.BufferAttribute(f(gnd.attributes[k].array),3));}
+  const groundMat=new THREE.MeshPhongMaterial({vertexColors:true,shininess:0,specular:0});
+  const gm=new THREE.Mesh(gnd,groundMat);gm.receiveShadow=true;gm.castShadow=true;scene.add(gm);
+  /* the coast band: a fine polar strip from a few metres inland of the shore out past the shelf and beach, so the stepped cliffs
+     keep their shape; cut into sectors that are culled like the undergrowth chunks */
+  const band=[];{const C=W_.C,SEA=C.SEA,STEP=isTouch?0.6:0.42,NA=Math.round(2*Math.PI*104/STEP),SEC=isTouch?40:56;
+    const kAt=(a,r)=>{const dR=(C.Rlow(a+0.002)-C.Rlow(a-0.002))/0.004;return Math.sqrt(1+(dR/Math.max(r,9))**2);};
+    /* rows: inland part in metres of shore distance (fine where the cliff is), seaward part as a fraction of the shelf/beach width */
+    const DIN=[];for(let d=C.BAND+2.5;d>4.2;d-=0.6)DIN.push(d);for(let d=4.2;d>-1.2;d-=isTouch?0.36:0.27)DIN.push(d);
+    const NOUT=isTouch?14:20,NR=DIN.length+NOUT;
+    const col=new THREE.Color();
+    for(let s0=0;s0<NA;s0+=SEC){const nc=Math.min(SEC,NA-s0)+1,pos=new Float32Array(nc*NR*3);let mx=0,mz=0;
+      for(let c=0;c<nc;c++){const a=-Math.PI+((s0+c)%NA)/NA*2*Math.PI,ca=Math.cos(a),sa=Math.sin(a),R=C.Rb(a),b=C.beachW(a),em=C.benchW(a)*(1-b)+12*b+1.8;
+        for(let r=0;r<NR;r++){const d=r<DIN.length?DIN[r]:-1.2-(em-1.2)*Math.pow((r-DIN.length+1)/NOUT,1.25),rr_=R-d*kAt(a,R-d),x=ca*rr_,z=sa*rr_,o=(c*NR+r)*3;
+          pos[o]=x;pos[o+1]=C.hAt(x,z);pos[o+2]=z;if(c===(nc>>1)&&r===0){mx=x;mz=z;}}}
+      const idx=[];for(let c=0;c<nc-1;c++)for(let r=0;r<NR-1;r++){const A=c*NR+r,B=(c+1)*NR+r;idx.push(A,A+1,B,B,A+1,B+1);}
+      const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setIndex(idx);g.computeVertexNormals();
+      {const A=new THREE.Vector3().fromArray(pos,idx[0]*3),B_=new THREE.Vector3().fromArray(pos,idx[1]*3),Cc=new THREE.Vector3().fromArray(pos,idx[2]*3);
+        if(B_.sub(A).cross(Cc.sub(A)).y<0){for(let q=0;q<idx.length;q+=3){const t=idx[q+1];idx[q+1]=idx[q+2];idx[q+2]=t;}g.setIndex(idx);g.computeVertexNormals();}}
+      const nrm=g.attributes.normal.array,cnt=nc*NR;let cA=new Float32Array(cnt*3);
+      for(let i=0;i<cnt;i++){const x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2];col.setHex(W_.worldCol(x,y,z,nrm[i*3+1],noise(x,z)));const k=0.94+0.06*(0.5+0.5*Math.sin(x*2.1+z*1.3)*Math.cos(z*1.7-x*0.6));cA[i*3]=col.r*k;cA[i*3+1]=col.g*k;cA[i*3+2]=col.b*k;}
+      for(let pass=0;pass<2;pass++){const cB=new Float32Array(cnt*3);for(let c=0;c<nc;c++)for(let r=0;r<NR;r++){let sr=0,sg=0,sb=0,n=0;for(let dc=-1;dc<=1;dc++)for(let dr=-1;dr<=1;dr++){const a=c+dc,b=r+dr;if(a<0||b<0||a>=nc||b>=NR)continue;const w=(dc||dr)?1:2,o=(a*NR+b)*3;sr+=cA[o]*w;sg+=cA[o+1]*w;sb+=cA[o+2]*w;n+=w;}const o=(c*NR+r)*3;cB[o]=sr/n;cB[o+1]=sg/n;cB[o+2]=sb/n;}cA=cB;}
+      g.setAttribute('color',new THREE.BufferAttribute(cA,3));
+      const gn=g.toNonIndexed(),p2=gn.attributes.position.array,c2=gn.attributes.color.array,n2=gn.attributes.normal.array;
+      for(let i=0;i<p2.length;i+=9){const cx=(p2[i]+p2[i+3]+p2[i+6])/3,cy=(p2[i+1]+p2[i+4]+p2[i+7])/3,cz=(p2[i+2]+p2[i+5]+p2[i+8])/3;
+        const ax=p2[i+3]-p2[i],ay=p2[i+4]-p2[i+1],az=p2[i+5]-p2[i+2],bx=p2[i+6]-p2[i],by=p2[i+7]-p2[i+1],bz=p2[i+8]-p2[i+2];let fx=ay*bz-az*by,fy=az*bx-ax*bz,fz=ax*by-ay*bx;const fl=hyp(fx,fy,fz)||1;fx/=fl;fy/=fl;fz/=fl;if(fy<0){fx=-fx;fy=-fy;fz=-fz;}
+        col.setHex(W_.worldCol(cx,cy,cz,fy,noise(cx,cz)));const k=0.92+wr()*0.08;
+        for(let j=0;j<9;j+=3){c2[i+j]=0.5*c2[i+j]+0.5*col.r*k;c2[i+j+1]=0.5*c2[i+j+1]+0.5*col.g*k;c2[i+j+2]=0.5*c2[i+j+2]+0.5*col.b*k;let x=0.5*n2[i+j]+0.5*fx,y=0.5*n2[i+j+1]+0.5*fy,z=0.5*n2[i+j+2]+0.5*fz;const l=hyp(x,y,z)||1;n2[i+j]=x/l;n2[i+j+1]=y/l;n2[i+j+2]=z/l;}}
+      gn.computeBoundingSphere();const me=new THREE.Mesh(gn,groundMat);me.receiveShadow=true;me.castShadow=true;me.userData={cx:mx,cz:mz};scene.add(me);band.push(me);}}
   /* bridges over the gorges: wide plank decks the van can cross, with rails and posts down into the canyon */
   const B=new Merger();
   for(const g of W_.GG){const ry=Math.atan2(-g.az,g.ax),P_=(u,v)=>[g.cx+g.ax*u-g.az*v,g.cz+g.az*u+g.ax*v];
@@ -1107,7 +1208,7 @@ if(WORLD){const W_=WORLD_,WS=W_.WS;let ws=987654321;const wr=()=>{ws=(Math.imul(
       for(const v of[-g.Wt/4,g.Wt/4]){const[x3,z3]=P_(sd*1.6,v),lo=W_.gridH(x3,z3);if(lo<g.deck-0.6)B.add(G.box,P.earth,M(x3,(g.deck-0.3+lo)/2,z3,ry,0.32,g.deck-0.3-lo,0.32));}}}
   /* boulders: scattered, more on gorge rims; solid for the van and the hiker */
   const wcol=[];
-  for(let i=0,n=0;i<4000&&n<(isTouch?160:260);i++){const x=wrr(-WS+6,WS-6),z=wrr(-WS+6,WS-6);if(W_.ew(x,z)<34||W_.roadD(x,z)<4||W_.wBridge(x,z))continue;
+  for(let i=0,n=0;i<4000&&n<(isTouch?160:260);i++){const x=wrr(-WS+6,WS-6),z=wrr(-WS+6,WS-6);if(W_.ew(x,z)<34||W_.cdAt(x,z)<9||W_.roadD(x,z)<4||W_.wBridge(x,z))continue;
     const[f]=W_.gorgeAt(x,z);if(f>0.05&&f<0.95&&wr()<0.6)continue;const r=wrr(0.3,1.3)*(wr()<0.15?1.8:1),y=W_.gridH(x,z);B.add(G.dod,P.shale,M(x,y+r*0.2,z,wr()*6,r,r*wrr(.55,.9),r*wrr(.8,1.15)));if(r>0.5)wcol.push([x,z,r*0.85]);n++;}
   /* gorges: rows of rim boulders, rocks on the strata ledges, ferns and logs on the floor, a ring of stones round each plunge pool */
   for(const g of W_.GG){const P_=(u,v)=>[g.cx+g.ax*u-g.az*v,g.cz+g.az*u+g.ax*v];
@@ -1137,7 +1238,7 @@ if(WORLD){const W_=WORLD_,WS=W_.WS;let ws=987654321;const wr=()=>{ws=(Math.imul(
   /* undergrowth everywhere: ferns, bushes, wildflowers, fallen logs and stumps, merged per chunk */
   const UG=new Map(),CHU=25;const ugM=(x,z)=>{const k=Math.floor((x+WS)/CHU)*100+Math.floor((z+WS)/CHU);if(!UG.has(k))UG.set(k,{m:new Merger(),cx:-WS+(Math.floor((x+WS)/CHU)+0.5)*CHU,cz:-WS+(Math.floor((z+WS)/CHU)+0.5)*CHU});return UG.get(k).m;};
   const nUG=isTouch?3600:7000;
-  for(let i=0,n=0;i<nUG*3&&n<nUG;i++){const x=wrr(-WS+4,WS-4),z=wrr(-WS+4,WS-4),e=W_.ew(x,z);if(e<33||e>W_.WR-3||W_.roadD(x,z)<2.6||W_.wBridge(x,z))continue;
+  for(let i=0,n=0;i<nUG*3&&n<nUG;i++){const x=wrr(-WS+4,WS-4),z=wrr(-WS+4,WS-4),e=W_.ew(x,z);if(e<33||W_.cdAt(x,z)<8||W_.roadD(x,z)<2.6||W_.wBridge(x,z))continue;
     const[f]=W_.gorgeAt(x,z);if(f>0.02&&f<0.9)continue;if(!W_.walkW(x,z,'rim')||waterAt(x,z)!==null)continue;
     const fm=0.8*W_.vn(x/26+3,z/26+1)+0.3*W_.vn(x/9,z/9),y=W_.gridH(x,z),r=wr(),m=ugM(x,z);n++;
     if(fm>0.05&&r<0.55){const c=wr()<0.75?P.fern:P.pine;for(let k=0;k<4;k++){const a=k*1.57+wr();m.add(G.cone4,c,M(x+Math.sin(a)*0.16,y+0.2,z+Math.cos(a)*0.16,a,0.17,0.48,0.05,Math.cos(a)*0.6,-Math.sin(a)*0.6));}}
@@ -1146,7 +1247,7 @@ if(WORLD){const W_=WORLD_,WS=W_.WS;let ws=987654321;const wr=()=>{ws=(Math.imul(
     else if(r<0.96&&fm>-0.1){const L=wrr(1.4,3),a=wr()*6.28;m.add(G.cyl6,P.earth,M(x,y+0.16,z,a,0.17,L,0.17,0,Math.PI/2));if(L>2.2)addC(x,z,0.4,'rock');}
     else{m.add(G.cyl6,P.earth,M(x,y+0.18,z,wr()*6,0.24,0.36,0.24));m.add(G.cyl6,P.tent,M(x,y+0.37,z,0,0.22,0.02,0.22));}}
   const ugMeshes=[];for(const c of UG.values()){const me=new THREE.Mesh(c.m.build(),matV);me.receiveShadow=true;me.userData={cx:c.cx,cz:c.cz};scene.add(me);ugMeshes.push(me);}
-  WORLDM={wr,wrr,addC,solidAt,nearTree,clearC:(x,z,Rr)=>{const i0=Math.floor((x-Rr)/4),i1=Math.floor((x+Rr)/4),j0=Math.floor((z-Rr)/4),j1=Math.floor((z+Rr)/4);for(let a=i0;a<=i1;a++)for(let b=j0;b<=j1;b++){const L=CG.get(key(a,b));if(!L)continue;for(const c of L)if((x-c[0])**2+(z-c[1])**2<Rr*Rr)c[2]=0;}},mtnPaper:mp,ground:gm,ug:ugMeshes};
+  WORLDM={wr,wrr,addC,solidAt,nearTree,clearC:(x,z,Rr)=>{const i0=Math.floor((x-Rr)/4),i1=Math.floor((x+Rr)/4),j0=Math.floor((z-Rr)/4),j1=Math.floor((z+Rr)/4);for(let a=i0;a<=i1;a++)for(let b=j0;b<=j1;b++){const L=CG.get(key(a,b));if(!L)continue;for(const c of L)if((x-c[0])**2+(z-c[1])**2<Rr*Rr)c[2]=0;}},mtnPaper:mp,ground:gm,ug:ugMeshes,band};
 }
 
 /* ---------- water ---------- */
@@ -1382,7 +1483,7 @@ if(WORLD){const W_=WORLD_,{wr,wrr}=WORLDM,WS=W_.WS,CH=25;
   const VAR=PINES.map((t,i)=>({t,pine:true,i})).concat(DECID.map((t,i)=>({t,pine:false,i:PINES.length+i})));
   const items=[];
   for(let z=-WS+3;z<WS-3;z+=1.9)for(let x=-WS+3;x<WS-3;x+=1.9){const px=x+wrr(-0.85,0.85),pz=z+wrr(-0.85,0.85),e=W_.ew(px,pz);
-    if(e<33.5||e>W_.WR-2.5)continue;const fm=0.8*W_.vn(px/26+3,pz/26+1)+0.3*W_.vn(px/9,pz/9);
+    if(e<33.5||W_.cdAt(px,pz)<10)continue;const fm=0.8*W_.vn(px/26+3,pz/26+1)+0.3*W_.vn(px/9,pz/9);
     const nearG=W_.GG.some(g=>{const[u,v]=W_.gLoc(g,px,pz);return Math.abs(u)<g.L/2+4&&Math.abs(v)<g.Wt/2+9;});
     if(wr()>(fm>0.08?0.72+0.25*smooth(0.08,0.5,fm):nearG?0.35:0.04))continue;
     {const r_=W_.riverAt(px,pz);if(r_&&r_.dd<1.4)continue;}
@@ -4128,7 +4229,7 @@ function exitCar(){const sx=Math.sin(car.rot),cz=Math.cos(car.rot);
   toast('No room to get out here.',2);}
 function carBlocked(x,z,rot){const sx=Math.sin(rot),cz=Math.cos(rot);
   for(const[lx,lz]of[[0.85,1.95],[-0.85,1.95],[0.85,-1.95],[-0.85,-1.95],[0,2.05],[0,-2.05],[0.9,0],[-0.9,0]]){const px_=x+cz*lx+sx*lz,pz_=z-sx*lx+cz*lz;
-    if(WORLD_?Math.max(Math.abs(px_),Math.abs(pz_))>WORLD_.WR-1.5||WORLD_.WMT.some(m=>hyp(px_-m.x,pz_-m.z)<m.r*0.75):Math.abs(px_)>LIM||Math.abs(pz_)>LIM)return true;
+    if(WORLD_?WORLD_.cdAt(px_,pz_)<1.2||WORLD_.WMT.some(m=>hyp(px_-m.x,pz_-m.z)<m.r*0.75):Math.abs(px_)>LIM||Math.abs(pz_)>LIM)return true;
     {const w=waterAt(px_,pz_);if(w!==null&&!onBridge(px_,pz_)&&!(WORLD_&&WORLD_.wBridge(px_,pz_))&&w-heightAt(px_,pz_,'low')>1.05)return true;}
     if(WORLDM&&WORLDM.solidAt(px_,pz_,0.05,true))return true;if(cabinHit(px_,pz_,0.1,car.y))return true;
     for(const c of colliders){if(car.cols.includes(c))continue;const dx=px_-c.x,dz=pz_-c.z;if(dx*dx+dz*dz<c.r*c.r)return true;}
@@ -5002,7 +5103,8 @@ function visuals(dt){
   camera.lookAt(camT);
   if(WORLD&&(wCullT-=dt)<=0){wCullT=0.35;const R2=(owlCam.k>0.1?95:72)**2,cx_=camT.x,cz_=camT.z;
     if(WTREES)for(const m of WTREES.meshes){const d=(m.position.x-cx_)**2+(m.position.z-cz_)**2;m.visible=d<R2;}
-    if(WORLDM)for(const m of WORLDM.ug){const d=(m.userData.cx-cx_)**2+(m.userData.cz-cz_)**2;m.visible=d<R2*0.7;}}
+    if(WORLDM){for(const m of WORLDM.ug){const d=(m.userData.cx-cx_)**2+(m.userData.cz-cz_)**2;m.visible=d<R2*0.7;}
+      for(const m of WORLDM.band){const d=(m.userData.cx-cx_)**2+(m.userData.cz-cz_)**2;m.visible=d<R2*1.3;}}}
   if(WTREES){camera.updateMatrixWorld();_dv.set(player.x,player.y+0.9,player.z).project(camera);DITHU.uPS.value.set((_dv.x*0.5+0.5)*rt.width,(_dv.y*0.5+0.5)*rt.height);DITHU.uPZ.value=_dv.z*0.5+0.5;
     DITHU.uPR.value=1.9*camera.projectionMatrix.elements[5]*rt.height*0.5/Math.max(4,camera.position.distanceTo(player.g.position));}
   /* owl's-eye view: blend from the follow camera to the owl's head, wide lens */
@@ -5039,7 +5141,7 @@ function renderReflection(){const h=WATER_Y,c=camera;
   _rf.set(0,0,-1).applyQuaternion(c.quaternion);reflCam.lookAt(c.position.x+_rf.x*10,2*h-(c.position.y+_rf.y*10),c.position.z+_rf.z*10);
   reflCam.updateMatrixWorld();reflCam.matrixWorldInverse.copy(reflCam.matrixWorld).invert();
   WU.tMat.value.set(0.5,0,0,0.5,0,0.5,0,0.5,0,0,0.5,0.5,0,0,0,1).multiply(reflCam.projectionMatrix).multiply(reflCam.matrixWorldInverse);
-  const hide=REFL_HIDE||(REFL_HIDE=[water.mesh,OCM&&OCM.sea,ripG,glints.pts,flies.pts,foam&&foam.pts,WORLDM&&WORLDM.water,WORLDM&&WORLDM.ground,WORLDM&&WORLDM.mtnPaper,...(WTREES?WTREES.meshes:[]),...(WORLDM?WORLDM.ug:[])].filter(Boolean)),vis_=hide.map(o=>o.visible);hide.forEach(o=>o.visible=false);
+  const hide=REFL_HIDE||(REFL_HIDE=[water.mesh,OCM&&OCM.sea,ripG,glints.pts,flies.pts,foam&&foam.pts,WORLDM&&WORLDM.water,WORLDM&&WORLDM.ground,WORLDM&&WORLDM.mtnPaper,...(WTREES?WTREES.meshes:[]),...(WORLDM?WORLDM.ug:[]),...(WORLDM?WORLDM.band:[])].filter(Boolean)),vis_=hide.map(o=>o.visible);hide.forEach(o=>o.visible=false);
   const au=renderer.shadowMap.autoUpdate;renderer.shadowMap.autoUpdate=false;renderer.clippingPlanes=[clipPlane];
   renderer.setRenderTarget(reflRT);renderer.render(scene,reflCam);
   renderer.clippingPlanes=[];renderer.shadowMap.autoUpdate=au;hide.forEach((o,i)=>o.visible=vis_[i]);}
