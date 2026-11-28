@@ -4289,25 +4289,25 @@ function carBlocked(x,z,rot){const sx=Math.sin(rot),cz=Math.cos(rot);
     {const w=waterAt(px_,pz_);if(w!==null&&!onBridge(px_,pz_)&&!(WORLD_&&WORLD_.wBridge(px_,pz_))&&w-heightAt(px_,pz_,'low')>1.05)return true;}
     if(WORLDM&&WORLDM.solidAt(px_,pz_,0.05,true))return true;if(cabinHit(px_,pz_,0.1,car.y))return true;
     for(const c of colliders){if(car.cols.includes(c))continue;const dx=px_-c.x,dz=pz_-c.z;if(dx*dx+dz*dz<c.r*c.r)return true;}
-    for(const tr of trees){if(tr.state!=='up')continue;const dx=px_-tr.x,dz=pz_-tr.z;const tr_=0.26+tr.s*0.04;if(dx*dx+dz*dz<tr_*tr_)return true;}}
+    for(const tr of trees){if(tr.state!=='up')continue;const dx=px_-tr.x,dz=pz_-tr.z;const tr_=0.2+tr.s*0.03;if(dx*dx+dz*dz<tr_*tr_)return true;}}
   return false;}
 function driveTick(dt){let fwd=keys.up,back=keys.down,stI=(keys.left?1:0)-(keys.right?1:0),thr=1;const boost=keys.run||runHeld;
-  /* touch: point the stick where you want to go (as you see it on screen). The van steers toward it, the push sets the throttle;
-     pointing behind the van brakes, then backs up toward it */
-  {const jm=hyp(joy.x,joy.y);if(jm>0.25){const yw=camCur.y*Math.PI/180,c=Math.cos(yw),sn=Math.sin(yw),wx=joy.x*c+joy.y*sn,wz=-joy.x*sn+joy.y*c,hd=Math.atan2(wx,wz);
-    const wrap=a=>((a+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI,d=wrap(hd-car.rot);thr=Math.min(1,jm);
-    if(Math.abs(d)<(car.v>1.5?2.5:2.0)){fwd=true;back=false;stI=clamp(d*1.8,-1,1);}
-    else{fwd=false;back=true;stI=-clamp(wrap(hd-car.rot-Math.PI)*1.8,-1,1);}}}
+  /* touch stick, the same whatever the camera does: up drives forward, down reverses, sideways steers; how far you push sets the throttle */
+  if(hyp(joy.x,joy.y)>0.2){if(joy.y<-0.25){fwd=true;thr=Math.min(1,-joy.y*1.25);}else if(joy.y>0.25){back=true;thr=Math.min(1,joy.y*1.25);}
+    if(Math.abs(joy.x)>0.12)stI-=clamp((joy.x-Math.sign(joy.x)*0.12)/0.7,-1,1);}
   car.inF=fwd;car.inB=back;
   const v0=car.v;
-  if(fwd)car.v+=(car.v<0?9:4.2*(0.35+0.65*thr))*dt;else if(back)car.v-=(car.v>0?9:3.2)*dt;else car.v-=Math.sign(car.v)*Math.min(Math.abs(car.v),2.4*dt);
-  {const climb=clamp(-(car.tp||0)*Math.sign(car.v)*1.4,0,0.6);car.v=clamp(car.v,-3.2*(1-climb*0.5),(boost?10:6.5)*(waterAt(car.x,car.z)!==null?0.8:1)*(1-climb));}
-  car.steer+=(clamp(stI,-1,1)*0.55-car.steer)*Math.min(1,dt*5);
+  if(fwd)car.v+=(car.v<0?9:4.2*(0.35+0.65*thr))*dt;else if(back)car.v-=(car.v>0?9:3.2*(0.35+0.65*thr))*dt;else car.v-=Math.sign(car.v)*Math.min(Math.abs(car.v),2.4*dt);
+  {const climb=clamp(-(car.tp||0)*Math.sign(car.v)*1.0,0,0.5);car.v=clamp(car.v,-3.2*(1-climb*0.5),(boost?10:6.5)*(waterAt(car.x,car.z)!==null?0.8:1)*(1-climb));}
+  car.steer+=(clamp(stI,-1,1)*(0.55+0.2*(1-smooth(2,6,Math.abs(car.v))))-car.steer)*Math.min(1,dt*5);   /* tighter turns when slow */
   const yaw=car.v/2.7*Math.tan(car.steer),nr=car.rot+yaw*dt,nx=car.x+Math.sin(nr)*car.v*dt,nz=car.z+Math.cos(nr)*car.v*dt;
-  if(carBlocked(nx,nz,nr)){if(Math.abs(car.v)>2.5){st.shake=Math.max(st.shake,0.2);}car.v=-car.v*0.25;
+  /* glance off: if the way ahead is blocked, try a slightly different heading before stopping */
+  let bl=carBlocked(nx,nz,nr),slid=false;
+  if(bl)for(const da of[0.18,-0.18,0.36,-0.36]){const r2=nr+da*(stI>=0?1:-1),x2=car.x+Math.sin(r2)*car.v*dt,z2=car.z+Math.cos(r2)*car.v*dt;if(!carBlocked(x2,z2,r2)){car.x=x2;car.z=z2;car.rot+=(r2-car.rot)*0.5;car.v*=0.96;bl=false;slid=true;break;}}
+  if(bl){if(Math.abs(car.v)>2.5){st.shake=Math.max(st.shake,0.2);}car.v=-car.v*0.25;
     /* still turn on the spot a little, so you can always steer out */
     if(Math.abs(stI)>0.1&&!carBlocked(car.x,car.z,car.rot+stI*0.9*dt))car.rot+=stI*0.9*dt;}
-  else{car.x=nx;car.z=nz;car.rot=nr;}
+  else if(!slid){car.x=nx;car.z=nz;car.rot=nr;}
   /* never stuck: if you hold the pedal and the van hasn't moved for a moment, it rocks free to the nearest clear spot */
   car.stk=((fwd||back)&&hyp(car.x-(car.lx||0),car.z-(car.lz||0))<dt*0.3)?(car.stk||0)+dt:0;car.lx=car.x;car.lz=car.z;
   if(car.stk>1.4){car.stk=0;const dir=fwd?1:-1;let done=false;
