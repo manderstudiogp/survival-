@@ -1153,6 +1153,77 @@ const colliders=[],edges=[];
   const gm=new THREE.Mesh(gnd,groundMat);gm.receiveShadow=true;gm.castShadow=MAP==='gorge'||!!OC;scene.add(gm);
 }
 /* ---------- Oregon Wilds: world ground, bridges, rocks and stand-in mountains ---------- */
+/* ---------- coast decoration, shared by the Ocean Test bench and Oregon Wilds ----------
+   O: the coast (OC, or WORLD_.C). Sx.add(geo,colour,matrix) takes every piece (one merger on the bench, the 25 m chunk under it in the world).
+   R: random numbers. o: {K: coast length scale (1 = bench), KB/BS: long-beach count and width scale, plants: how many, spot(): a random [x,z] to try,
+   skip(x,z): keep clear, coll(x,z,r): solid, stackTree(x,y,z): a bent tree on a tall stack, trails: stones along TRAILS} */
+function coastDeco(O,Sx,RN,o){const SEA=O.SEA,hA=O.hAt;
+  const dk=(c,k)=>(Math.round(((c>>16)&255)*k)<<16)|(Math.round(((c>>8)&255)*k)<<8)|Math.round((c&255)*k);
+  const ROCK=[P.shale,dk(P.shale,0.88),dk(P.shale,0.76)],WET=dk(P.earth,0.95),rc=y=>y<SEA+0.8?WET:ROCK[(RN()*3)|0];
+  const pick=a=>a[(RN()*a.length)|0],rr=(a,b)=>a+RN()*(b-a),K=o.K||1,KB=o.KB||1,BS=o.BS||1;
+  /* the cliff faces: a few faceted slabs set into the steep faces; talus along the bench edge */
+  for(let a=-Math.PI;a<Math.PI;a+=0.024/K){const R=O.Rb(a);
+    for(let k=0;k<2;k++){if(RN()<0.6)continue;const r_=R-rr(0.1,O.CWc),x=Math.cos(a)*r_,z=Math.sin(a)*r_;if(O.slopeAt(x,z)<1.6)continue;const y=hA(x,z),s=rr(0.3,0.62);
+      Sx.add(G.dod,rc(y),M(x,y,z,-a+rr(-.3,.3),s*0.55,s*rr(1.4,2.4),s*rr(0.9,1.3)));
+      if(y>SEA+1.5&&RN()<0.2)Sx.add(G.dod,P.fern,M(x,y+s*0.8,z,RN()*6,s*0.7,s*0.18,s*0.7));}
+    if(O.beachW(a)<0.3&&RN()<0.55){const r_=O.footR(a)-rr(0.2,1.2),x=Math.cos(a)*r_,z=Math.sin(a)*r_,s=rr(0.3,0.75);Sx.add(G.dod,WET,M(x,hA(x,z)-0.1,z,RN()*6,s,s*rr(0.6,1),s));}}
+  /* the rock bench: pitted dark rock, little pools, barnacle-white crusts, mussel-dark clumps (tide pools come later) */
+  for(let i=0;i<520*K;i++){const a=RN()*6.283;if(O.beachW(a)>0.3)continue;const R=O.Rb(a)+rr(0.15,O.benchW(a)),x=Math.cos(a)*R,z=Math.sin(a)*R,y=hA(x,z);if(y<SEA-0.1)continue;const r=RN();
+    if(r<0.45){const s=rr(0.12,0.4);Sx.add(G.dod,RN()<0.5?WET:dk(P.shale,0.7),M(x,y+0.02,z,RN()*6,s,s*0.45,s));}
+    else if(r<0.62)Sx.add(G.cyl6,P.truck,M(x,y+0.015,z,RN()*6,rr(0.18,0.5),0.02,rr(0.15,0.4)));
+    else if(r<0.8){for(let q=0;q<4;q++)Sx.add(G.ico,P.white,M(x+rr(-.15,.15),y+0.03,z+rr(-.15,.15),0,0.035));}
+    else Sx.add(G.dod,P.pine,M(x,y+0.03,z,RN()*6,rr(0.1,0.22),0.06,rr(0.1,0.2)));}
+  /* the long beach: drift logs, kelp wrack along the tide line, sea-worn stones, dune grass and beach strawberry at the back */
+  {const b0=O.BEACH!==undefined?O.BEACH:O.COVE;for(let i=0;i<11*KB;i++){const a=b0+rr(-0.36,0.36)*BS,R=O.Rb(a)+rr(0.3,2.2),x=Math.cos(a)*R,z=Math.sin(a)*R;if(hA(x,z)<SEA+0.2)continue;
+      Sx.add(G.cyl6,dk(P.tent,rr(0.8,0.95)),M(x,hA(x,z)+0.12,z,a+rr(1.1,2.0),rr(0.09,0.17),rr(1.2,3.4),rr(0.09,0.17),0,Math.PI/2));
+      if(RN()<0.4)Sx.add(G.dod,dk(P.tent,0.8),M(x,hA(x,z)+0.18,z,RN()*6,0.22,0.18,0.22));}
+    for(let i=0;i<70*KB;i++){const a=b0+rr(-0.4,0.4)*BS,R=O.Rb(a)+rr(4.5,6.5),x=Math.cos(a)*R,z=Math.sin(a)*R,y=hA(x,z);if(y<SEA+0.03||y>SEA+0.4)continue;
+      Sx.add(G.dod,RN()<0.6?dk(P.pine,0.7):P.earth,M(x,y+0.02,z,RN()*6,rr(0.15,0.35),0.04,rr(0.08,0.2)));}
+    for(let i=0;i<40*KB;i++){const a=b0+rr(-0.4,0.4)*BS,R=O.Rb(a)+rr(0,7),x=Math.cos(a)*R,z=Math.sin(a)*R,y=hA(x,z);if(y<SEA)continue;const s=rr(0.08,0.24);Sx.add(G.dod,pick(ROCK),M(x,y+0.03,z,RN()*6,s,s*0.6,s));}
+    for(let i=0;i<160*KB;i++){const a=b0+rr(-0.45,0.45)*BS,R=O.Rb(a)+rr(-1.6,1.2),x=Math.cos(a)*R,z=Math.sin(a)*R,y=hA(x,z);if(y<SEA+0.9||O.slopeAt(x,z)>1)continue;
+      if(RN()<0.75){for(let q=0;q<3;q++)Sx.add(G.cone4,q?P.birch:P.sage,M(x+rr(-.15,.15),y+0.22,z+rr(-.15,.15),RN()*6,0.06,rr(0.35,0.65),0.06,rr(-.35,.35),rr(-.35,.35)));}
+      else{Sx.add(G.dod,P.fern,M(x,y+0.05,z,RN()*6,0.25,0.08,0.25));Sx.add(G.ico,P.white,M(x+0.08,y+0.12,z,0,0.035));Sx.add(G.ico,P.rust,M(x-0.1,y+0.11,z+0.05,0,0.04));}}}
+  /* sea stacks: stacked basalt-ish drums, each turned and nudged so the column looks weathered, with a grass cap on the tall ones */
+  const stack=(st)=>{const base=SEA-2.6,H=st.top-base,n=Math.max(2,Math.ceil(H/1.05)),lean=rr(-0.06,0.06),la=RN()*6.28;
+    for(let i=0;i<n;i++){const t=i/(n-1),y=base+H*t-H/n*0.35,ri=st.r*(1-0.2*t)*rr(0.88,1.12),ox=Math.cos(la)*lean*(y-SEA),oz=Math.sin(la)*lean*(y-SEA);
+      Sx.add(RN()<0.5?G.cyl6:G.cyl5,rc(y),M(st.x+ox,y,st.z+oz,RN()*6,ri,H/n*1.3,ri*rr(0.78,1)));
+      for(let k=0;k<2;k++){const aa=RN()*6.28,s=ri*rr(0.42,0.62);Sx.add(G.dod,rc(y),M(st.x+ox+Math.cos(aa)*ri*0.72,y+rr(-0.3,0.3),st.z+oz+Math.sin(aa)*ri*0.72,RN()*6,s,s*rr(1,1.7),s));}}
+    if(st.k!=='skerry'&&st.top>SEA+2.2){const tx=st.x+Math.cos(la)*lean*(st.top-SEA),tz=st.z+Math.sin(la)*lean*(st.top-SEA),cr=st.r*0.78;
+      Sx.add(G.dod,P.fern,M(tx,st.top+0.12,tz,RN()*6,cr,0.32,cr));Sx.add(G.dod,P.sage,M(tx+rr(-.3,.3),st.top+0.3,tz+rr(-.3,.3),RN()*6,cr*0.6,0.2,cr*0.6));
+      for(let k=0;k<5;k++){const aa=RN()*6.28,d=cr*rr(0.3,0.85);for(let q=0;q<3;q++)Sx.add(G.cone4,q?P.birch:P.sage,M(tx+Math.cos(aa)*d+rr(-.1,.1),st.top+0.42,tz+Math.sin(aa)*d+rr(-.1,.1),RN()*6,0.06,rr(0.35,0.6),0.06,rr(-.3,.3),rr(-.3,.3)));}
+      for(let k=0;k<3;k++){const aa=RN()*6.28;Sx.add(G.dod,P.white,M(tx+Math.cos(aa)*cr*0.95,st.top-rr(0.1,0.8),tz+Math.sin(aa)*cr*0.95,RN()*6,0.14,rr(0.3,0.6),0.08));}
+      if(st.r>2.2&&st.top>SEA+9.3&&o.stackTree)o.stackTree(tx,st.top+0.25,tz);}};
+  for(const st of O.STACKS)stack(st);
+  for(const A of O.ARCH){const n=16,dx=A.B[0]-A.A[0],dz=A.B[1]-A.A[1],ry=Math.atan2(-dz,dx),al=hyp(dx,dz)||1,px=-dz/al,pz=dx/al;
+    for(let i=0;i<=n;i++){const t=i/n,x=A.A[0]+dx*t,z=A.A[1]+dz*t,y=A.yA+(A.yB-A.yA)*t+0.7*Math.sin(Math.PI*t);
+      for(let k=0;k<2;k++){const s=rr(0.9,1.25),off=(k?1:-1)*rr(0.2,0.45);Sx.add(G.dod,pick(ROCK),M(x+px*off,y-0.75+rr(-0.15,0.1),z+pz*off,ry+rr(-.3,.3),s*1.1,s*0.85,s));}
+      Sx.add(G.dod,P.fern,M(x,y+0.05,z,RN()*6,0.85,0.18,0.85));if(i%3===0)for(let q=0;q<3;q++)Sx.add(G.cone4,q?P.sage:P.birch,M(x+rr(-.4,.4),y+0.3,z+rr(-.4,.4),RN()*6,0.06,0.45,0.06));}
+    if(A.land&&o.coll)o.coll(A.A[0],A.A[1],1.2);}
+  /* plants everywhere there is soil: what grows depends on where you are (exposed brink, open top, sheltered slopes, dune) */
+  const tuft=(x,y,z,c1,c2,h)=>{for(let q=0;q<3;q++)Sx.add(G.cone4,q?c1:c2,M(x+rr(-.15,.15),y+h*0.4,z+rr(-.15,.15),RN()*6,0.065,h*rr(0.8,1.2),0.065,rr(-.35,.35),rr(-.35,.35)));};
+  const PLANTS={
+    salal:(x,y,z)=>{const s=rr(0.3,0.6);Sx.add(G.dod,pick([P.fern,P.pine]),M(x,y+s*0.45,z,RN()*6,s,s*0.7,s));Sx.add(G.dod,P.fern,M(x+s*0.4,y+s*0.3,z,RN()*6,s*0.6,s*0.5,s*0.6));},
+    coyote:(x,y,z)=>{const s=rr(0.35,0.7);Sx.add(G.ico,P.sage,M(x,y+s*0.5,z,RN()*6,s,s*0.75,s));Sx.add(G.ico,dk(P.sage,0.85),M(x+s*0.3,y+s*0.75,z-s*0.2,0,s*0.55));},
+    fern:(x,y,z)=>{const c=RN()<0.7?P.fern:P.pine;for(let k=0;k<5;k++){const a=k*1.26+RN();Sx.add(G.cone4,c,M(x+Math.sin(a)*0.16,y+0.2,z+Math.cos(a)*0.16,a,0.15,0.5,0.05,Math.cos(a)*0.7,-Math.sin(a)*0.7));}},
+    lupine:(x,y,z)=>{for(let k=0;k<3;k++){const ox=rr(-.25,.25),oz=rr(-.25,.25),h=rr(0.25,0.45);Sx.add(G.cyl5,P.fern,M(x+ox,y+h/2,z+oz,0,0.015,h,0.015));for(let q=0;q<3;q++)Sx.add(G.ico,RN()<0.7?P.truck:P.white,M(x+ox,y+h-0.04+q*0.06,z+oz,0,0.04-q*0.008));}},
+    yarrow:(x,y,z)=>{for(let k=0;k<3;k++){const ox=rr(-.2,.2),oz=rr(-.2,.2),h=rr(0.2,0.35);Sx.add(G.cyl5,P.sage,M(x+ox,y+h/2,z+oz,0,0.012,h,0.012));Sx.add(G.cyl6,P.white,M(x+ox,y+h,z+oz,0,0.06,0.025,0.06));}},
+    thrift:(x,y,z)=>{Sx.add(G.dod,P.fern,M(x,y+0.05,z,RN()*6,0.16,0.08,0.16));for(let k=0;k<4;k++)Sx.add(G.ico,pick([P.rust,P.pumpkin]),M(x+rr(-.1,.1),y+rr(0.12,0.2),z+rr(-.1,.1),0,0.04));},
+    poppy:(x,y,z)=>{for(let k=0;k<3;k++){const ox=rr(-.2,.2),oz=rr(-.2,.2);Sx.add(G.cyl5,P.sage,M(x+ox,y+0.1,z+oz,0,0.01,0.2,0.01));Sx.add(G.cone5,P.pumpkin,M(x+ox,y+0.22,z+oz,0,0.05,0.06,0.05,Math.PI));}},
+    grass:(x,y,z)=>tuft(x,y,z,P.birch,P.sage,rr(0.35,0.6)),
+    sedge:(x,y,z)=>tuft(x,y,z,P.fern,P.sage,rr(0.3,0.5)),
+    berry:(x,y,z)=>{const s=rr(0.35,0.55);Sx.add(G.ico,P.fern,M(x,y+s*0.6,z,RN()*6,s,s*0.8,s));for(let k=0;k<4;k++)Sx.add(G.ico,pick([P.pumpkin,P.rust]),M(x+rr(-s,s)*0.7,y+s*rr(0.4,1.1),z+rr(-s,s)*0.7,0,0.045));},
+    log:(x,y,z)=>{Sx.add(G.cyl6,P.earth,M(x,y+0.15,z,RN()*6,0.15,rr(1.2,2.4),0.15,0,Math.PI/2));Sx.add(G.dod,P.fern,M(x,y+0.3,z,RN()*6,0.2,0.08,0.3));},
+    rock:(x,y,z)=>{const s=rr(0.2,0.55);Sx.add(G.dod,pick(ROCK),M(x,y+s*0.2,z,RN()*6,s,s*rr(.5,.8),s));if(RN()<0.5)Sx.add(G.dod,P.fern,M(x,y+s*0.6,z,RN()*6,s*0.8,s*0.18,s*0.8));}};
+  const MIX={brink:['grass','grass','thrift','grass','poppy','sedge'],top:['grass','salal','lupine','yarrow','coyote','poppy','grass','rock','berry'],
+    slope:['salal','salal','fern','fern','coyote','berry','sedge','lupine','yarrow','log','rock','grass'],dune:['grass','grass','grass','sedge','thrift']};
+  for(let i=0,n=0;i<o.plants*8&&n<o.plants;i++){const[x,z]=o.spot();const y=hA(x,z),sl=O.slopeAt(x,z);if(y<SEA+0.9||sl>1.25)continue;
+    if(o.skip(x,z)||O.onStack(x,z,0.5))continue;
+    const a=Math.atan2(z,x),d=O.coastD(x,z),b=O.beachW(a),c=O.cliffK(x,z);
+    const zone=y<SEA+3&&b>0.25?'dune':c>0.55&&d>O.CWc-0.2&&d<O.CWc+1.4?'brink':(K>1?d<O.CWc-0.2:y<-0.8)||c<0.5?'slope':'top';
+    if(zone==='top'&&RN()<0.35)continue;PLANTS[pick(MIX[zone])](x,y,z);n++;}
+  if(o.trails)for(const L_ of TRAILS)for(let i=0;i<L_.length-1;i++){const a=L_[i],b=L_[i+1],l=hyp(b[0]-a[0],b[1]-a[1]);
+    for(let t=0;t<l;t+=0.6){const x=a[0]+(b[0]-a[0])*t/l+rr(-.25,.25),z=a[1]+(b[1]-a[1])*t/l+rr(-.25,.25);if(O.slopeAt(x,z)>1.3)continue;Sx.add(G.dod,P.shale,M(x,hA(x,z)+0.01,z,RN()*6,0.2,0.05,0.22));}}
+}
 let WORLDM=null;
 if(WORLD){const W_=WORLD_,WS=W_.WS;let ws=987654321;const wr=()=>{ws=(Math.imul(ws,1664525)+1013904223)>>>0;return ws/4294967296;},wrr=(a,b)=>a+(b-a)*wr();
   /* ground: same half-faceted blend as the hollow; anything inside the hollow sits hidden under it */
@@ -1246,8 +1317,15 @@ if(WORLD){const W_=WORLD_,WS=W_.WS;let ws=987654321;const wr=()=>{ws=(Math.imul(
     else if(r<0.9){for(let k=0;k<3;k++){const ox=wrr(-.3,.3),oz=wrr(-.3,.3);m.add(G.cyl5,P.fern,M(x+ox,y+0.15,z+oz,0,0.015,0.3,0.015));m.add(G.ico,[P.birch,P.rust,P.pumpkin,P.white][(wr()*4)|0],M(x+ox,y+0.32,z+oz,0,0.06));}}
     else if(r<0.96&&fm>-0.1){const L=wrr(1.4,3),a=wr()*6.28;m.add(G.cyl6,P.earth,M(x,y+0.16,z,a,0.17,L,0.17,0,Math.PI/2));if(L>2.2)addC(x,z,0.4,'rock');}
     else{m.add(G.cyl6,P.earth,M(x,y+0.18,z,wr()*6,0.24,0.36,0.24));m.add(G.cyl6,P.tent,M(x,y+0.37,z,0,0.22,0.02,0.22));}}
+  /* the coast: cliff slabs, the rock shelf, the long beach, stacks and arches, and shore plants, each into the 25 m chunk it stands in */
+  {const C=W_.C;C.coastTrees=[];const Sx={add:(g,c,m)=>ugM(m.elements[12],m.elements[14]).add(g,c,m)};
+    coastDeco(C,Sx,wr,{K:C.Rm/17,KB:4.6,BS:0.79,plants:isTouch?1500:3200,
+      spot:()=>{const a=wrr(-Math.PI,Math.PI),R=C.Rb(a),c=Math.cos(a),s_=Math.sin(a),d0=C.slopeW(c*(R-8),s_*(R-8))>0.3?26:15,r=R-wrr(-2,d0);return [c*r,s_*r];},
+      skip:(x,z)=>W_.roadD(x,z)<3||!!W_.wBridge(x,z)||(()=>{const q=W_.riverAt(x,z);return !!q&&q.dd<1;})(),
+      coll:(x,z,r)=>addC(x,z,r,'rock'),stackTree:(x,y,z)=>C.coastTrees.push({x,y,z,k:'stack'})});}
   const ugMeshes=[];for(const c of UG.values()){const me=new THREE.Mesh(c.m.build(),matV);me.receiveShadow=true;me.userData={cx:c.cx,cz:c.cz};scene.add(me);ugMeshes.push(me);}
   WORLDM={wr,wrr,addC,solidAt,nearTree,clearC:(x,z,Rr)=>{const i0=Math.floor((x-Rr)/4),i1=Math.floor((x+Rr)/4),j0=Math.floor((z-Rr)/4),j1=Math.floor((z+Rr)/4);for(let a=i0;a<=i1;a++)for(let b=j0;b<=j1;b++){const L=CG.get(key(a,b));if(!L)continue;for(const c of L)if((x-c[0])**2+(z-c[1])**2<Rr*Rr)c[2]=0;}},mtnPaper:mp,ground:gm,ug:ugMeshes,band};
+  seed=isTouch?62432638:-375219894;   /* the random stream as it stood here before the coast was added, so Ember Hollow's layout is unchanged */
 }
 
 /* ---------- water ---------- */
@@ -1490,6 +1568,15 @@ function treeScale(dep){const k=smooth(0.4,4.2,dep);let sc=(0.48+0.9*k)*rr(0.82,
 }
 /* ---------- Oregon Wilds: forests (instanced in 25 m chunks so only nearby ones draw); trees near the hiker dissolve softly ---------- */
 const DITHU={uPS:{value:new THREE.Vector2(-999,-999)},uPZ:{value:0},uPR:{value:1}};
+/* wind-bent shore cypress (Ocean bench and the Oregon Wilds coast) */
+const bentGeo=(v)=>{const m=new Merger(),j=k=>Math.sin(v*7.1+k*3.3);
+    const tp=[[0,0,0],[0.25+0.1*j(1),1.3,0.05*j(2)],[0.85+0.2*j(3),2.3,0.1*j(4)],[1.7+0.3*j(5),2.95,0.05*j(6)]];
+    for(let i=0;i<3;i++)m.add(G.cyl5,P.earth,beamM(tp[i],tp[i+1],0.17-0.035*i));
+    m.add(G.cyl5,P.earth,beamM(tp[1],[-0.5,2.1,0.3*j(7)],0.06));m.add(G.cyl5,P.earth,beamM(tp[2],[0.6,3.0,-0.5],0.05));
+    const pads=[[1.75,3.2,0,0.95,0.42],[1.05,3.05,0.35,0.8,0.4],[2.45,2.95,-0.2,0.8,0.36],[1.4,3.5,-0.15,0.7,0.3],[2.1,3.4,0.3,0.6,0.28],
+      [0.7,2.55,-0.35,0.6,0.32],[1.6,2.65,0.45,0.62,0.3],[0.05,2.25,0.25,0.42,0.26],[2.95,2.7,0.1,0.5,0.26]];
+    pads.forEach(([x,y,z,w,h],k)=>m.add(G.dod,k%4===2?P.fern:P.pine,M(x+0.15*j(k+8),y,z,v+k,w,h,w*0.8)));
+    return {geo:m.build(),H:3.8,R:1.1,pine:false};};
 let WTREES=null;
 if(WORLD){const W_=WORLD_,{wr,wrr}=WORLDM,WS=W_.WS,CH=25;
   const tm=matV.clone();tm.onBeforeCompile=function(sh){Object.assign(sh.uniforms,DITHU);
@@ -1500,7 +1587,7 @@ if(WORLD){const W_=WORLD_,{wr,wrr}=WORLDM,WS=W_.WS,CH=25;
   const VAR=PINES.map((t,i)=>({t,pine:true,i})).concat(DECID.map((t,i)=>({t,pine:false,i:PINES.length+i})));
   const items=[];
   for(let z=-WS+3;z<WS-3;z+=1.9)for(let x=-WS+3;x<WS-3;x+=1.9){const px=x+wrr(-0.85,0.85),pz=z+wrr(-0.85,0.85),e=W_.ew(px,pz);
-    if(e<33.5||W_.cdAt(px,pz)<10)continue;const fm=0.8*W_.vn(px/26+3,pz/26+1)+0.3*W_.vn(px/9,pz/9);
+    if(e<33.5||W_.cdAt(px,pz)<10||(W_.cdAt(px,pz)<26&&W_.C.slopeW(px,pz)>0.25))continue;const fm=0.8*W_.vn(px/26+3,pz/26+1)+0.3*W_.vn(px/9,pz/9);
     const nearG=W_.GG.some(g=>{const[u,v]=W_.gLoc(g,px,pz);return Math.abs(u)<g.L/2+4&&Math.abs(v)<g.Wt/2+9;});
     if(wr()>(fm>0.08?0.72+0.25*smooth(0.08,0.5,fm):nearG?0.35:0.04))continue;
     {const r_=W_.riverAt(px,pz);if(r_&&r_.dd<1.4)continue;}
@@ -1509,8 +1596,25 @@ if(WORLD){const W_=WORLD_,{wr,wrr}=WORLDM,WS=W_.WS,CH=25;
     const au=W_.vn(px/40+9,pz/40-4)>0.35,dec=au?wr()<0.75:wr()<0.18,v=dec?VAR[PINES.length+((wr()*DECID.length)|0)]:VAR[(wr()*PINES.length)|0];
     const s=wrr(0.75,1.2)*(fm>0.4?1.15:1);items.push({x:px,z:pz,y:W_.gridH(px,pz),yaw:wr()*6.28,s,v,k:wrr(0.86,1.06),H:v.t.H*s});}
   const cap=isTouch?2300:4600;while(items.length>cap)items.splice((wr()*items.length)|0,1);
+  /* the coast: wind-bent cypress on the exposed brink and top, Sitka spruce and red alder in the shelter of the gradual slopes,
+     and a bent tree on the tallest stacks (out of reach, so not solid) */
+  {const C=W_.C,s0=seed,BW_=[bentGeo(0.3),bentGeo(1.7),bentGeo(2.9)];seed=s0;
+    const vb=BW_.map(t=>{const v={t,pine:false,i:VAR.length};VAR.push(v);return v;}),wy=Math.atan2(-0.3,0.95);
+    const occ=new Set(),cell=(x,z)=>Math.floor(x/2)*9973+Math.floor(z/2),mark=(x,z)=>occ.add(cell(x,z));
+    const ok=(x,z)=>{const i=Math.floor(x/2),j=Math.floor(z/2);for(let a=i-1;a<=i+1;a++)for(let b=j-1;b<=j+1;b++)if(occ.has(a*9973+b))return false;return true;};
+    items.forEach(it=>mark(it.x,it.z));
+    const clear=(x,z)=>W_.walkW(x,z,'rim')&&W_.roadD(x,z)>4.6&&!W_.wBridge(x,z)&&ok(x,z)&&(()=>{const q=W_.riverAt(x,z);return !q||q.dd>1.4;})();
+    const nB=isTouch?50:90,nG=isTouch?90:150;
+    for(let i=0,n=0;i<nB*40&&n<nB;i++){const a=wrr(-Math.PI,Math.PI),R=C.Rb(a),d=C.CWc+0.4+Math.pow(wr(),1.6)*12,x=Math.cos(a)*(R-d),z=Math.sin(a)*(R-d);
+      if(C.cliffK(x,z)<0.6||C.slopeAt(x,z)>0.7||!clear(x,z))continue;
+      const s=wrr(0.8,1.15),v=vb[(wr()*3)|0];items.push({x,z,y:C.hAt(x,z),yaw:wy+wrr(-0.25,0.25),s,v,k:wrr(0.86,1.06),H:v.t.H*s});mark(x,z);n++;}
+    for(let i=0,n=0;i<nG*40&&n<nG;i++){const a=wrr(-Math.PI,Math.PI),R=C.Rb(a),d=wrr(1,20),x=Math.cos(a)*(R-d),z=Math.sin(a)*(R-d),y=C.hAt(x,z);
+      if(C.cliffK(x,z)>0.45||y<C.SEA+1.4||C.slopeAt(x,z)>0.95||!clear(x,z))continue;if(wr()>0.35+0.65*smooth(C.SEA+1.4,C.SEA+4,y))continue;
+      const dec=wr()<0.3,v=dec?VAR[PINES.length+[2,3,4][(wr()*3)|0]]:VAR[[0,1,2,4][(wr()*4)|0]],s=dec?wrr(0.55,0.85):wrr(0.6,1.05);
+      items.push({x,z,y,yaw:wr()*6.28,s,v,k:wrr(0.86,1.06),H:v.t.H*s});mark(x,z);n++;}
+    for(const t of C.coastTrees){const v=vb[(wr()*3)|0],s=wrr(0.6,0.8);items.push({x:t.x,z:t.z,y:t.y,yaw:wy+wrr(-.2,.2),s,v,k:wrr(0.86,1.06),H:v.t.H*s,noC:true});}}
   const chunks=new Map();for(const it of items){const ci=Math.floor((it.x+WS)/CH),cj=Math.floor((it.z+WS)/CH),k=ci*100+cj;if(!chunks.has(k))chunks.set(k,{ci,cj,list:[]});chunks.get(k).list.push(it);
-    it.c=WORLDM.addC(it.x,it.z,0.16*it.s+0.12,'tree',it);}
+    if(!it.noC)it.c=WORLDM.addC(it.x,it.z,0.16*it.s+0.12,'tree',it);}
   const meshes=[],_m4=new THREE.Matrix4(),_q=new THREE.Quaternion(),_p=new THREE.Vector3(),_sc=new THREE.Vector3(),_c=new THREE.Color(),UPV=new THREE.Vector3(0,1,0);
   const share=(src,cx,cz)=>{const g=new THREE.BufferGeometry();for(const k in src.attributes)g.setAttribute(k,src.attributes[k]);g.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,4,0),CH*0.75+6);return g;};
   for(const ch of chunks.values()){const cx=-WS+(ch.ci+0.5)*CH,cz=-WS+(ch.cj+0.5)*CH,byV=new Map();ch.list.forEach(it=>{if(!byV.has(it.v.i))byV.set(it.v.i,[]);byV.get(it.v.i).push(it);});
@@ -1584,83 +1688,12 @@ if(WORLD){const W_=WORLD_,{wr,wrr}=WORLDM,WS=W_.WS,CH=25;
   for(const sx_ of[-1,1])for(const o of[-0.72,0.72])S.add(G.cyl6,P.earth,M(g.BX+sx_*(g.BH+0.15),0.5,g.BZ+o,0,0.11,1.6,0.11));
   }
   else if(OC){const O=OC,SEA=O.SEA,hA=O.hAt;
-  const dk=(c,k)=>(Math.round(((c>>16)&255)*k)<<16)|(Math.round(((c>>8)&255)*k)<<8)|Math.round((c&255)*k);
-  const ROCK=[P.shale,dk(P.shale,0.88),dk(P.shale,0.76)],WET=dk(P.earth,0.95),rc=y=>y<SEA+0.8?WET:ROCK[(rng()*3)|0];
-  const pick=a=>a[(rng()*a.length)|0];
-  /* the cliff faces: a few faceted slabs set into the steep faces; talus along the bench edge */
-  for(let a=-Math.PI;a<Math.PI;a+=0.024){const R=O.Rb(a);
-    for(let k=0;k<2;k++){if(rng()<0.6)continue;const r_=R-rr(0.1,O.CWc),x=Math.cos(a)*r_,z=Math.sin(a)*r_;if(O.slopeAt(x,z)<1.6)continue;const y=hA(x,z),s=rr(0.3,0.62);
-      S.add(G.dod,rc(y),M(x,y,z,-a+rr(-.3,.3),s*0.55,s*rr(1.4,2.4),s*rr(0.9,1.3)));
-      if(y>SEA+1.5&&rng()<0.2)S.add(G.dod,P.fern,M(x,y+s*0.8,z,rng()*6,s*0.7,s*0.18,s*0.7));}
-    if(O.beachW(a)<0.3&&rng()<0.55){const r_=O.footR(a)-rr(0.2,1.2),x=Math.cos(a)*r_,z=Math.sin(a)*r_,s=rr(0.3,0.75);S.add(G.dod,WET,M(x,hA(x,z)-0.1,z,rng()*6,s,s*rr(0.6,1),s));}}
-  /* the rock bench: pitted dark rock, little pools, barnacle-white crusts, mussel-dark clumps (tide pools come later) */
-  for(let i=0;i<520;i++){const a=rng()*6.283;if(O.beachW(a)>0.3)continue;const R=O.Rb(a)+rr(0.15,O.benchW(a)),x=Math.cos(a)*R,z=Math.sin(a)*R,y=hA(x,z);if(y<SEA-0.1)continue;const r=rng();
-    if(r<0.45){const s=rr(0.12,0.4);S.add(G.dod,rng()<0.5?WET:dk(P.shale,0.7),M(x,y+0.02,z,rng()*6,s,s*0.45,s));}
-    else if(r<0.62)S.add(G.cyl6,P.truck,M(x,y+0.015,z,rng()*6,rr(0.18,0.5),0.02,rr(0.15,0.4)));
-    else if(r<0.8){for(let q=0;q<4;q++)S.add(G.ico,P.white,M(x+rr(-.15,.15),y+0.03,z+rr(-.15,.15),0,0.035));}
-    else S.add(G.dod,P.pine,M(x,y+0.03,z,rng()*6,rr(0.1,0.22),0.06,rr(0.1,0.2)));}
-  /* the long beach: drift logs, kelp wrack along the tide line, sea-worn stones, dune grass and beach strawberry at the back */
-  {const b0=O.COVE;for(let i=0;i<11;i++){const a=b0+rr(-0.36,0.36),R=O.Rb(a)+rr(0.3,2.2),x=Math.cos(a)*R,z=Math.sin(a)*R;if(hA(x,z)<SEA+0.2)continue;
-      S.add(G.cyl6,dk(P.tent,rr(0.8,0.95)),M(x,hA(x,z)+0.12,z,a+rr(1.1,2.0),rr(0.09,0.17),rr(1.2,3.4),rr(0.09,0.17),0,Math.PI/2));
-      if(rng()<0.4)S.add(G.dod,dk(P.tent,0.8),M(x,hA(x,z)+0.18,z,rng()*6,0.22,0.18,0.22));}
-    for(let i=0;i<70;i++){const a=b0+rr(-0.4,0.4),R=O.Rb(a)+rr(4.5,6.5),x=Math.cos(a)*R,z=Math.sin(a)*R,y=hA(x,z);if(y<SEA+0.03||y>SEA+0.4)continue;
-      S.add(G.dod,rng()<0.6?dk(P.pine,0.7):P.earth,M(x,y+0.02,z,rng()*6,rr(0.15,0.35),0.04,rr(0.08,0.2)));}
-    for(let i=0;i<40;i++){const a=b0+rr(-0.4,0.4),R=O.Rb(a)+rr(0,7),x=Math.cos(a)*R,z=Math.sin(a)*R,y=hA(x,z);if(y<SEA)continue;const s=rr(0.08,0.24);S.add(G.dod,pick(ROCK),M(x,y+0.03,z,rng()*6,s,s*0.6,s));}
-    for(let i=0;i<160;i++){const a=b0+rr(-0.45,0.45),R=O.Rb(a)+rr(-1.6,1.2),x=Math.cos(a)*R,z=Math.sin(a)*R,y=hA(x,z);if(y<SEA+0.9||O.slopeAt(x,z)>1)continue;
-      if(rng()<0.75){for(let q=0;q<3;q++)S.add(G.cone4,q?P.birch:P.sage,M(x+rr(-.15,.15),y+0.22,z+rr(-.15,.15),rng()*6,0.06,rr(0.35,0.65),0.06,rr(-.35,.35),rr(-.35,.35)));}
-      else{S.add(G.dod,P.fern,M(x,y+0.05,z,rng()*6,0.25,0.08,0.25));S.add(G.ico,P.white,M(x+0.08,y+0.12,z,0,0.035));S.add(G.ico,P.rust,M(x-0.1,y+0.11,z+0.05,0,0.04));}}}
-  /* sea stacks: stacked basalt-ish drums, each turned and nudged so the column looks weathered, with a grass cap on the tall ones */
-  const stack=(st)=>{const base=SEA-2.6,H=st.top-base,n=Math.max(2,Math.ceil(H/1.05)),lean=rr(-0.06,0.06),la=rng()*6.28;
-    for(let i=0;i<n;i++){const t=i/(n-1),y=base+H*t-H/n*0.35,ri=st.r*(1-0.2*t)*rr(0.88,1.12),ox=Math.cos(la)*lean*(y-SEA),oz=Math.sin(la)*lean*(y-SEA);
-      S.add(rng()<0.5?G.cyl6:G.cyl5,rc(y),M(st.x+ox,y,st.z+oz,rng()*6,ri,H/n*1.3,ri*rr(0.78,1)));
-      for(let k=0;k<2;k++){const aa=rng()*6.28,s=ri*rr(0.42,0.62);S.add(G.dod,rc(y),M(st.x+ox+Math.cos(aa)*ri*0.72,y+rr(-0.3,0.3),st.z+oz+Math.sin(aa)*ri*0.72,rng()*6,s,s*rr(1,1.7),s));}}
-    if(st.k!=='skerry'&&st.top>SEA+2.2){const tx=st.x+Math.cos(la)*lean*(st.top-SEA),tz=st.z+Math.sin(la)*lean*(st.top-SEA),cr=st.r*0.78;
-      S.add(G.dod,P.fern,M(tx,st.top+0.12,tz,rng()*6,cr,0.32,cr));S.add(G.dod,P.sage,M(tx+rr(-.3,.3),st.top+0.3,tz+rr(-.3,.3),rng()*6,cr*0.6,0.2,cr*0.6));
-      for(let k=0;k<5;k++){const aa=rng()*6.28,d=cr*rr(0.3,0.85);for(let q=0;q<3;q++)S.add(G.cone4,q?P.birch:P.sage,M(tx+Math.cos(aa)*d+rr(-.1,.1),st.top+0.42,tz+Math.sin(aa)*d+rr(-.1,.1),rng()*6,0.06,rr(0.35,0.6),0.06,rr(-.3,.3),rr(-.3,.3)));}
-      for(let k=0;k<3;k++){const aa=rng()*6.28;S.add(G.dod,P.white,M(tx+Math.cos(aa)*cr*0.95,st.top-rr(0.1,0.8),tz+Math.sin(aa)*cr*0.95,rng()*6,0.14,rr(0.3,0.6),0.08));}
-      if(st.r>2.2&&st.top>0.8)O.stackTrees.push([tx,st.top+0.25,tz]);}};
-  O.stackTrees=[];
-  for(const st of O.STACKS)stack(st);
-  for(const A of O.ARCH){const n=16,dx=A.B[0]-A.A[0],dz=A.B[1]-A.A[1],ry=Math.atan2(-dz,dx),al=hyp(dx,dz)||1,px=-dz/al,pz=dx/al;
-    for(let i=0;i<=n;i++){const t=i/n,x=A.A[0]+dx*t,z=A.A[1]+dz*t,y=A.yA+(A.yB-A.yA)*t+0.7*Math.sin(Math.PI*t);
-      for(let k=0;k<2;k++){const s=rr(0.9,1.25),off=(k?1:-1)*rr(0.2,0.45);S.add(G.dod,pick(ROCK),M(x+px*off,y-0.75+rr(-0.15,0.1),z+pz*off,ry+rr(-.3,.3),s*1.1,s*0.85,s));}
-      S.add(G.dod,P.fern,M(x,y+0.05,z,rng()*6,0.85,0.18,0.85));if(i%3===0)for(let q=0;q<3;q++)S.add(G.cone4,q?P.sage:P.birch,M(x+rr(-.4,.4),y+0.3,z+rr(-.4,.4),rng()*6,0.06,0.45,0.06));}
-    if(A.land)colliders.push({x:A.A[0],z:A.A[1],r:1.2});}
-  /* plants everywhere there is soil: what grows depends on where you are (exposed brink, open top, sheltered slopes, dune) */
-  const tuft=(x,y,z,c1,c2,h)=>{for(let q=0;q<3;q++)S.add(G.cone4,q?c1:c2,M(x+rr(-.15,.15),y+h*0.4,z+rr(-.15,.15),rng()*6,0.065,h*rr(0.8,1.2),0.065,rr(-.35,.35),rr(-.35,.35)));};
-  const PLANTS={
-    salal:(x,y,z)=>{const s=rr(0.3,0.6);S.add(G.dod,pick([P.fern,P.pine]),M(x,y+s*0.45,z,rng()*6,s,s*0.7,s));S.add(G.dod,P.fern,M(x+s*0.4,y+s*0.3,z,rng()*6,s*0.6,s*0.5,s*0.6));},
-    coyote:(x,y,z)=>{const s=rr(0.35,0.7);S.add(G.ico,P.sage,M(x,y+s*0.5,z,rng()*6,s,s*0.75,s));S.add(G.ico,dk(P.sage,0.85),M(x+s*0.3,y+s*0.75,z-s*0.2,0,s*0.55));},
-    fern:(x,y,z)=>{const c=rng()<0.7?P.fern:P.pine;for(let k=0;k<5;k++){const a=k*1.26+rng();S.add(G.cone4,c,M(x+Math.sin(a)*0.16,y+0.2,z+Math.cos(a)*0.16,a,0.15,0.5,0.05,Math.cos(a)*0.7,-Math.sin(a)*0.7));}},
-    lupine:(x,y,z)=>{for(let k=0;k<3;k++){const ox=rr(-.25,.25),oz=rr(-.25,.25),h=rr(0.25,0.45);S.add(G.cyl5,P.fern,M(x+ox,y+h/2,z+oz,0,0.015,h,0.015));for(let q=0;q<3;q++)S.add(G.ico,rng()<0.7?P.truck:P.white,M(x+ox,y+h-0.04+q*0.06,z+oz,0,0.04-q*0.008));}},
-    yarrow:(x,y,z)=>{for(let k=0;k<3;k++){const ox=rr(-.2,.2),oz=rr(-.2,.2),h=rr(0.2,0.35);S.add(G.cyl5,P.sage,M(x+ox,y+h/2,z+oz,0,0.012,h,0.012));S.add(G.cyl6,P.white,M(x+ox,y+h,z+oz,0,0.06,0.025,0.06));}},
-    thrift:(x,y,z)=>{S.add(G.dod,P.fern,M(x,y+0.05,z,rng()*6,0.16,0.08,0.16));for(let k=0;k<4;k++)S.add(G.ico,pick([P.rust,P.pumpkin]),M(x+rr(-.1,.1),y+rr(0.12,0.2),z+rr(-.1,.1),0,0.04));},
-    poppy:(x,y,z)=>{for(let k=0;k<3;k++){const ox=rr(-.2,.2),oz=rr(-.2,.2);S.add(G.cyl5,P.sage,M(x+ox,y+0.1,z+oz,0,0.01,0.2,0.01));S.add(G.cone5,P.pumpkin,M(x+ox,y+0.22,z+oz,0,0.05,0.06,0.05,Math.PI));}},
-    grass:(x,y,z)=>tuft(x,y,z,P.birch,P.sage,rr(0.35,0.6)),
-    sedge:(x,y,z)=>tuft(x,y,z,P.fern,P.sage,rr(0.3,0.5)),
-    berry:(x,y,z)=>{const s=rr(0.35,0.55);S.add(G.ico,P.fern,M(x,y+s*0.6,z,rng()*6,s,s*0.8,s));for(let k=0;k<4;k++)S.add(G.ico,pick([P.pumpkin,P.rust]),M(x+rr(-s,s)*0.7,y+s*rr(0.4,1.1),z+rr(-s,s)*0.7,0,0.045));},
-    log:(x,y,z)=>{S.add(G.cyl6,P.earth,M(x,y+0.15,z,rng()*6,0.15,rr(1.2,2.4),0.15,0,Math.PI/2));S.add(G.dod,P.fern,M(x,y+0.3,z,rng()*6,0.2,0.08,0.3));},
-    rock:(x,y,z)=>{const s=rr(0.2,0.55);S.add(G.dod,pick(ROCK),M(x,y+s*0.2,z,rng()*6,s,s*rr(.5,.8),s));if(rng()<0.5)S.add(G.dod,P.fern,M(x,y+s*0.6,z,rng()*6,s*0.8,s*0.18,s*0.8));}};
-  const MIX={brink:['grass','grass','thrift','grass','poppy','sedge'],top:['grass','salal','lupine','yarrow','coyote','poppy','grass','rock','berry'],
-    slope:['salal','salal','fern','fern','coyote','berry','sedge','lupine','yarrow','log','rock','grass'],dune:['grass','grass','grass','sedge','thrift']};
-  for(let i=0,n=0;i<9000&&n<(isTouch?650:1100);i++){const x=rr(-LIM+1,LIM-1),z=rr(-LIM+1,LIM-1);const y=hA(x,z),sl=O.slopeAt(x,z);if(y<SEA+0.9||sl>1.25)continue;
-    if(trailDist(x,z)<0.8||hyp(x-FIRE.x,z-FIRE.z)<3.2||hyp(x-TENT.x,z-TENT.z)<2||O.onStack(x,z,0.5))continue;
-    const a=Math.atan2(z,x),d=O.coastD(x,z),b=O.beachW(a),c=O.cliffK(x,z);
-    const zone=y<SEA+3&&b>0.25?'dune':c>0.55&&d>O.CWc-0.2&&d<O.CWc+1.4?'brink':y<-0.8||c<0.5?'slope':'top';
-    if(zone==='top'&&rng()<0.35)continue;PLANTS[pick(MIX[zone])](x,y,z);n++;}
-  for(const L_ of TRAILS)for(let i=0;i<L_.length-1;i++){const a=L_[i],b=L_[i+1],l=hyp(b[0]-a[0],b[1]-a[1]);
-    for(let t=0;t<l;t+=0.6){const x=a[0]+(b[0]-a[0])*t/l+rr(-.25,.25),z=a[1]+(b[1]-a[1])*t/l+rr(-.25,.25);if(O.slopeAt(x,z)>1.3)continue;S.add(G.dod,P.shale,M(x,hA(x,z)+0.01,z,rng()*6,0.2,0.05,0.22));}}
+  const pick=a=>a[(rng()*a.length)|0];O.stackTrees=[];
+  coastDeco(O,S,rng,{plants:isTouch?650:1100,spot:()=>[rr(-LIM+1,LIM-1),rr(-LIM+1,LIM-1)],trails:true,coll:(x,z,r)=>colliders.push({x,z,r}),stackTree:(x,y,z)=>O.stackTrees.push([x,y,z]),
+    skip:(x,z)=>trailDist(x,z)<0.8||hyp(x-FIRE.x,z-FIRE.z)<3.2||hyp(x-TENT.x,z-TENT.z)<2});
   /* trees: wind-bent cypress and shore pine on the exposed top and brink; Sitka spruce and alder in the shelter of the slopes */
   const WIND=[0.95,0.3],wy=Math.atan2(-WIND[1],WIND[0]);
-  const bent=(v)=>{const m=new Merger(),j=k=>Math.sin(v*7.1+k*3.3);
-    const tp=[[0,0,0],[0.25+0.1*j(1),1.3,0.05*j(2)],[0.85+0.2*j(3),2.3,0.1*j(4)],[1.7+0.3*j(5),2.95,0.05*j(6)]];
-    for(let i=0;i<3;i++)m.add(G.cyl5,P.earth,beamM(tp[i],tp[i+1],0.17-0.035*i));
-    m.add(G.cyl5,P.earth,beamM(tp[1],[-0.5,2.1,0.3*j(7)],0.06));m.add(G.cyl5,P.earth,beamM(tp[2],[0.6,3.0,-0.5],0.05));
-    const pads=[[1.75,3.2,0,0.95,0.42],[1.05,3.05,0.35,0.8,0.4],[2.45,2.95,-0.2,0.8,0.36],[1.4,3.5,-0.15,0.7,0.3],[2.1,3.4,0.3,0.6,0.28],
-      [0.7,2.55,-0.35,0.6,0.32],[1.6,2.65,0.45,0.62,0.3],[0.05,2.25,0.25,0.42,0.26],[2.95,2.7,0.1,0.5,0.26]];
-    pads.forEach(([x,y,z,w,h],k)=>m.add(G.dod,k%4===2?P.fern:P.pine,M(x+0.15*j(k+8),y,z,v+k,w,h,w*0.8)));
-    return {geo:m.build(),H:3.8,R:1.1,pine:false};};
-  const BENT=[bent(0.3),bent(1.7),bent(2.9)];O.BENT=BENT;
+  const BENT=[bentGeo(0.3),bentGeo(1.7),bentGeo(2.9)];O.BENT=BENT;
   const okTree=(x,z,sp)=>free(x,z,0.6)&&!trees.some(t=>hyp(t.x-x,t.z-z)<sp);
   const plantBent=(x,z,s)=>{addTree(x,z,s,pick(BENT),true);const tr=trees[trees.length-1],yw=wy+rr(-0.25,0.25);tr.yaw=yw;tr.mesh.rotation.y=yw;};
   for(let i=0,n=0;i<900&&n<16;i++){const x=rr(-17,17),z=rr(-17,17),c=O.cliffK(x,z),d=O.coastD(x,z);if(c<0.6||hA(x,z)<-0.5||!okTree(x,z,2.2))continue;
