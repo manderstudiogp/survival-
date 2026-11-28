@@ -3868,14 +3868,15 @@ if(HASHP.code){$('onCode').value=HASHP.code;let auto=false;try{auto=sessionStora
 /* ---------- the host's world: map, clock, weather and snow ---------- */
 const WSYNC=['on','p','kind','dur','peak','frozen','season','manual','manualUntil','scrub'];
 function netWorld(){const w={};WSYNC.forEach(k=>{w[k]=typeof W[k]==='number'?+W[k].toFixed(4):W[k];});
-  return {map:MAPKEY,day:st.day,t:+st.t.toFixed(4),fr:st.frozen?1:0,sp:st.speed,snow:+(st.snow||0).toFixed(3),w};}
+  return {map:MAPKEY,day:st.day,t:+st.t.toFixed(4),fr:st.frozen?1:0,sp:st.speed,snow:+(st.snow||0).toFixed(3),w,cr:CRATES.map(c=>Object.assign({},c.inv))};}
 NETKIT.on('world',w=>{if(NETKIT.isHost()||!w)return;
   if(w.map&&w.map!==MAPKEY){const code=NETKIT.code();try{sessionStorage.setItem('plw-autojoin',code);}catch(e){}toast('Moving to the host\'s map…',3);
     NETKIT.leave();setTimeout(()=>{location.replace(netBase()+'#'+(w.map==='meadow'?'':w.map+'.')+code);setTimeout(()=>location.reload(),60);},600);return;}
   if(typeof w.day==='number'&&(w.day!==st.day||Math.abs(w.t-st.t)>0.01)){st.day=w.day;st.t=w.t;}
   if(typeof w.fr==='number')st.frozen=!!w.fr;if(typeof w.sp==='number')st.speed=w.sp;
   if(w.w&&typeof w.w==='object')WSYNC.forEach(k=>{if(k in w.w)W[k]=w.w[k];});
-  if(typeof w.snow==='number')st.snow=w.snow;});
+  if(typeof w.snow==='number')st.snow=w.snow;
+  if(Array.isArray(w.cr))w.cr.forEach((inv,i)=>{const c=CRATES[i];if(c&&inv&&typeof inv==='object')for(const k of c.holds)if(typeof inv[k]==='number')c.inv[k]=inv[k];});});
 /* ---------- the host's animals: guests show exactly where the host's animals are and what they're doing ---------- */
 const r2=v=>Math.round(v*100)/100;
 function netAnimPack(){return animals.map(a=>[r2(a.x),r2(a.z),r2(a.rot),r2(a.spd||0),r2(a.rear||0),r2(a.sit||0),r2(a.crouch||0),
@@ -3904,7 +3905,7 @@ function netLabel(el,x,y,z,show){_nv.set(x,y,z).project(camera);const vis=show&&
 function netTick(dt){const inS=NETKIT.inSession();
   /* network timers run on real time, so a slow device still sends at a steady rate */
   const now_=performance.now();
-  if(inS){if(now_>=NET.sendT){NET.sendT=now_+80;const cs=netCampS(),s={x:+player.x.toFixed(2),y:+player.y.toFixed(2),z:+player.z.toFixed(2),r:+player.rot.toFixed(2),m:player.moving?1:0,c:car&&car.occupied?1:0,cs};
+  if(inS){if(now_>=NET.sendT){NET.sendT=now_+80;const cs=netCampS(),s={x:+player.x.toFixed(2),y:+player.y.toFixed(2),z:+player.z.toFixed(2),r:+player.rot.toFixed(2),m:player.moving?1:0,c:car&&car.occupied?1:0,cs,run:keys.runActive?1:0,b:st.berries|0,sh:CABINKIT.isSheltered(player.x,player.z)?1:0};
       if(cs===1){s.cx=+FIRE.x.toFixed(2);s.cz=+FIRE.z.toFixed(2);s.cf=Math.round(st.fuel*20)/20;}NETKIT.state(s);}
     if(NETKIT.isHost()){const sig=[W.on,W.kind,W.frozen,W.season,W.manualUntil,W.peak,st.frozen,st.speed,st.day].join();
       if(now_>=NET.worldT||sig!==NET.wsig){NET.worldT=now_+1500;NET.wsig=sig;NETKIT.world(netWorld());}
@@ -3925,6 +3926,35 @@ function netTick(dt){const inS=NETKIT.inSession();
       if(s_.cs===1&&CAMP.state==='set'&&hyp(FIRE.x-s_.cx,FIRE.z-s_.cz)<4){packCamp();CAMP.state='carried';toast('Your camp is packed and you are carrying it. Pitch it anywhere from Camp in the dock.',4.5);}}}
   for(const[id,o]of NET.others)if(!seen.has(id)){scene.remove(o.g);o.lab.remove();netCampDrop(o);NET.others.delete(id);}
   if(!inS)NET.campCheck=false;}
+/* ---------- the world reacts to every player, not just the host ---------- */
+/* everyone the host's animals can notice: you, plus every guest (from what they send) */
+function netActors(){const me={me:true,id:NETKIT.inSession()?NETKIT.me():'solo',x:player.x,z:player.z,rot:player.rot,run:!!keys.runActive,car:!!(car&&car.occupied),ber:st.berries|0,sh:false};
+  if(!NETKIT.inSession())return [me];const out=[me];
+  for(const p of NETKIT.players()){const s_=p.state;if(p.isMe||!s_||typeof s_.x!=='number')continue;
+    out.push({me:false,id:p.id,name:p.name||'Hiker',x:s_.x,z:s_.z,rot:s_.r||0,run:!!s_.run,car:!!s_.c,ber:s_.b|0,sh:!!s_.sh});}
+  return out;}
+function netNear(x,z){const A=NET.act||[];let b=A[0],bd=1e9;for(const a of A){const d=hyp(a.x-x,a.z-z);if(d<bd){bd=d;b=a;}}return b||{me:true,x:player.x,z:player.z,rot:player.rot,run:false,car:false,ber:st.berries,sh:false};}
+/* other players' camps: a lit fire warms you, a pitched tent shelters you */
+function netCamps(){const out=[];if(!NETKIT.inSession())return out;for(const p of NETKIT.players()){const s_=p.state;if(!p.isMe&&s_&&s_.cs===1&&typeof s_.cx==='number')out.push(s_);}return out;}
+function netLitOther(x,z,r){return netCamps().some(c=>c.cf>0&&hyp(x-c.cx,z-c.cz)<r);}
+function netLit(x,z,r){return (st.fuel>0&&hyp(x-FIRE.x,z-FIRE.z)<r)||netLitOther(x,z,r);}
+function netTentNear(x,z,r){return netCamps().some(c=>hyp(x-(c.cx+CAMP.home.tx-CAMP.home.fx),z-(c.cz+CAMP.home.tz-CAMP.home.fz))<r);}
+/* what the host's world does to a player: done here if it's you, sent to them if it's a guest */
+function netStealMe(){if(st.berries>0){const n=Math.ceil(st.berries/2);st.berries-=n;st.shake=Math.max(st.shake,0.2);toast('A wolf darts in, nips your ankle and runs off with '+n+' berr'+(n===1?'y':'ies')+'! (Berries in crates and the van are safe.)',3.5);}
+  else toast('A wolf sniffs at your empty pockets and slinks off.',2.4);}
+function netEv(A,k,c){if(A.me){if(k==='ko')ko(c);else if(k==='steal')netStealMe();}else NETKIT.send('ev',{to:A.id,k,c});}
+function netSay(A,t,d){if(A.me)toast(t,d);else NETKIT.send('ev',{to:A.id,k:'say',t,d});}
+function netSayAll(t,d){toast(t,d);if(NETKIT.inSession()&&NETKIT.isHost())NETKIT.send('ev',{to:'*',k:'say',t,d});}
+NETKIT.on('ev',(d,from)=>{if(!d||!from||from.isMe||!netGuest())return;const h=NETKIT.players().find(p=>p.isHost);if(!h||h.id!==from.id)return;
+  if(d.to!=='*'&&d.to!==NETKIT.me())return;
+  if(d.k==='ko'&&typeof d.c==='string')ko(d.c);else if(d.k==='steal')netStealMe();else if(d.k==='say'&&typeof d.t==='string')toast(d.t.slice(0,200),+d.d||3);});
+/* knocked out, fainted, back on their feet: everyone in the game hears about it */
+const KOSAY={bear:'was knocked down by a bear!',wolf:'was worn down by the wolves.',tired:'fainted from exhaustion.',up:'is back on their feet.'};
+function netSendKo(c){if(NETKIT.inSession())NETKIT.send('kod',{n:NET.name||'Hiker',c});}
+NETKIT.on('kod',(d,from)=>{if(!d||(from&&from.isMe)||!KOSAY[d.c])return;toast(String(d.n||'A hiker').slice(0,16)+' '+KOSAY[d.c],4);});
+/* the camp crates are shared: every take or put is sent to everyone, and the host's counts win */
+function netCrate(c,k,d){if(!d||!NETKIT.inSession())return;const i=CRATES.indexOf(c);if(i>=0)NETKIT.send('crate',{i,k,d});}
+NETKIT.on('crate',(m,from)=>{if(!m||(from&&from.isMe))return;const c=CRATES[m.i];if(!c||!c.holds.includes(m.k)||typeof m.d!=='number')return;c.inv[m.k]=clamp((c.inv[m.k]||0)+m.d,0,1000);if(!$('ip').hidden)paintInv();});
 /* ---------- cabin building kit hookup ---------- */
 let kitMouse=null,kitTap=null;const kitRay=new THREE.Raycaster();
 CABINKIT.init(scene,{
@@ -4662,12 +4692,12 @@ function rest(){
   else fadeSeq('You stretch out for a short nap…',()=>{if(!netGuest())st.t+=0.05;st.energy=Math.min(100,st.energy+35);st.hunger=Math.max(0,st.hunger-4);},'Refreshed. Back to the trail.');
 }
 function resetWild(){bears.forEach(b=>{b.x=b.sx;b.z=b.sz;b.state='idle';b.rear=0;});wolves.forEach((w,i)=>{if(w.role)return;w.state='roam';w.x=DEN.x+i-1;w.z=DEN.z;});pack.cd=12;}
-function ko(cause){
+function ko(cause){netSendKo(cause);
   const msg={tired:'Too worn out to go on, you curl up under the trees…',bear:'The bear sends you tumbling down the slope…',wolf:'The wolves wear you out and you slump into the ferns…'}[cause];
   fadeSeq(msg,()=>{for(let i=0;i<200;i++){const x=rr(-15,15),z=rr(-15,15);
       if(blocked(x,z,0.6,'rim')||(BEAR&&hyp(x-BEAR.x,z-BEAR.z)<11)||(DEN&&hyp(x-DEN.x,z-DEN.z)<6))continue;player.x=x;player.z=z;player.level='rim';break;}
     player.climb=null;player.chopTree=null;cancelFish();
-    st.hunger=Math.max(st.hunger,45);st.warmth=Math.max(st.warmth,50);st.energy=65;st.sticks=0;st.berries=0;resetWild();},
+    st.hunger=Math.max(st.hunger,45);st.warmth=Math.max(st.warmth,50);st.energy=65;st.sticks=0;st.berries=0;if(!netGuest())resetWild();netSendKo('up');},
     'You wake up somewhere new, a little sore. Your camp is right where you left it.');
 }
 
@@ -4770,15 +4800,15 @@ function bearLife(b,dt,night,d,px,pz){
     default:next();}
 }
 function updateWild(dt,night){
-  const px=player.x,pz=player.z,fireLit=st.fuel>0,nearFire=fireLit&&hyp(px-FIRE.x,pz-FIRE.z)<6.5,food=st.berries>0;
+  const ACT=NET.act=netActors(),px=player.x,pz=player.z,fireLit=st.fuel>0,nearFire=fireLit&&hyp(px-FIRE.x,pz-FIRE.z)<6.5,food=ACT.some(a=>a.ber>0);
   // the deer herd
-  {const L=herd[0],dL=hyp(L.x-px,L.z-pz),scared=herd.some(d=>d.g.visible&&(hyp(d.x-px,d.z-pz)<(car&&car.occupied?9:6)||(pet&&hyp(d.x-pet.x,d.z-pet.z)<6)));
+  {const L=herd[0],dL=hyp(L.x-px,L.z-pz),scared=herd.some(d=>d.g.visible&&(ACT.some(a=>hyp(d.x-a.x,d.z-a.z)<(a.car?9:6))||(pet&&hyp(d.x-pet.x,d.z-pet.z)<6)));
     herd.forEach(d=>{d.headDown=false;d.state='idle';});HS.t-=dt;
     if(HS.mode==='away'){if(HS.t<=0){HS.mode='walk';HS.wi=1;HS.best=1e9;HS.st=0;{const r0=HERD_ROUTE[0];if(aBlocked(r0[0],r0[1],0.6,'rim'))for(let k=0;k<60;k++){const a_=k*2.4,rr_=0.4+k*0.08,x=r0[0]+Math.cos(a_)*rr_,z=r0[1]+Math.sin(a_)*rr_;if(!aBlocked(x,z,0.6,'rim')){r0[0]=x;r0[1]=z;break;}}}
       herd.forEach(d=>{d.x=HERD_ROUTE[0][0]+d.ox*0.4;d.z=HERD_ROUTE[0][1]+d.oz*0.4;if(Math.abs(d.x)>17.5)d.x=Math.sign(d.x)*17.5;if(Math.abs(d.z)>17.5)d.z=Math.sign(d.z)*17.5;d.g.visible=true;d.rot=Math.atan2(HERD_ROUTE[1][0]-HERD_ROUTE[0][0],HERD_ROUTE[1][1]-HERD_ROUTE[0][1]);});}}
     else{
-      if(scared&&HS.mode!=='flee'){HS.mode='flee';HS.t=4;if(!st.warned.herd&&dL<14){st.warned.herd=1;toast('The deer herd startles and bounds away!',2.4);}}
-      if(HS.mode==='flee'){herd.forEach(d=>{amove(d,d.x-px+rr(-.3,.3),d.z-pz+rr(-.3,.3),d.dk==='fawn'?4.6:4.8,dt);d.state='flee';});if(HS.t<=0){HS.mode='walk';}}
+      if(scared&&HS.mode!=='flee'){HS.mode='flee';HS.t=4;{const nA=netNear(L.x,L.z);if(hyp(L.x-nA.x,L.z-nA.z)<14&&!(nA.me&&st.warned.herd)){if(nA.me)st.warned.herd=1;netSay(nA,'The deer herd startles and bounds away!',2.4);}}}
+      if(HS.mode==='flee'){herd.forEach(d=>{amove(d,d.x-netNear(d.x,d.z).x+rr(-.3,.3),d.z-netNear(d.x,d.z).z+rr(-.3,.3),d.dk==='fawn'?4.6:4.8,dt);d.state='flee';});if(HS.t<=0){HS.mode='walk';}}
       else if(HS.mode==='leave'){const ex=HERD_ROUTE[HERD_ROUTE.length-1];herd.forEach(d=>{if(!d.g.visible)return;const ddx=ex[0]-d.x,ddz=ex[1]-d.z;
           if(ddx*ddx+ddz*ddz<1.4||HS.t<=0)d.g.visible=false;else amove(d,ddx,ddz,1.6,dt);});if(herd.every(d=>!d.g.visible)){HS.mode='away';HS.t=rr(120,200);}}
       else if(HS.mode==='graze'){herd.forEach((d,i)=>{const t_=T*0.3+i*1.7;d.headDown=Math.sin(t_)>-0.55;if(!d.headDown)d.state='alert';if(hyp(d.x-L.x,d.z-L.z)>3.2)amove(d,L.x+d.ox-d.x,L.z+d.oz-d.z,0.8,dt);});if(HS.t<=0)HS.mode='walk';}
@@ -4794,7 +4824,7 @@ function updateWild(dt,night){
   pack.cd-=dt;pack.ang+=dt*(food?0.35:0.22);
   const aware=13+5*night+(food?4:0),R=food?6:8.5;
   updatePets(dt,night);
-  const guarded=!!pet&&pet.lv===player.level&&hyp(pet.x-px,pet.z-pz)<12;
+  const guarded0=!!pet&&pet.lv===player.level&&hyp(pet.x-px,pet.z-pz)<12;
   /* the pack's hunt: away in the forest → slips back to circle you from the tree line like sharks, crouched and prowling
      → creeps in low, one at a time, to steal food → melts away for a while → comes back. Stays outside the campfire light;
      with your own wolf beside you they keep well back and steal nothing. Charge at one (run toward it) and it bolts. */
@@ -4807,20 +4837,20 @@ function updateWild(dt,night){
     const provoked=w=>keys.runActive&&hyp(w.x-px,w.z-pz)<16&&Math.abs(angD(Math.atan2(w.x-px,w.z-pz),player.rot))<0.35;
     if(pack.mode==='away'){if(pack.t<=0&&!player.climb){pack.mode='stalk';pack.t=rr(75,105);pack.steals=0;pack.next=rr(35,70);pack.thief=rng()<0.45;
         wild.forEach(w=>{if(hyp(w.x-px,w.z-pz)>16||hyp(w.x-px,w.z-pz)<19){const sp=wolfSpot(20,25);if(sp){w.x=sp[0];w.z=sp[1];}}w.state='stalk';w.stare=0;});
-        toast('Something is moving between the trees…',3);}}
+        netSayAll('Something is moving between the trees…',3);}}
     else if(pack.mode==='stalk'){
       if(pack.t<=0||pack.steals>=1){pack.mode='leave';pack.t=11;wild.forEach(w=>{w.state='leave';});
-        toast(pack.steals?'Snacks in their jaws, the wolves melt back into the forest.':'The wolves lose interest and melt back into the forest.',3.5);}
+        netSayAll(pack.steals?'Snacks in their jaws, the wolves melt back into the forest.':'The wolves lose interest and melt back into the forest.',3.5);}
       else{pack.next-=dt;
-        if(pack.next<=0&&pack.thief&&st.berries>0&&!guarded&&!inLight&&!(car&&car.occupied)&&!wild.some(w=>w.state==='dart'||w.state==='flee'||w.state==='bluff')){const w=wild[pack.turn++%wild.length];w.state='dart';w.timer=14;pack.next=rr(40,70);}}}
+        if(pack.next<=0&&pack.thief&&ACT.some(a=>a.ber>0&&!(a.me&&guarded0)&&!netLit(a.x,a.z,7)&&!a.car)&&!wild.some(w=>w.state==='dart'||w.state==='flee'||w.state==='bluff')){const w=wild[pack.turn++%wild.length];w.state='dart';w.timer=14;pack.next=rr(40,70);}}}
     else if(pack.mode==='leave'&&pack.t<=0){pack.mode='away';pack.t=rr(80,140);wild.forEach(w=>{w.state='roam';});}
-    wild.forEach((w,i)=>{const d=hyp(w.x-px,w.z-pz);w.watch=false;let cT=0;
+    wild.forEach((w,i)=>{const A_=netNear(w.x,w.z),px=A_.x,pz=A_.z,guarded=A_.me&&guarded0,inLight=netLit(px,pz,7),charging=w=>A_.run&&hyp(w.x-px,w.z-pz)<4.5&&Math.abs(angD(Math.atan2(w.x-px,w.z-pz),A_.rot))<0.6,provoked=w=>A_.run&&hyp(w.x-px,w.z-pz)<16&&Math.abs(angD(Math.atan2(w.x-px,w.z-pz),A_.rot))<0.35;const d=hyp(w.x-px,w.z-pz);w.watch=false;let cT=0;
       if(w.state==='stalk'){
         const R=(inLight||guarded?24:20)+(i%3)*2.2;
         const ang=pack.ang+i*(6.283/Math.max(1,wild.length))+Math.sin(T*0.23+i)*0.35,r=R+Math.sin(T*0.31+i*1.7)*3.2+Math.sin(T*0.9+i*2.3)*1.2;
         const tx=px+Math.cos(ang)*r,tz=pz+Math.sin(ang)*r,dx=tx-w.x,dz=tz-w.z,dd=hyp(dx,dz);
         w.stare=(w.stare||0)-dt;
-        if(provoked(w)){w.state='bluff';w.timer=2.2;if(T-(pack.bt||-99)>8){pack.bt=T;toast('A wolf snarls and lunges at you, then pulls up short. Back off.',3);}}
+        if(provoked(w)){w.state='bluff';w.timer=2.2;if(T-(pack.bt||-99)>8){pack.bt=T;netSay(A_,'A wolf snarls and lunges at you, then pulls up short. Back off.',3);}}
         else if(d<17){amove(w,w.x-px,w.z-pz,2.2,dt);cT=0.6;if(d>12)face(w,px,pz,dt);}
         else if(w.stare>0){face(w,px,pz,dt);w.watch=true;cT=1;}
         else if(dd>0.6){const fast=dd>5;amove(w,dx,dz,fast?1.5:0.5,dt);cT=fast?0.6:1;if(!fast&&rng()<dt*0.14)w.stare=rr(2.5,5);}
@@ -4828,10 +4858,9 @@ function updateWild(dt,night){
         if(charging(w)){w.state='flee';w.timer=2.5;}}
       else if(w.state==='dart'){w.timer-=dt;cT=0.85;amove(w,px-w.x,pz-w.z,d>3?2.2:1.7,dt);
         if(guarded||inLight||w.timer<=0){w.state='flee';w.timer=2;}
-        else if(charging(w)){w.state='flee';w.timer=2.5;toast('You charge at the wolf and it bolts!',2);}
+        else if(charging(w)){w.state='flee';w.timer=2.5;netSay(A_,'You charge at the wolf and it bolts!',2);}
         else if(d<1.1){
-          if(st.berries>0){const n=Math.ceil(st.berries/2);st.berries-=n;pack.steals++;st.shake=Math.max(st.shake,0.2);toast('A wolf darts in, nips your ankle and runs off with '+n+' berr'+(n===1?'y':'ies')+'! (Berries in crates and the van are safe.)',3.5);}
-          else toast('A wolf sniffs at your empty pockets and slinks off.',2.4);
+          if(A_.ber>0)pack.steals++;netEv(A_,'steal');
           w.state='flee';w.timer=2.6;}}
       else if(w.state==='bluff'){w.timer-=dt;cT=0.9;if(d>6&&w.timer>1)amove(w,px-w.x,pz-w.z,2.6,dt);else face(w,px,pz,dt);if(w.timer<=0){w.state='flee';w.timer=3.5;}}
       else if(w.state==='flee'){w.timer-=dt;amove(w,w.x-px,w.z-pz,3.0,dt);if(d>22)w.timer=Math.min(w.timer,0.2);if(w.timer<=0)w.state=pack.mode==='stalk'?'stalk':'roam';}
@@ -4842,13 +4871,13 @@ function updateWild(dt,night){
     });
   }
   // bears: each one keeps a ring of personal space; step inside it (away from the fire) and it rears, then charges
-  {let near=99;for(const b of bears){const d=hyp(b.x-px,b.z-pz);near=Math.min(near,d);let rearT=0;b.headDown=false;b.watch=false;if(b.act!=='rest')b.sit=Math.max(0,(b.sit||0)-dt*1.5);
-    const safe=nearFire||(car&&car.occupied)||CABINKIT.isSheltered(px,pz);
+  {let near=99;for(const b of bears){const A_=netNear(b.x,b.z),px=A_.x,pz=A_.z,guarded=A_.me&&guarded0;const d=hyp(b.x-px,b.z-pz);near=Math.min(near,d);let rearT=0;b.headDown=false;b.watch=false;if(b.act!=='rest')b.sit=Math.max(0,(b.sit||0)-dt*1.5);
+    const safe=netLit(px,pz,6.5)||A_.car||A_.sh||CABINKIT.isSheltered(px,pz);
     if(guarded&&(b.state==='rear'||b.state==='charge')){b.state='retreat';b.timer=6;if(pet.guard!==b){pet.guard=b;if(T-(pet.bt||-99)>6){pet.bt=T;toast('Your wolf stands its ground. The bear backs off!',3);}}}
     if(b.state==='rear'){b.timer-=dt;face(b,px,pz,dt*3);rearT=1;if(b.timer<=0){b.state=safe?'retreat':'charge';b.timer=6;}}
-    else if(b.state==='charge'){b.timer-=dt;amove(b,px-b.x,pz-b.z,4.4,dt);if(safe){b.state='retreat';b.timer=6;}else if(d<1.3){b.state='retreat';b.timer=8;ko('bear');}else if(b.timer<=0){b.state='retreat';b.timer=6;}}
+    else if(b.state==='charge'){b.timer-=dt;amove(b,px-b.x,pz-b.z,4.4,dt);if(safe){b.state='retreat';b.timer=6;}else if(d<1.3){b.state='retreat';b.timer=8;netEv(A_,'ko','bear');}else if(b.timer<=0){b.state='retreat';b.timer=6;}}
     else if(b.state==='retreat'){b.timer-=dt;amove(b,b.x-px,b.z-pz,1.8,dt);if(b.timer<=0){b.state='idle';b.act='walk';[b.tx,b.tz]=bearSpot(b);b.at=40;}}
-    else if(d<BEAR.ring&&!guarded&&!safe){b.state='rear';b.timer=0.75;toast('The bear rears up!',1.6);}
+    else if(d<BEAR.ring&&!guarded&&!safe){b.state='rear';b.timer=0.75;netSay(A_,'The bear rears up!',1.6);}
     else bearLife(b,dt,night,d,px,pz);
     b.rear+=(rearT-b.rear)*Math.min(1,dt*8);b.ringG.position.set(b.x,heightAt(b.x,b.z,'rim')+0.05,b.z);b.ringG.visible=b.g.visible;}
     if(BEAR)ringMat.opacity=0.22+(near<BEAR.aware?0.25+0.15*Math.sin(T*6):0);}
@@ -4964,7 +4993,7 @@ $('invBody').addEventListener('click',e=>{const b=e.target.closest('button');if(
   else if(b.dataset.camp){startCampPlace();}
   else if(b.dataset.campvan){CAMP.state='van';toast('Camp box loaded in the van.',2);}
   else if(b.dataset.mv&&tg){const k=b.dataset.k,inv=tg==='van'?car.inv:tg.inv,cap=tg==='van'?VANCAP[k]:1000,want=b.dataset.n==='all'?1e9:+b.dataset.n;
-    if(b.dataset.mv==='take'){const n=Math.min(want,inv[k]||0,CAP[k]-(st[k]||0));inv[k]-=n;st[k]=(st[k]||0)+n;}else{const n=Math.min(want,st[k]||0,cap-(inv[k]||0));inv[k]=(inv[k]||0)+n;st[k]-=n;}}
+    if(b.dataset.mv==='take'){const n=Math.min(want,inv[k]||0,CAP[k]-(st[k]||0));inv[k]-=n;st[k]=(st[k]||0)+n;if(tg!=='van')netCrate(tg,k,-n);}else{const n=Math.min(want,st[k]||0,cap-(inv[k]||0));inv[k]=(inv[k]||0)+n;st[k]-=n;if(tg!=='van')netCrate(tg,k,n);}}
   paintInv();});
 let invT=0;function updInvPanel(dt){if($('ip').hidden||(invT-=dt)>0)return;invT=0.5;if(document.activeElement&&$('ip').contains(document.activeElement))return;paintInv();}
 /* ---------- compass and map ---------- */
@@ -5118,13 +5147,13 @@ function sim(dt,night){
      if(moving)player.rot=lerpAng(player.rot,Math.atan2(ix,iz),1-Math.exp(-10*dt));player.phase+=dt*sp*2.6;}
    player.moving=sp>0.1?(sp>2.2?1.4:1):0;}
   // stats
-  const fd=hyp(player.x-FIRE.x,player.z-FIRE.z),lit=st.fuel>0,byFire=lit&&fd<5;
+  const fd=hyp(player.x-FIRE.x,player.z-FIRE.z),lit=st.fuel>0,byFire=(lit&&fd<5)||netLitOther(player.x,player.z,5);
   st.hunger-=dt*(running?0.6:moving?0.25:0.12);
   if(byFire)st.warmth+=dt*6;else if(night>0.5)st.warmth-=dt*1.1;else if(fd>22)st.warmth-=dt*0.15;else st.warmth+=dt*0.35;
-  {const dF=yearDay(),winter=dF>=7.1&&dF<13.5,sheltered=byFire||(car&&car.occupied)||(TENT&&hyp(player.x-TENT.x,player.z-TENT.z)<2.6)||CABINKIT.isSheltered(player.x,player.z);
+  {const dF=yearDay(),winter=dF>=7.1&&dF<13.5,sheltered=byFire||(car&&car.occupied)||(TENT&&hyp(player.x-TENT.x,player.z-TENT.z)<2.6)||netTentNear(player.x,player.z,2.6)||CABINKIT.isSheltered(player.x,player.z);
     if(winter&&!sheltered)st.warmth-=dt*(0.45+0.6*(night>0.5?1:0)+0.5*(st.snow||0));
     if((st.snow||0)>0.4&&player.spd>0.3&&!(car&&car.occupied))st.energy=Math.max(0,st.energy-dt*0.35*(st.snow||0));}
-  {const cover=byFire||(car&&car.occupied)||(TENT&&CAMP.state==='set'&&hyp(player.x-TENT.x,player.z-TENT.z)<2.6)||CABINKIT.isSheltered(player.x,player.z);if(W.I>0.05&&!cover)st.warmth-=dt*(W.kind==='rain'?0.25+0.8*W.I:0.5+2.2*W.I)*(1+0.6*Math.min(1,depthAt(player.x,player.z,player.level)*2));}
+  {const cover=byFire||(car&&car.occupied)||(TENT&&CAMP.state==='set'&&hyp(player.x-TENT.x,player.z-TENT.z)<2.6)||netTentNear(player.x,player.z,2.6)||CABINKIT.isSheltered(player.x,player.z);if(W.I>0.05&&!cover)st.warmth-=dt*(W.kind==='rain'?0.25+0.8*W.I:0.5+2.2*W.I)*(1+0.6*Math.min(1,depthAt(player.x,player.z,player.level)*2));}
   st.energy-=dt*(running?0.65:moving?0.22:-(byFire?0.5:0.05));
   if(st.hunger<=0)st.energy-=dt*0.6;if(st.warmth<=0)st.energy-=dt*0.8;
   if(st.hunger<30&&st.berries>0){st.berries--;st.hunger=Math.min(100,st.hunger+30);toast('You snack on a handful of saved berries.');}

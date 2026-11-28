@@ -98,6 +98,7 @@ def main():
         A = open_player('A', BASE + '#hollow', dev=True)
         on_hollow('A', A)
         check('A has dev tools (Time, Light, Weather, map picker)', all(shown(A, s) for s in ['#timeBtn', '#lightBtn', '#weatherBtn', '.maps']))
+        E(A, "{const t0=toast;toast=(m,d)=>{(window.__toasts=window.__toasts||[]).push(m);t0(m,d);};}")
         E(A, "NET.name='Alder';$('onName').value='Alder';"); A.evaluate("()=>window.__E(\"$('onHost').click()\")")
         A.wait_for_function('()=>window.__E("NETKIT.inSession()")', timeout=10000)
         A.evaluate("()=>window.__E(\"$('onCopy').click()\")"); time.sleep(0.5)
@@ -186,12 +187,49 @@ def main():
               f'A {wa} | B {wb}')
         if not results[-1][1]:
             print('   B world:', E(B, 'JSON.stringify(NETKIT.world())')[:400]); print('   B W:', E(B, 'JSON.stringify(W)')[:300], 'yearDay A/B', E(A,'yearDay()'), E(B,'yearDay()'))
-        pa, pb = J(A, 'animals.map(a=>[a.x,a.z,a.g.visible])'), J(B, 'animals.map(a=>[a.x,a.z,a.g.visible])')
-        worst = max((((x1-x2)**2+(z1-z2)**2)**0.5 for (x1, z1, v1), (x2, z2, v2) in zip(pa, pb) if v1), default=0)
-        vis_same = all(v1 == v2 for (_, _, v1), (_, _, v2) in zip(pa, pb))
-        check('animals match the host', len(pa) == len(pb) and vis_same and worst < 0.4, f'{len(pa)} animals, worst gap {worst:.2f} m')
+        # the pages render ~1.5 frames/s, so a running animal can be a frame or two apart: allow for its speed
+        for _try in range(3):
+          pa, pb = J(A, 'animals.map(a=>[a.x,a.z,a.g.visible,a.spd||0])'), J(B, 'animals.map(a=>[a.x,a.z,a.g.visible])')
+          over = [(i, round(((x1-x2)**2+(z1-z2)**2)**0.5, 2), round(sp, 1)) for i, ((x1, z1, v1, sp), (x2, z2, v2)) in enumerate(zip(pa, pb))
+                if v1 and ((x1-x2)**2+(z1-z2)**2)**0.5 > 0.4 + 0.15*sp]
+          if not over: break
+          time.sleep(2)
+        vis_same = all(a[2] == b[2] for a, b in zip(pa, pb))
+        worst = max((((a[0]-b[0])**2+(a[1]-b[1])**2)**0.5 for a, b in zip(pa, pb) if a[2]), default=0)
+        check('animals match the host', len(pa) == len(pb) and vis_same and not over, f'{len(pa)} animals, worst gap {worst:.2f} m, over tolerance {over}')
         ta, tb = E(A, 'st.t'), E(B, 'st.t')
         check('time of day follows the host', abs(ta - tb) < 0.02, f'A {ta:.4f} B {tb:.4f}')
+
+        # ---- shared crates: B takes 10 berries from the forage crate; A's crate must go down too
+        c_before = J(A, 'CRATES[2].inv.berries'); b_ber = E(B, 'st.berries')
+        E(B, 'player.x=CRATES[2].x+1.5;player.z=CRATES[2].z+0.8;'); time.sleep(1)
+        E(B, 'openInv()'); time.sleep(0.5)
+        B.evaluate("()=>{const b=document.querySelector('#invBody [data-mv=take][data-k=berries][data-n=\"10\"]');if(b)b.click();window.__tk=!!b;}")
+        time.sleep(3)
+        ca2, cb2, b_ber2 = J(A, 'CRATES[2].inv.berries'), J(B, 'CRATES[2].inv.berries'), E(B, 'st.berries')
+        if not B.evaluate('window.__tk'):
+            print('   dbg near', E(B, "String(nearContainer()&&nearContainer().name)"), 'pos', J(B,'[player.x,player.z,CRATES[2].x,CRATES[2].z]'), 'inv', E(B, "$('invBody').textContent.slice(0,200)"), 'ip hidden', E(B,"$('ip').hidden"))
+        check('crates are shared (B took 10 berries; A\'s crate went down)', B.evaluate('window.__tk') and b_ber2 == b_ber + 10 and ca2 == cb2 == c_before - 10,
+              f'crate A {c_before}->{ca2}, B sees {cb2}; B carries {b_ber}->{b_ber2}')
+        E(B, "setMenu(false)")
+
+        # ---- others' fires warm you
+        lit = E(A, 'st.fuel')
+        check('B is warmed by A\'s campfire', lit > 0 and E(B, 'netLitOther(CAMP.home.fx,CAMP.home.fz,5)'), f'A fire {lit:.2f}')
+
+        # ---- the host's bear goes for B: B is knocked down, and everyone hears about it
+        bx, bz = J(A, '[bears[0].x,bears[0].z]')
+        E(B, f'player.x={bx}+1.0;player.z={bz};player.level="rim";')
+        t_end = time.time() + 90
+        while time.time() < t_end:
+            ta_ = J(A, 'window.__toasts||[]')
+            if any('Birch is back on their feet' in t for t in ta_): break
+            time.sleep(2)
+        ta_, tb_ = J(A, 'window.__toasts||[]'), J(B, 'window.__toasts||[]')
+        check('the host\'s bear reacts to B (B is warned)', any('bear rears' in t for t in tb_), [t for t in tb_ if 'bear' in t.lower()][:3])
+        check('everyone hears B was knocked down', any('Birch was knocked down by a bear' in t for t in ta_), [t for t in ta_ if 'Birch' in t][-3:])
+        check('everyone hears B respawned', any('Birch is back on their feet' in t for t in ta_))
+        check('the warning went to B, not the host', not any('bear rears' in t for t in ta_))
 
         # ---- leave
         B.evaluate("()=>window.__E(\"$('onLeave').click()\")"); time.sleep(1.5)
